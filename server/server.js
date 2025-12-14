@@ -173,22 +173,30 @@ app.use('/api/candidate/register', authLimiter);
 app.use('/api/candidate', require('./routes/candidateRoutes'));
 
 const PORT = process.env.PORT || 5000;
-// Listen on all network interfaces (0.0.0.0) to allow access from other devices
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server started on port ${PORT}`);
-  console.log(`Access from this device: http://localhost:${PORT}`);
-  // Get the actual IP address dynamically
-  const os = require('os');
-  const networkInterfaces = os.networkInterfaces();
-  let localIP = 'localhost';
-  for (const interfaceName in networkInterfaces) {
-    for (const iface of networkInterfaces[interfaceName]) {
-      if (iface.family === 'IPv4' && !iface.internal && iface.address.startsWith('192.168.')) {
-        localIP = iface.address;
-        break;
+
+// Only listen if NOT running on Vercel (i.e., running locally)
+// Vercel will handle the serverless function invocation
+if (require.main === module) {
+  // Listen on all network interfaces (0.0.0.0) to allow access from other devices
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server started on port ${PORT}`);
+    console.log(`Access from this device: http://localhost:${PORT}`);
+    // Get the actual IP address dynamically
+    const os = require('os');
+    const networkInterfaces = os.networkInterfaces();
+    let localIP = 'localhost';
+    for (const interfaceName in networkInterfaces) {
+      for (const iface of networkInterfaces[interfaceName]) {
+        if (iface.family === 'IPv4' && !iface.internal && iface.address.startsWith('192.168.')) {
+          localIP = iface.address;
+          break;
+        }
       }
+      if (localIP !== 'localhost') break;
     }
-    if (localIP !== 'localhost') break;
-  }
-  console.log(`Access from network: http://${localIP}:${PORT}`);
-});
+    console.log(`Access from network: http://${localIP}:${PORT}`);
+  });
+}
+
+// Export the app for Vercel serverless functions
+module.exports = app;
