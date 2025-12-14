@@ -1,0 +1,218 @@
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import AdminSidebar from '../components/AdminSidebar';
+import { API_ENDPOINTS } from '../config/api';
+
+const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalJobs: 0,
+    openJobs: 0,
+    totalApplications: 0,
+    pendingApplications: 0,
+    totalRegisteredEmails: 0,
+    verifiedEmails: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  const token = localStorage.getItem('token');
+  const config = useMemo(() => ({ headers: { 'x-auth-token': token } }), [token]);
+
+  const handleAuthError = useCallback((err) => {
+    // Check if it's an authentication error
+    if (err.response?.status === 401 || err.response?.data?.msg?.includes('token') || err.response?.data?.msg?.includes('authorization')) {
+      localStorage.removeItem('token');
+      navigate('/admin/login');
+      return true;
+    }
+    return false;
+  }, [navigate]);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const [jobsRes, appsRes, candidatesRes] = await Promise.all([
+        axios.get(API_ENDPOINTS.ADMIN.JOBS, config),
+        axios.get(API_ENDPOINTS.ADMIN.APPLICATIONS, config),
+        axios.get(API_ENDPOINTS.ADMIN.REGISTERED_EMAILS, config).catch(() => ({ data: [] })) // Don't fail if endpoint doesn't exist
+      ]);
+
+      const jobs = jobsRes.data;
+      const applications = appsRes.data;
+      const candidates = candidatesRes.data || [];
+
+      setStats({
+        totalJobs: jobs.length,
+        openJobs: jobs.filter(j => j.status === 'Open').length,
+        totalApplications: applications.length,
+        pendingApplications: applications.filter(a => a.status === 'Pending').length,
+        totalRegisteredEmails: candidates.length,
+        verifiedEmails: candidates.filter(c => c.emailVerified).length
+      });
+    } catch (err) {
+      if (!handleAuthError(err)) {
+        console.error('Error loading stats:', err);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [config, handleAuthError]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  if (loading) {
+    return (
+      <div className="flex">
+        <AdminSidebar />
+        <div className="ml-64 flex-1 p-8">
+          <div className="text-center">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <AdminSidebar />
+      <div className="ml-64 flex-1 p-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
+          <p className="text-gray-600">Welcome to the Admin Panel</p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Total Jobs</p>
+                <p className="text-3xl font-bold text-gray-800 mt-2">{stats.totalJobs}</p>
+              </div>
+              <div className="bg-blue-100 p-3 rounded-full">
+                <span className="text-2xl">💼</span>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/admin/jobs')}
+              className="mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              View All Jobs →
+            </button>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Open Jobs</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">{stats.openJobs}</p>
+              </div>
+              <div className="bg-green-100 p-3 rounded-full">
+                <span className="text-2xl">✅</span>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/admin/jobs')}
+              className="mt-4 text-green-600 hover:text-green-800 text-sm font-medium"
+            >
+              Manage Jobs →
+            </button>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Total Applications</p>
+                <p className="text-3xl font-bold text-gray-800 mt-2">{stats.totalApplications}</p>
+              </div>
+              <div className="bg-purple-100 p-3 rounded-full">
+                <span className="text-2xl">👥</span>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/admin/candidates')}
+              className="mt-4 text-purple-600 hover:text-purple-800 text-sm font-medium"
+            >
+              View Candidates →
+            </button>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Pending Reviews</p>
+                <p className="text-3xl font-bold text-yellow-600 mt-2">{stats.pendingApplications}</p>
+              </div>
+              <div className="bg-yellow-100 p-3 rounded-full">
+                <span className="text-2xl">⏳</span>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/admin/candidates')}
+              className="mt-4 text-yellow-600 hover:text-yellow-800 text-sm font-medium"
+            >
+              Review Now →
+            </button>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Registered Emails</p>
+                <p className="text-3xl font-bold text-indigo-600 mt-2">{stats.totalRegisteredEmails}</p>
+                <p className="text-xs text-gray-500 mt-1">{stats.verifiedEmails} verified</p>
+              </div>
+              <div className="bg-indigo-100 p-3 rounded-full">
+                <span className="text-2xl">📧</span>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/admin/registered-emails')}
+              className="mt-4 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+            >
+              Manage Emails →
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button
+              onClick={() => navigate('/admin/jobs')}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition text-left"
+            >
+              <div className="font-semibold">Manage Job Posts</div>
+              <div className="text-sm opacity-90">Add, edit, or delete job positions</div>
+            </button>
+            <button
+              onClick={() => navigate('/admin/candidates')}
+              className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition text-left"
+            >
+              <div className="font-semibold">View Candidates</div>
+              <div className="text-sm opacity-90">Review all job applications</div>
+            </button>
+            <button
+              onClick={() => navigate('/admin/registered-emails')}
+              className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition text-left"
+            >
+              <div className="font-semibold">Registered Emails</div>
+              <div className="text-sm opacity-90">View and manage all registered emails</div>
+            </button>
+            <button
+              onClick={fetchStats}
+              className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition text-left"
+            >
+              <div className="font-semibold">Refresh Stats</div>
+              <div className="text-sm opacity-90">Update dashboard information</div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;
