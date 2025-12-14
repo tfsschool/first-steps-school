@@ -94,92 +94,18 @@ npm install
 npm start
 ```
 
-The client will run on `http://localhost:3000`
+The client will run on ``
 
 ## Usage
 
 ### For Public Users
 
-1. Visit the website at `http://localhost:3000`
+1. Visit the website at ``
 2. Navigate to the **Careers** page to see available positions
 3. Click **Apply Now** on any position
 4. Fill out the application form and upload your CV
 5. Submit the application
 
-### For Admin
-
-1. Navigate to `http://localhost:3000/admin/login`
-2. Login with credentials:
-   - Username: `admin`
-   - Password: `admin123`
-3. In the Admin Dashboard:
-   - **Add New Position**: Fill in title and description, then click Add
-   - **View Applicants**: Click on any job to see applicants
-   - **Delete Job**: Click the Delete button next to any job
-   - **Download CSV**: Click "Download CSV" to export applicant data
-   - **View CV**: Click "View CV" link to download/view applicant CVs
-
-## Security Features
-
-- JWT-based authentication for admin routes
-- Protected admin dashboard (requires login)
-- File upload validation (PDF/Doc only, 5MB limit)
-- Input validation and sanitization
-- CORS enabled for frontend-backend communication
-
-## Project Structure
-
-```
-first-steps-school/
-├── client/                 # React frontend
-│   ├── src/
-│   │   ├── components/     # Reusable components
-│   │   ├── pages/          # Page components
-│   │   └── App.js          # Main app component
-│   └── package.json
-├── server/                 # Node.js backend
-│   ├── config/             # Database configuration
-│   ├── middleware/         # Auth middleware
-│   ├── models/             # MongoDB models
-│   ├── routes/             # API routes
-│   ├── uploads/            # Uploaded CV files
-│   ├── server.js           # Server entry point
-│   └── package.json
-└── README.md
-```
-
-## API Endpoints
-
-### Public Routes (`/api/public`)
-- `GET /jobs` - Get all open job positions
-- `POST /apply/:jobId` - Submit application for a job
-
-### Admin Routes (`/api/admin`)
-- `POST /login` - Admin login
-- `GET /jobs` - Get all jobs (protected)
-- `POST /job` - Add new job (protected)
-- `DELETE /job/:id` - Delete job (protected)
-- `GET /applications/:jobId` - Get applicants for a job (protected)
-- `GET /download-csv/:jobId` - Download CSV of applicants (protected)
-
-## Important Notes
-
-1. **Admin Creation**: The `/create-admin` route should be removed or protected in production
-2. **Environment Variables**: Always use strong JWT_SECRET in production
-3. **File Uploads**: CV files are stored in `server/uploads/` directory
-4. **Database**: Ensure MongoDB is running before starting the server
-5. **CORS**: Currently configured for localhost development
-
-## Future Enhancements
-
-- Email notifications for new applications
-- Application status tracking
-- Admin password change functionality
-- Multiple admin users support
-- Application filtering and search
-- Resume parsing and keyword extraction
-
-## License
 
 ISC
 
