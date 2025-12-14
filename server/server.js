@@ -10,7 +10,7 @@ const compression = require('compression');
 const connectDB = require('./config/db');
 
 const app = express();
-
+app.set('trust proxy', 1);
 // Connect Database
 connectDB();
 
@@ -36,16 +36,10 @@ app.use((req, res, next) => {
 app.use(mongoSanitize());
 app.use(xss());
 
-// --- ROBUST CORS CONFIGURATION (THE FIX) ---
-const allowedOrigins = [
-  process.env.FRONTEND_URL,                        // Your Backend Setting
-  'https://first-steps-school.vercel.app',         // Your Frontend Project
-  'https://first-steps-school-client.vercel.app',  // Alternate Frontend Link
-  'http://localhost:3000',                         // Localhost Frontend
-  'http://localhost:5000'                          // Localhost Backend
-].filter(Boolean);
+// --- ROBUST CORS CONFIGURATION ---
+const allowedOrigins = ['https://first-steps-school-frontend.vercel.app'];
 
-const corsOptions = {
+app.use(cors({
   origin: function (origin, callback) {
     // 1. Allow requests with no origin (like direct browser visits, Postman, or mobile apps)
     if (!origin) return callback(null, true);
@@ -57,23 +51,28 @@ const corsOptions = {
 
     // 3. Dynamic Check: Allow ANY Vercel deployment (Crucial for Vercel previews)
     if (origin.endsWith('.vercel.app')) {
-       return callback(null, true);
+      return callback(null, true);
     }
 
-    // 4. Local Development: Allow local network IPs (e.g., 192.168.x.x)
-    if (process.env.NODE_ENV !== 'production' && origin.includes('192.168.')) {
+    // 4. Local Development: Allow localhost and local network IPs
+    if (process.env.NODE_ENV !== 'production') {
+      // Allow localhost with any port
+      if (origin.startsWith('http://localhost:') || origin.startsWith('https://localhost:')) {
         return callback(null, true);
+      }
+      // Allow local network IPs (e.g., 192.168.x.x)
+      if (origin.includes('192.168.') || origin.includes('127.0.0.1')) {
+        return callback(null, true);
+      }
     }
 
     // 5. Block everything else
     console.log(`❌ CORS: Blocked origin: ${origin}`);
     return callback(new Error('Not allowed by CORS'));
   },
-  credentials: true,
+  credentials: true, // REQUIRED: Allows cookies to be sent cross-site
   optionsSuccessStatus: 200
-};
-
-app.use(cors(corsOptions));
+}));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -84,6 +83,7 @@ const globalLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false }
 });
 app.use('/api', globalLimiter);
 

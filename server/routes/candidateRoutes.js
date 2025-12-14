@@ -7,6 +7,13 @@ const UserProfile = require('../models/UserProfile');
 const { sendEmail } = require('../config/email');
 const { authenticate } = require('../middleware/auth');
 
+// Helper function to get frontend URL with proper trailing slash handling
+const getFrontendUrl = () => {
+  const url = process.env.FRONTEND_URL || 'http://localhost:3000';
+  // Remove trailing slash to avoid double slashes
+  return url.replace(/\/+$/, '');
+};
+
 // 1. Request Email Verification (Registration)
 router.post('/register', async (req, res) => {
   try {
@@ -46,8 +53,14 @@ router.post('/register', async (req, res) => {
     }
 
     // Send verification email
+    // Use the FRONTEND_URL from env, or fallback to localhost for development
+    const clientURL = process.env.FRONTEND_URL || 'http://localhost:3000';
+    
+    // Ensure no double slashes if the env var has a trailing slash
+    const baseURL = clientURL.replace(/\/$/, "");
+    
     // URL encode the token to handle special characters
-    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${encodeURIComponent(verificationToken)}&email=${encodeURIComponent(email)}`;
+    const verificationUrl = `${baseURL}/verify-email?token=${encodeURIComponent(verificationToken)}&email=${encodeURIComponent(email)}`;
     
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -179,12 +192,13 @@ router.get('/verify-email', async (req, res) => {
             );
 
             // Set HTTP-only cookie
-            res.cookie('authToken', authToken, {
+            const options = {
+              expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
               httpOnly: true,
-              secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
-              sameSite: 'lax',
-              maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-            });
+              secure: true,        // REQUIRED: Must be true for Vercel/HTTPS
+              sameSite: 'none'     // REQUIRED: Allows Frontend to talk to Backend
+            };
+            res.cookie('authToken', authToken, options);
 
             return res.json({
               msg: 'Email is already verified. You have been logged in.',
@@ -251,19 +265,21 @@ router.get('/verify-email', async (req, res) => {
     );
 
     // Set HTTP-only cookie
-    res.cookie('authToken', authToken, {
-      httpOnly: true, // Prevents JavaScript access
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      sameSite: 'strict', // CSRF protection
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    const options = {
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      httpOnly: true,
+      secure: true,        // REQUIRED: Must be true for Vercel/HTTPS
+      sameSite: 'none'     // REQUIRED: Allows Frontend to talk to Backend
+    };
+    res.cookie('authToken', authToken, options);
 
     // Send welcome email
+    const frontendUrl = getFrontendUrl();
     const welcomeHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #7c3aed;">Registration Successful!</h2>
         <p>Your account has been created successfully. You can now apply for jobs.</p>
-        <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/careers" 
+        <a href="${frontendUrl}/careers" 
            style="display: inline-block; background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0;">
           Click here to apply for jobs
         </a>
@@ -291,7 +307,7 @@ router.get('/verify-email', async (req, res) => {
             <p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: #10b981; font-weight: bold;">Email Verified ✓</span></p>
           </div>
           <p style="color: #6b7280; margin-bottom: 15px;">The candidate can now create their profile and apply for jobs.</p>
-          <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/candidates?search=${candidate.email}" 
+          <a href="${getFrontendUrl()}/admin/candidates?search=${candidate.email}" 
              style="display: inline-block; background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 10px;">
             View in Admin Dashboard
           </a>
@@ -381,7 +397,8 @@ router.post('/login', async (req, res) => {
     await candidate.save();
 
     // Send login link email
-    const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login-verify?token=${encodeURIComponent(loginToken)}&email=${encodeURIComponent(email)}`;
+    const frontendUrl = getFrontendUrl();
+    const loginUrl = `${frontendUrl}/login-verify?token=${encodeURIComponent(loginToken)}&email=${encodeURIComponent(email)}`;
     
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -472,12 +489,13 @@ router.get('/verify-login', async (req, res) => {
           { expiresIn: '7d' }
         );
 
-        res.cookie('authToken', authToken, {
+        const options = {
+          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          maxAge: 7 * 24 * 60 * 60 * 1000
-        });
+          secure: true,        // REQUIRED: Must be true for Vercel/HTTPS
+          sameSite: 'none'     // REQUIRED: Allows Frontend to talk to Backend
+        };
+        res.cookie('authToken', authToken, options);
 
         return res.json({ 
           msg: 'Login successful!',
@@ -527,12 +545,13 @@ router.get('/verify-login', async (req, res) => {
     );
 
     // Set HTTP-only cookie
-    res.cookie('authToken', authToken, {
-      httpOnly: true, // Prevents JavaScript access
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      sameSite: 'strict', // CSRF protection
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    const options = {
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      httpOnly: true,
+      secure: true,        // REQUIRED: Must be true for Vercel/HTTPS
+      sameSite: 'none'     // REQUIRED: Allows Frontend to talk to Backend
+    };
+    res.cookie('authToken', authToken, options);
 
     res.json({ 
       msg: 'Login successful!',
@@ -566,11 +585,12 @@ router.get('/check-auth', authenticate, async (req, res) => {
 // 7. Logout
 router.post('/logout', (req, res) => {
   // Clear HTTP-only cookie
-  res.clearCookie('authToken', {
+  const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
-  });
+    secure: true,        // REQUIRED: Must be true for Vercel/HTTPS
+    sameSite: 'none'     // REQUIRED: Allows Frontend to talk to Backend
+  };
+  res.clearCookie('authToken', options);
 
   res.json({ 
     msg: 'Logged out successfully',
