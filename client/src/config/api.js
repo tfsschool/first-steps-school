@@ -73,7 +73,9 @@ export const API_ENDPOINTS = {
     APPLICATIONS: `${BASE_URL}/api/admin/applications`, // Get all applications
     APPLICATIONS_BY_JOB: (jobId) => `${BASE_URL}/api/admin/applications/${jobId}`, // Get applications for a specific job
     APPLICATION: (id) => `${BASE_URL}/api/admin/application/${id}`,
-    DOWNLOAD_CSV: (jobId) => `${BASE_URL}/api/admin/download-csv/${jobId}`,
+    APPLICATION_STATUS: (id) => `${BASE_URL}/api/admin/application/${id}/status`, // Update application status
+    DOWNLOAD_CSV: (jobId) => `${BASE_URL}/api/admin/download-csv/${jobId}`, // Download CSV for a job
+    DOWNLOAD_CSV_APPLICATION: (applicationId) => `${BASE_URL}/api/admin/download-csv-application/${applicationId}`, // Download CSV for a single application
     STATS: `${BASE_URL}/api/admin/stats`,
     REGISTERED_EMAILS: `${BASE_URL}/api/admin/candidates`, // Get all registered candidates
     DELETE_CANDIDATE: (id) => `${BASE_URL}/api/admin/candidate/${id}` // Delete a candidate

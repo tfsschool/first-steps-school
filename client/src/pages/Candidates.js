@@ -46,7 +46,7 @@ const Candidates = () => {
 
   const handleStatusChange = async (applicationId, newStatus) => {
     try {
-      await axios.put(`${API_ENDPOINTS.ADMIN.APPLICATION(applicationId)}/status`, 
+      await axios.put(API_ENDPOINTS.ADMIN.APPLICATION_STATUS(applicationId), 
         { status: newStatus }, config);
       fetchApplications();
     } catch (err) {
@@ -79,7 +79,7 @@ const Candidates = () => {
 
   const handleDownloadCSV = async (applicationId) => {
     try {
-      const res = await axios.get(`${API_ENDPOINTS.ADMIN.APPLICATION(applicationId)}/download-csv`, {
+      const res = await axios.get(API_ENDPOINTS.ADMIN.DOWNLOAD_CSV_APPLICATION(applicationId), {
         ...config,
         responseType: 'blob'
       });

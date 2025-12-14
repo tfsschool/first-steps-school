@@ -72,7 +72,7 @@ const JobManagement = () => {
         await axios.put(API_ENDPOINTS.ADMIN.JOB(editingJob._id), formData, config);
         alert('Job updated successfully!');
       } else {
-        await axios.post(API_ENDPOINTS.ADMIN.JOBS, formData, config);
+        await axios.post(API_ENDPOINTS.ADMIN.JOB(), formData, config);
         alert('Job posted successfully!');
       }
       setShowModal(false);
