@@ -333,6 +333,31 @@ router.get('/download-csv-application/:applicationId', adminAuth, async (req, re
     }
 });
 
+// 7. Get Admin Stats (Protected)
+router.get('/stats', adminAuth, async (req, res) => {
+    try {
+        const [jobs, applications, candidates] = await Promise.all([
+            Job.find().lean(),
+            Application.find().lean(),
+            Candidate.find().lean()
+        ]);
+
+        const stats = {
+            totalJobs: jobs.length,
+            openJobs: jobs.filter(j => j.status === 'Open').length,
+            totalApplications: applications.length,
+            pendingApplications: applications.filter(a => a.status === 'Pending').length,
+            totalRegisteredEmails: candidates.length,
+            verifiedEmails: candidates.filter(c => c.emailVerified).length
+        };
+
+        res.json(stats);
+    } catch (err) {
+        console.error('Error fetching stats:', err);
+        res.status(500).json({ msg: 'Server Error', error: err.message });
+    }
+});
+
 // 8. Delete Candidate (Protected)
 router.delete('/candidate/:id', adminAuth, async (req, res) => {
     try {
