@@ -325,18 +325,47 @@ const CandidateDetails = ({ application }) => {
           <div className="mt-4">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-gray-600">Profile Picture:</span>
-              <a
-                href={profile.profilePicture.startsWith('http') ? profile.profilePicture : `${API_ENDPOINTS.UPLOADS.BASE}/${profile.profilePicture.replace(/^uploads[\\/]/, '')}`}
-                download
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
-              >
-                📥 Download Picture
-              </a>
+              <div className="flex gap-2">
+                {(() => {
+                  const pictureUrl = typeof profile.profilePicture === 'object' 
+                    ? profile.profilePicture.preview_url || profile.profilePicture.secure_url
+                    : profile.profilePicture.startsWith('http') 
+                      ? profile.profilePicture 
+                      : `${API_ENDPOINTS.UPLOADS.BASE}/${profile.profilePicture.replace(/^uploads[\\/]/, '')}`;
+                  const downloadUrl = typeof profile.profilePicture === 'object'
+                    ? profile.profilePicture.download_url || profile.profilePicture.secure_url
+                    : pictureUrl;
+                  return (
+                    <>
+                      <a
+                        href={pictureUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                      >
+                        👁️ Preview
+                      </a>
+                      <span className="text-gray-400">|</span>
+                      <a
+                        href={downloadUrl}
+                        download
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                      >
+                        📥 Download
+                      </a>
+                    </>
+                  );
+                })()}
+              </div>
             </div>
             <img 
-              src={profile.profilePicture.startsWith('http') ? profile.profilePicture : `${API_ENDPOINTS.UPLOADS.BASE}/${profile.profilePicture.replace(/^uploads[\\/]/, '')}`} 
+              src={typeof profile.profilePicture === 'object' 
+                ? profile.profilePicture.preview_url || profile.profilePicture.secure_url
+                : profile.profilePicture.startsWith('http') 
+                  ? profile.profilePicture 
+                  : `${API_ENDPOINTS.UPLOADS.BASE}/${profile.profilePicture.replace(/^uploads[\\/]/, '')}`} 
               alt="Profile" 
               className="mt-2 w-24 h-24 object-cover rounded-lg"
             />
@@ -417,29 +446,83 @@ const CandidateDetails = ({ application }) => {
       {/* Documents */}
       <div className="bg-white p-4 rounded-lg shadow-sm">
         <h4 className="font-semibold text-gray-700 mb-3">Documents</h4>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {application.cvPath && (
             <div>
-              <a
-                href={application.cvPath.startsWith('http') ? application.cvPath : `${API_ENDPOINTS.UPLOADS.BASE}/${application.cvPath.replace(/^uploads[\\/]/, '')}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline"
-              >
-                📄 View CV/Resume
-              </a>
+              <span className="text-gray-600 text-sm">Application CV:</span>
+              <div className="flex gap-2 mt-1">
+                {(() => {
+                  const cvUrl = typeof application.cvPath === 'object'
+                    ? application.cvPath.preview_url || application.cvPath.secure_url
+                    : application.cvPath.startsWith('http')
+                      ? application.cvPath
+                      : `${API_ENDPOINTS.UPLOADS.BASE}/${application.cvPath.replace(/^uploads[\\/]/, '')}`;
+                  const downloadUrl = typeof application.cvPath === 'object'
+                    ? application.cvPath.download_url || application.cvPath.secure_url
+                    : cvUrl;
+                  return (
+                    <>
+                      <a
+                        href={cvUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                      >
+                        👁️ View CV
+                      </a>
+                      <span className="text-gray-400">|</span>
+                      <a
+                        href={downloadUrl}
+                        download
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                      >
+                        📥 Download CV
+                      </a>
+                    </>
+                  );
+                })()}
+              </div>
             </div>
           )}
           {profile.resumePath && (
             <div>
-              <a
-                href={profile.resumePath.startsWith('http') ? profile.resumePath : `${API_ENDPOINTS.UPLOADS.BASE}/${profile.resumePath.replace(/^uploads[\\/]/, '')}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline"
-              >
-                📄 View Resume from Profile
-              </a>
+              <span className="text-gray-600 text-sm">Profile Resume:</span>
+              <div className="flex gap-2 mt-1">
+                {(() => {
+                  const resumeUrl = typeof profile.resumePath === 'object'
+                    ? profile.resumePath.preview_url || profile.resumePath.secure_url
+                    : profile.resumePath.startsWith('http')
+                      ? profile.resumePath
+                      : `${API_ENDPOINTS.UPLOADS.BASE}/${profile.resumePath.replace(/^uploads[\\/]/, '')}`;
+                  const downloadUrl = typeof profile.resumePath === 'object'
+                    ? profile.resumePath.download_url || profile.resumePath.secure_url
+                    : resumeUrl;
+                  return (
+                    <>
+                      <a
+                        href={resumeUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                      >
+                        👁️ View Resume
+                      </a>
+                      <span className="text-gray-400">|</span>
+                      <a
+                        href={downloadUrl}
+                        download
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                      >
+                        📥 Download Resume
+                      </a>
+                    </>
+                  );
+                })()}
+              </div>
             </div>
           )}
         </div>

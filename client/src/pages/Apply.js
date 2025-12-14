@@ -198,8 +198,17 @@ const Apply = () => {
           </div>
 
           {/* Profile Summary */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h3 className="font-semibold mb-2">Your Profile Information</h3>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 relative">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-semibold">Your Profile Information</h3>
+              <button
+                type="button"
+                onClick={() => navigate('/create-profile')}
+                className="bg-gray-500 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-600 transition"
+              >
+                Edit Profile
+              </button>
+            </div>
             <p><strong>Name:</strong> {profile.fullName}</p>
             <p><strong>Email:</strong> {profile.email}</p>
             <p><strong>Phone:</strong> {profile.phone}</p>
@@ -229,14 +238,6 @@ const Apply = () => {
               className="w-full bg-purple-700 text-white py-3 rounded-lg font-semibold hover:bg-purple-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {submitting ? 'Submitting...' : 'Submit Application'}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate('/create-profile')}
-              className="w-full bg-gray-500 text-white py-2 rounded-lg font-semibold hover:bg-gray-600 transition"
-            >
-              Edit Profile
             </button>
           </form>
         </div>

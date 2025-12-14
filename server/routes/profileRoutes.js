@@ -4,7 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const UserProfile = require('../models/UserProfile');
 const { authenticate } = require('../middleware/auth');
-const { cloudinary, cvStorage, imageStorage } = require('../config/cloudinary');
+const { cloudinary, cvStorage, imageStorage, uploadFile, getPreviewUrl, getDownloadUrl, normalizeFileData } = require('../config/cloudinary');
 
 // Multer Config for Profile Picture using Cloudinary
 const profilePictureUpload = multer({
@@ -96,7 +96,16 @@ router.get('/', authenticate, async (req, res) => {
       return res.status(404).json({ msg: 'Profile not found' });
     }
     
-    res.json(profile);
+    // Normalize file URLs (handle both old string format and new object format)
+    const profileData = profile.toObject();
+    if (profileData.profilePicture) {
+      profileData.profilePicture = normalizeFileData(profileData.profilePicture);
+    }
+    if (profileData.resumePath) {
+      profileData.resumePath = normalizeFileData(profileData.resumePath);
+    }
+    
+    res.json(profileData);
   } catch (err) {
     console.error('Error fetching profile:', err);
     res.status(500).json({ msg: 'Server Error', error: err.message });
@@ -124,21 +133,20 @@ router.post('/', authenticate, upload.fields([
       // Upload profile picture to Cloudinary
       if (req.files.profilePicture) {
         try {
-          const result = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-              {
-                folder: 'first-steps-school/profile-pictures',
-                resource_type: 'image',
-                transformation: [{ width: 500, height: 500, crop: 'limit', quality: 'auto' }]
-              },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
-              }
-            );
-            uploadStream.end(req.files.profilePicture[0].buffer);
-          });
-          profileData.profilePicture = result.secure_url;
+          const fileInfo = await uploadFile(
+            req.files.profilePicture[0].buffer,
+            'first-steps-school/profile-pictures',
+            req.files.profilePicture[0].originalname
+          );
+          // Store file information object with preview and download URLs
+          profileData.profilePicture = {
+            public_id: fileInfo.public_id,
+            secure_url: fileInfo.secure_url,
+            preview_url: fileInfo.preview_url,
+            download_url: fileInfo.download_url,
+            format: fileInfo.format,
+            resource_type: fileInfo.resource_type
+          };
         } catch (uploadError) {
           console.error('Error uploading profile picture:', uploadError);
           return res.status(500).json({ msg: 'Error uploading profile picture', error: uploadError.message });
@@ -148,20 +156,20 @@ router.post('/', authenticate, upload.fields([
       // Upload resume to Cloudinary
       if (req.files.resume) {
         try {
-          const result = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-              {
-                folder: 'first-steps-school/cvs',
-                resource_type: 'raw'
-              },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
-              }
-            );
-            uploadStream.end(req.files.resume[0].buffer);
-          });
-          profileData.resumePath = result.secure_url;
+          const fileInfo = await uploadFile(
+            req.files.resume[0].buffer,
+            'first-steps-school/cvs',
+            req.files.resume[0].originalname
+          );
+          // Store file information object with preview and download URLs
+          profileData.resumePath = {
+            public_id: fileInfo.public_id,
+            secure_url: fileInfo.secure_url,
+            preview_url: fileInfo.preview_url,
+            download_url: fileInfo.download_url,
+            format: fileInfo.format,
+            resource_type: fileInfo.resource_type
+          };
         } catch (uploadError) {
           console.error('Error uploading resume:', uploadError);
           return res.status(500).json({ msg: 'Error uploading resume', error: uploadError.message });

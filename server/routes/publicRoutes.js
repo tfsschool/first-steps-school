@@ -6,11 +6,11 @@ const mongoose = require('mongoose');
 const Job = require('../models/Job');
 const Application = require('../models/Application');
 const { authenticate, optionalAuth } = require('../middleware/auth');
-const { cvStorage } = require('../config/cloudinary');
+const { cvStorage, uploadFile, getPreviewUrl, getDownloadUrl } = require('../config/cloudinary');
 
-// Multer Config for CV Uploads using Cloudinary
+// Multer Config for CV Uploads (using memory storage, then upload to Cloudinary)
 const upload = multer({ 
-    storage: cvStorage,
+    storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
     fileFilter: (req, file, cb) => {
         const allowedTypes = /pdf|doc|docx/;
@@ -80,11 +80,29 @@ router.post('/apply/:jobId', authenticate, upload.single('cv'), async (req, res)
         // Handle profile-based application (cvPath provided) or file upload
         let cvPath;
         if (req.body.cvPath) {
-            // Using profile resume (already a Cloudinary URL)
+            // Using profile resume (already a Cloudinary URL or file object)
             cvPath = req.body.cvPath;
         } else if (req.file) {
-            // Using uploaded file - req.file.path is the Cloudinary secure URL
-            cvPath = req.file.path;
+            // Upload file to Cloudinary using new uploadFile function
+            try {
+                const fileInfo = await uploadFile(
+                    req.file.buffer,
+                    'first-steps-school/cvs',
+                    req.file.originalname
+                );
+                // Store file information object with preview and download URLs
+                cvPath = {
+                    public_id: fileInfo.public_id,
+                    secure_url: fileInfo.secure_url,
+                    preview_url: fileInfo.preview_url,
+                    download_url: fileInfo.download_url,
+                    format: fileInfo.format,
+                    resource_type: fileInfo.resource_type
+                };
+            } catch (uploadError) {
+                console.error('Error uploading CV:', uploadError);
+                return res.status(500).json({ msg: 'Error uploading CV', error: uploadError.message });
+            }
         } else {
             return res.status(400).json({ msg: 'CV file is required' });
         }
