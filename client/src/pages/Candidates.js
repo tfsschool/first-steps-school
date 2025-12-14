@@ -447,84 +447,61 @@ const CandidateDetails = ({ application }) => {
       <div className="bg-white p-4 rounded-lg shadow-sm">
         <h4 className="font-semibold text-gray-700 mb-3">Documents</h4>
         <div className="space-y-3">
-          {application.cvPath && (
-            <div>
-              <span className="text-gray-600 text-sm">Application CV:</span>
-              <div className="flex gap-2 mt-1">
-                {(() => {
-                  const cvUrl = typeof application.cvPath === 'object'
-                    ? application.cvPath.preview_url || application.cvPath.secure_url
-                    : application.cvPath.startsWith('http')
-                      ? application.cvPath
-                      : `${API_ENDPOINTS.UPLOADS.BASE}/${application.cvPath.replace(/^uploads[\\/]/, '')}`;
-                  const downloadUrl = typeof application.cvPath === 'object'
-                    ? application.cvPath.download_url || application.cvPath.secure_url
-                    : cvUrl;
-                  return (
-                    <>
-                      <a
-                        href={cvUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
-                      >
-                        👁️ View CV
-                      </a>
-                      <span className="text-gray-400">|</span>
-                      <a
-                        href={downloadUrl}
-                        download
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
-                      >
-                        📥 Download CV
-                      </a>
-                    </>
-                  );
-                })()}
+          {(() => {
+            // Use application CV if available, otherwise use profile resume
+            const cvData = application.cvPath || profile.resumePath;
+            if (!cvData) return null;
+
+            const cvUrl = typeof cvData === 'object'
+              ? cvData.preview_url || cvData.secure_url
+              : cvData.startsWith('http')
+                ? cvData
+                : `${API_ENDPOINTS.UPLOADS.BASE}/${cvData.replace(/^uploads[\\/]/, '')}`;
+            
+            // For download, ensure PDF extension is preserved
+            let downloadUrl = typeof cvData === 'object'
+              ? cvData.download_url || cvData.secure_url
+              : cvUrl;
+            
+            // Ensure download URL has .pdf extension for PDFs
+            const isPdf = typeof cvData === 'object' 
+              ? (cvData.format === 'pdf' || cvData.resource_type === 'raw')
+              : (cvUrl.toLowerCase().includes('.pdf') || cvUrl.toLowerCase().includes('/raw/'));
+            
+            // Add .pdf extension if it's a PDF and doesn't have it
+            if (isPdf && !downloadUrl.toLowerCase().endsWith('.pdf')) {
+              downloadUrl = downloadUrl + '.pdf';
+            }
+            
+            // Get filename for download attribute
+            const filename = typeof cvData === 'object' && cvData.original_filename
+              ? cvData.original_filename
+              : 'resume.pdf';
+
+            return (
+              <div>
+                <span className="text-gray-600 text-sm">CV/Resume:</span>
+                <div className="flex gap-2 mt-1">
+                  <a
+                    href={cvUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                  >
+                    👁️ View CV
+                  </a>
+                  <span className="text-gray-400">|</span>
+                  <a
+                    href={downloadUrl}
+                    download={isPdf ? (filename.endsWith('.pdf') ? filename : filename + '.pdf') : filename}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                  >
+                    📥 Download CV
+                  </a>
+                </div>
               </div>
-            </div>
-          )}
-          {profile.resumePath && (
-            <div>
-              <span className="text-gray-600 text-sm">Profile Resume:</span>
-              <div className="flex gap-2 mt-1">
-                {(() => {
-                  const resumeUrl = typeof profile.resumePath === 'object'
-                    ? profile.resumePath.preview_url || profile.resumePath.secure_url
-                    : profile.resumePath.startsWith('http')
-                      ? profile.resumePath
-                      : `${API_ENDPOINTS.UPLOADS.BASE}/${profile.resumePath.replace(/^uploads[\\/]/, '')}`;
-                  const downloadUrl = typeof profile.resumePath === 'object'
-                    ? profile.resumePath.download_url || profile.resumePath.secure_url
-                    : resumeUrl;
-                  return (
-                    <>
-                      <a
-                        href={resumeUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
-                      >
-                        👁️ View Resume
-                      </a>
-                      <span className="text-gray-400">|</span>
-                      <a
-                        href={downloadUrl}
-                        download
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
-                      >
-                        📥 Download Resume
-                      </a>
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </div>
     </div>

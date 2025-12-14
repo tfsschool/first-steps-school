@@ -64,9 +64,16 @@ const getDownloadUrl = (publicId, resourceType, format, originalFilename) => {
   // For PDFs and other raw files, ensure correct extension
   if (resourceType === 'raw' || format === 'pdf' || 
       (originalFilename && originalFilename.toLowerCase().endsWith('.pdf'))) {
-    // For raw files (PDFs), use the format parameter to ensure .pdf extension
+    // For raw files (PDFs), Cloudinary needs the extension in the public_id
+    // Also need to ensure proper content-type by using the format parameter
+    let pdfPublicId = publicId;
+    // If public_id doesn't end with .pdf, append it
+    if (!pdfPublicId.toLowerCase().endsWith('.pdf')) {
+      pdfPublicId = pdfPublicId + '.pdf';
+    }
+    // Use format: 'pdf' to ensure proper content-type header
     options.format = 'pdf';
-    return cloudinary.url(publicId, options);
+    return cloudinary.url(pdfPublicId, options);
   }
 
   // For images, return original format
@@ -175,15 +182,24 @@ const uploadFile = async (buffer, folder, originalFilename) => {
         if (error) {
           reject(error);
         } else {
+          // For raw files (PDFs), ensure public_id includes the extension
+          let publicId = result.public_id;
+          if (result.resource_type === 'raw' && originalFilename && originalFilename.toLowerCase().endsWith('.pdf')) {
+            // If public_id doesn't end with .pdf, add it
+            if (!publicId.toLowerCase().endsWith('.pdf')) {
+              publicId = publicId + '.pdf';
+            }
+          }
+          
           const fileInfo = {
-            public_id: result.public_id,
+            public_id: publicId,
             secure_url: result.secure_url,
             format: result.format,
             resource_type: result.resource_type,
             original_filename: originalFilename || result.original_filename,
             // Generate preview and download URLs
-            preview_url: getPreviewUrl(result.public_id, result.resource_type, result.format),
-            download_url: getDownloadUrl(result.public_id, result.resource_type, result.format, originalFilename)
+            preview_url: getPreviewUrl(publicId, result.resource_type, result.format),
+            download_url: getDownloadUrl(publicId, result.resource_type, result.format, originalFilename)
           };
           resolve(fileInfo);
         }
