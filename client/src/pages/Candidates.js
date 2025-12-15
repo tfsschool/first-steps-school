@@ -327,14 +327,29 @@ const CandidateDetails = ({ application }) => {
               <span className="text-gray-600">Profile Picture:</span>
               <div className="flex gap-2">
                 {(() => {
-                  const pictureUrl = typeof profile.profilePicture === 'object' 
-                    ? profile.profilePicture.preview_url || profile.profilePicture.secure_url
-                    : profile.profilePicture.startsWith('http') 
-                      ? profile.profilePicture 
-                      : `${API_ENDPOINTS.UPLOADS.BASE}/${profile.profilePicture.replace(/^uploads[\\/]/, '')}`;
-                  const downloadUrl = typeof profile.profilePicture === 'object'
-                    ? profile.profilePicture.download_url || profile.profilePicture.secure_url
+                  let pictureUrl;
+                  if (profile.profilePicture && typeof profile.profilePicture === 'object' && profile.profilePicture !== null) {
+                    // It's an object - use preview_url or secure_url
+                    pictureUrl = profile.profilePicture.preview_url || profile.profilePicture.secure_url || null;
+                  } else if (typeof profile.profilePicture === 'string') {
+                    // It's a string - check if it's a Cloudinary URL or local path
+                    if (profile.profilePicture.startsWith('http://') || profile.profilePicture.startsWith('https://')) {
+                      // It's already a full Cloudinary URL
+                      pictureUrl = profile.profilePicture;
+                    } else {
+                      // Legacy local file path - construct uploads URL
+                      pictureUrl = `${API_ENDPOINTS.UPLOADS.BASE}/${profile.profilePicture.replace(/^uploads[\\/]/, '')}`;
+                    }
+                  } else {
+                    return null;
+                  }
+
+                  if (!pictureUrl) return null;
+
+                  const downloadUrl = profile.profilePicture && typeof profile.profilePicture === 'object' && profile.profilePicture !== null
+                    ? profile.profilePicture.download_url || profile.profilePicture.secure_url || pictureUrl
                     : pictureUrl;
+
                   return (
                     <>
                       <a
@@ -361,11 +376,18 @@ const CandidateDetails = ({ application }) => {
               </div>
             </div>
             <img 
-              src={typeof profile.profilePicture === 'object' 
-                ? profile.profilePicture.preview_url || profile.profilePicture.secure_url
-                : profile.profilePicture.startsWith('http') 
-                  ? profile.profilePicture 
-                  : `${API_ENDPOINTS.UPLOADS.BASE}/${profile.profilePicture.replace(/^uploads[\\/]/, '')}`} 
+              src={(() => {
+                if (profile.profilePicture && typeof profile.profilePicture === 'object' && profile.profilePicture !== null) {
+                  return profile.profilePicture.preview_url || profile.profilePicture.secure_url || '';
+                } else if (typeof profile.profilePicture === 'string') {
+                  if (profile.profilePicture.startsWith('http://') || profile.profilePicture.startsWith('https://')) {
+                    return profile.profilePicture;
+                  } else {
+                    return `${API_ENDPOINTS.UPLOADS.BASE}/${profile.profilePicture.replace(/^uploads[\\/]/, '')}`;
+                  }
+                }
+                return '';
+              })()} 
               alt="Profile" 
               className="mt-2 w-24 h-24 object-cover rounded-lg"
             />
@@ -452,29 +474,50 @@ const CandidateDetails = ({ application }) => {
             const cvData = application.cvPath || profile.resumePath;
             if (!cvData) return null;
 
-            const cvUrl = typeof cvData === 'object'
-              ? cvData.preview_url || cvData.secure_url
-              : cvData.startsWith('http')
-                ? cvData
-                : `${API_ENDPOINTS.UPLOADS.BASE}/${cvData.replace(/^uploads[\\/]/, '')}`;
+            // Determine the preview URL
+            let cvUrl;
+            if (cvData && typeof cvData === 'object' && cvData !== null) {
+              // It's an object - use preview_url or secure_url
+              cvUrl = cvData.preview_url || cvData.secure_url || null;
+            } else if (typeof cvData === 'string') {
+              // It's a string - check if it's a Cloudinary URL or local path
+              if (cvData.startsWith('http://') || cvData.startsWith('https://')) {
+                // It's already a full Cloudinary URL
+                cvUrl = cvData;
+              } else {
+                // Legacy local file path - construct uploads URL
+                cvUrl = `${API_ENDPOINTS.UPLOADS.BASE}/${cvData.replace(/^uploads[\\/]/, '')}`;
+              }
+            } else {
+              // Fallback - shouldn't happen, but handle gracefully
+              console.error('Unexpected cvData type:', typeof cvData, cvData);
+              return null;
+            }
+
+            if (!cvUrl) return null;
             
             // For download, ensure PDF extension is preserved
-            let downloadUrl = typeof cvData === 'object'
-              ? cvData.download_url || cvData.secure_url
-              : cvUrl;
+            let downloadUrl;
+            if (cvData && typeof cvData === 'object' && cvData !== null) {
+              // Use download_url or secure_url from object
+              downloadUrl = cvData.download_url || cvData.secure_url || cvUrl;
+            } else {
+              // Use the same URL for download if it's a string
+              downloadUrl = cvUrl;
+            }
             
             // Ensure download URL has .pdf extension for PDFs
-            const isPdf = typeof cvData === 'object' 
+            const isPdf = cvData && typeof cvData === 'object' && cvData !== null
               ? (cvData.format === 'pdf' || cvData.resource_type === 'raw')
               : (cvUrl.toLowerCase().includes('.pdf') || cvUrl.toLowerCase().includes('/raw/'));
             
             // Add .pdf extension if it's a PDF and doesn't have it
-            if (isPdf && !downloadUrl.toLowerCase().endsWith('.pdf')) {
+            if (isPdf && downloadUrl && !downloadUrl.toLowerCase().endsWith('.pdf')) {
               downloadUrl = downloadUrl + '.pdf';
             }
             
             // Get filename for download attribute
-            const filename = typeof cvData === 'object' && cvData.original_filename
+            const filename = cvData && typeof cvData === 'object' && cvData !== null && cvData.original_filename
               ? cvData.original_filename
               : 'resume.pdf';
 

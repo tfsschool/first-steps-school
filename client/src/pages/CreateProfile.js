@@ -158,25 +158,43 @@ const CreateProfile = () => {
 
           // Set preview for existing files (handle both string and object format)
           if (existingProfile.profilePicture) {
-            const profilePictureUrl = typeof existingProfile.profilePicture === 'object'
-              ? existingProfile.profilePicture.preview_url || existingProfile.profilePicture.secure_url
-              : existingProfile.profilePicture.startsWith('http')
-                ? existingProfile.profilePicture
-                : `${API_ENDPOINTS.UPLOADS.BASE}/${existingProfile.profilePicture.replace(/^uploads\//, '')}`;
-            setPreview(prev => ({
-              ...prev,
-              profilePicture: profilePictureUrl
-            }));
+            let profilePictureUrl;
+            if (existingProfile.profilePicture && typeof existingProfile.profilePicture === 'object' && existingProfile.profilePicture !== null) {
+              profilePictureUrl = existingProfile.profilePicture.preview_url || existingProfile.profilePicture.secure_url || '';
+            } else if (typeof existingProfile.profilePicture === 'string') {
+              if (existingProfile.profilePicture.startsWith('http://') || existingProfile.profilePicture.startsWith('https://')) {
+                profilePictureUrl = existingProfile.profilePicture;
+              } else {
+                profilePictureUrl = `${API_ENDPOINTS.UPLOADS.BASE}/${existingProfile.profilePicture.replace(/^uploads\//, '')}`;
+              }
+            } else {
+              profilePictureUrl = '';
+            }
+            if (profilePictureUrl) {
+              setPreview(prev => ({
+                ...prev,
+                profilePicture: profilePictureUrl
+              }));
+            }
           }
           if (existingProfile.resumePath) {
-            const resumeUrl = typeof existingProfile.resumePath === 'object'
-              ? existingProfile.resumePath.preview_url || existingProfile.resumePath.secure_url
-              : existingProfile.resumePath.startsWith('http')
-                ? existingProfile.resumePath
-                : `${API_ENDPOINTS.UPLOADS.BASE}/${existingProfile.resumePath.replace(/^uploads\//, '')}`;
-            const resumeFilename = typeof existingProfile.resumePath === 'object'
+            let resumeUrl;
+            if (existingProfile.resumePath && typeof existingProfile.resumePath === 'object' && existingProfile.resumePath !== null) {
+              resumeUrl = existingProfile.resumePath.preview_url || existingProfile.resumePath.secure_url || '';
+            } else if (typeof existingProfile.resumePath === 'string') {
+              if (existingProfile.resumePath.startsWith('http://') || existingProfile.resumePath.startsWith('https://')) {
+                resumeUrl = existingProfile.resumePath;
+              } else {
+                resumeUrl = `${API_ENDPOINTS.UPLOADS.BASE}/${existingProfile.resumePath.replace(/^uploads\//, '')}`;
+              }
+            } else {
+              resumeUrl = '';
+            }
+            const resumeFilename = existingProfile.resumePath && typeof existingProfile.resumePath === 'object' && existingProfile.resumePath !== null
               ? existingProfile.resumePath.original_filename || 'resume.pdf'
-              : existingProfile.resumePath.split('/').pop() || 'resume.pdf';
+              : typeof existingProfile.resumePath === 'string'
+                ? existingProfile.resumePath.split('/').pop() || 'resume.pdf'
+                : 'resume.pdf';
             setPreview(prev => ({
               ...prev,
               resume: resumeFilename
