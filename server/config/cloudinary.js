@@ -66,11 +66,14 @@ const getDownloadUrl = (publicId, resourceType, format, originalFilename) => {
       (originalFilename && originalFilename.toLowerCase().endsWith('.pdf'))) {
     // For raw files (PDFs), Cloudinary needs the extension in the public_id
     // Also need to ensure proper content-type by using the format parameter
-    let pdfPublicId = publicId;
-    // If public_id doesn't end with .pdf, append it
-    if (!pdfPublicId.toLowerCase().endsWith('.pdf')) {
+    let pdfPublicId = String(publicId || '').trim();
+    
+    // CRITICAL: Check if it already ends with .pdf (case-insensitive) to avoid double extension
+    const lowerPublicId = pdfPublicId.toLowerCase();
+    if (!lowerPublicId.endsWith('.pdf')) {
       pdfPublicId = pdfPublicId + '.pdf';
     }
+    
     // Use format: 'pdf' to ensure proper content-type header
     options.format = 'pdf';
     return cloudinary.url(pdfPublicId, options);
@@ -117,7 +120,8 @@ const normalizeFileData = (fileData) => {
         const versionIndex = urlParts.findIndex(part => part.match(/^v\d+$/));
         const startIndex = versionIndex !== -1 ? versionIndex + 1 : uploadIndex + 2;
         const publicIdParts = urlParts.slice(startIndex);
-        const publicId = publicIdParts.join('/').replace(/\.[^/.]+$/, ''); // Remove extension
+        // Keep the full public_id including extension - Cloudinary stores it with extension for raw files
+        const publicId = publicIdParts.join('/');
         
         // Determine resource type and format from URL
         let resourceType = 'auto';
@@ -125,22 +129,33 @@ const normalizeFileData = (fileData) => {
         
         if (fileData.includes('/image/')) {
           resourceType = 'image';
-        } else if (fileData.includes('/raw/') || fileData.includes('/pdf')) {
+        } else if (fileData.includes('/raw/') || fileData.includes('/pdf') || fileData.includes('resource_type=raw')) {
           resourceType = 'raw';
           format = 'pdf';
         }
         
-        // Extract format from URL if present
-        const formatMatch = fileData.match(/\.(jpg|jpeg|png|gif|pdf|doc|docx)$/i);
+        // Extract format from URL if present (check both URL path and query params)
+        const formatMatch = fileData.match(/\.(jpg|jpeg|png|gif|pdf|doc|docx)(\?|$)/i);
         if (formatMatch) {
           format = formatMatch[1].toLowerCase();
         }
         
+        // For raw files (PDFs), ensure public_id has .pdf extension if format is pdf
+        // This prevents getDownloadUrl from adding it again
+        let finalPublicId = publicId;
+        if (resourceType === 'raw' && format === 'pdf') {
+          // Only add .pdf if it doesn't already end with it (case-insensitive check)
+          const lowerPublicId = publicId.toLowerCase();
+          if (!lowerPublicId.endsWith('.pdf')) {
+            finalPublicId = publicId + '.pdf';
+          }
+        }
+        
         return {
-          preview_url: getPreviewUrl(publicId, resourceType, format),
-          download_url: getDownloadUrl(publicId, resourceType, format, null),
+          preview_url: getPreviewUrl(finalPublicId, resourceType, format),
+          download_url: getDownloadUrl(finalPublicId, resourceType, format, null),
           secure_url: fileData,
-          public_id: publicId,
+          public_id: finalPublicId,
           format: format,
           resource_type: resourceType
         };
