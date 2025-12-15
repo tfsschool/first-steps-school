@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
@@ -66,11 +66,19 @@ const CreateProfile = () => {
     resume: null
   });
   const [submitting, setSubmitting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  
+  // Use ref to access latest formData in auto-save without causing re-renders
+  const formDataRef = useRef(formData);
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
 
   // Load existing profile and check authentication on mount
   useEffect(() => {
@@ -183,6 +191,26 @@ const CreateProfile = () => {
 
     loadProfile();
   }, [isAuthenticated, userEmail, authLoading, navigate]);
+
+  // Auto-save on form data changes (debounced)
+  useEffect(() => {
+    // Only auto-save if profile has been loaded and user has entered some data
+    if (!profileLoaded || !isAuthenticated || !userEmail) {
+      return;
+    }
+
+    // Don't auto-save if no meaningful data
+    if (!formData.fullName && !formData.phone) {
+      return;
+    }
+
+    // Debounce auto-save - save 3 seconds after user stops typing
+    const timer = setTimeout(() => {
+      autoSave(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [formData, profileLoaded, isAuthenticated, userEmail, autoSave]);
 
   // Calculate progress
   const progress = (currentStep / totalSteps) * 100;
@@ -371,9 +399,91 @@ const CreateProfile = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Auto-save function (saves progress without full validation)
+  const autoSave = useCallback(async (showNotification = false) => {
+    // Don't save if not authenticated
+    if (!isAuthenticated || !userEmail) {
+      return;
+    }
+
+    // Get latest formData from ref
+    const currentFormData = formDataRef.current;
+
+    // Don't save if no meaningful data entered yet
+    if (!currentFormData.fullName && !currentFormData.email && !currentFormData.phone) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const submitData = new FormData();
+      
+      // Add files only if they exist
+      if (currentFormData.profilePicture) {
+        submitData.append('profilePicture', currentFormData.profilePicture);
+      }
+      if (currentFormData.resume) {
+        submitData.append('resume', currentFormData.resume);
+      }
+      
+      // Filter out empty entries before sending
+      const filteredEducation = currentFormData.education.filter(edu => 
+        edu.degree && edu.degree.trim() && 
+        edu.institution && edu.institution.trim()
+      );
+      
+      const filteredWorkExperience = currentFormData.workExperience.filter(exp => 
+        exp.companyName && exp.companyName.trim() && 
+        exp.jobTitle && exp.jobTitle.trim()
+      );
+      
+      const filteredCertifications = currentFormData.certifications.filter(cert => 
+        cert.name && cert.name.trim()
+      );
+      
+      // Add form data as JSON (allow partial data)
+      const profileData = {
+        fullName: currentFormData.fullName || '',
+        dateOfBirth: currentFormData.dateOfBirth || '',
+        gender: currentFormData.gender || '',
+        nationality: currentFormData.nationality || '',
+        cnic: currentFormData.cnic ? currentFormData.cnic.replace(/[-\s]/g, '') : '',
+        phone: currentFormData.phone || '',
+        email: userEmail,
+        address: currentFormData.address || '',
+        education: filteredEducation,
+        workExperience: filteredWorkExperience,
+        skills: currentFormData.skills.filter(s => s && s.trim()),
+        certifications: filteredCertifications
+      };
+      
+      submitData.append('profileData', JSON.stringify(profileData));
+      
+      await axios.post(API_ENDPOINTS.PROFILE.CREATE_UPDATE, submitData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        withCredentials: true
+      });
+      
+      setLastSaved(new Date());
+      if (showNotification) {
+        setPopupMessage('Progress saved!');
+        setShowSuccessPopup(true);
+        setTimeout(() => setShowSuccessPopup(false), 1500);
+      }
+    } catch (err) {
+      // Silently fail for auto-save (don't interrupt user flow)
+      console.error('Auto-save error:', err);
+    } finally {
+      setSaving(false);
+    }
+  }, [isAuthenticated, userEmail]);
+
   // Next step
-  const nextStep = () => {
+  const nextStep = async () => {
     if (validateStep()) {
+      // Auto-save before moving to next step
+      await autoSave(false);
+      
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1);
       }
@@ -1132,6 +1242,32 @@ const CreateProfile = () => {
             {currentStep === 5 && renderStep5()}
             {currentStep === 6 && renderStep6()}
 
+            {/* Save Progress Indicator */}
+            <div className="mt-4 flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <span className="text-blue-600">Saving progress...</span>
+                  </>
+                ) : lastSaved ? (
+                  <span className="text-gray-500">
+                    ✓ Saved {lastSaved.toLocaleTimeString()}
+                  </span>
+                ) : (
+                  <span className="text-gray-400">Your progress will be saved automatically</span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => autoSave(true)}
+                disabled={saving || !isAuthenticated}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium underline disabled:text-gray-400 disabled:cursor-not-allowed"
+              >
+                {saving ? 'Saving...' : 'Save Progress'}
+              </button>
+            </div>
+
             {/* Navigation Buttons */}
             <div className="flex justify-between mt-8">
               <button
@@ -1147,9 +1283,10 @@ const CreateProfile = () => {
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="bg-blue-600 text-white px-6 py-2 rounded"
+                  disabled={saving}
+                  className="bg-blue-600 text-white px-6 py-2 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  Next
+                  {saving ? 'Saving...' : 'Next'}
                 </button>
               ) : (
                 <button
