@@ -474,52 +474,14 @@ const CandidateDetails = ({ application }) => {
             const cvData = application.cvPath || profile.resumePath;
             if (!cvData) return null;
 
-            // Determine the preview URL
-            let cvUrl;
-            if (cvData && typeof cvData === 'object' && cvData !== null) {
-              // It's an object - use preview_url or secure_url
-              cvUrl = cvData.preview_url || cvData.secure_url || null;
-            } else if (typeof cvData === 'string') {
-              // It's a string - check if it's a Cloudinary URL or local path
-              if (cvData.startsWith('http://') || cvData.startsWith('https://')) {
-                // It's already a full Cloudinary URL
-                cvUrl = cvData;
-              } else {
-                // Legacy local file path - construct uploads URL
-                cvUrl = `${API_ENDPOINTS.UPLOADS.BASE}/${cvData.replace(/^uploads[\\/]/, '')}`;
-              }
-            } else {
-              // Fallback - shouldn't happen, but handle gracefully
-              console.error('Unexpected cvData type:', typeof cvData, cvData);
-              return null;
-            }
-
+            // Simple logic: if string, use it directly; if object, use secure_url
+            const cvUrl = typeof cvData === 'string' ? cvData : cvData?.secure_url;
             if (!cvUrl) return null;
-            
-            // For download, ensure PDF extension is preserved
-            let downloadUrl;
-            if (cvData && typeof cvData === 'object' && cvData !== null) {
-              // Use download_url or secure_url from object
-              downloadUrl = cvData.download_url || cvData.secure_url || cvUrl;
-            } else {
-              // Use the same URL for download if it's a string
-              downloadUrl = cvUrl;
-            }
-            
-            // Ensure download URL has .pdf extension for PDFs
-            const isPdf = cvData && typeof cvData === 'object' && cvData !== null
-              ? (cvData.format === 'pdf' || cvData.resource_type === 'raw')
-              : (cvUrl.toLowerCase().includes('.pdf') || cvUrl.toLowerCase().includes('/raw/'));
-            
-            // Add .pdf extension if it's a PDF and doesn't have it
-            if (isPdf && downloadUrl && !downloadUrl.toLowerCase().endsWith('.pdf')) {
-              downloadUrl = downloadUrl + '.pdf';
-            }
-            
-            // Get filename for download attribute
-            const filename = cvData && typeof cvData === 'object' && cvData !== null && cvData.original_filename
-              ? cvData.original_filename
-              : 'resume.pdf';
+
+            // For download, use the same URL (or download_url if available)
+            const downloadUrl = typeof cvData === 'object' && cvData?.download_url 
+              ? cvData.download_url 
+              : cvUrl;
 
             return (
               <div>
@@ -536,7 +498,7 @@ const CandidateDetails = ({ application }) => {
                   <span className="text-gray-400">|</span>
                   <a
                     href={downloadUrl}
-                    download={isPdf ? (filename.endsWith('.pdf') ? filename : filename + '.pdf') : filename}
+                    download
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
                   >
                     📥 Download CV
