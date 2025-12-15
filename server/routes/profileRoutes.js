@@ -138,15 +138,8 @@ router.post('/', authenticate, upload.fields([
             'first-steps-school/profile-pictures',
             req.files.profilePicture[0].originalname
           );
-          // Store file information object with preview and download URLs
-          profileData.profilePicture = {
-            public_id: fileInfo.public_id,
-            secure_url: fileInfo.secure_url,
-            preview_url: fileInfo.preview_url,
-            download_url: fileInfo.download_url,
-            format: fileInfo.format,
-            resource_type: fileInfo.resource_type
-          };
+          // Store only the secure_url string (schema expects String type)
+          profileData.profilePicture = fileInfo.secure_url;
         } catch (uploadError) {
           console.error('Error uploading profile picture:', uploadError);
           return res.status(500).json({ msg: 'Error uploading profile picture', error: uploadError.message });
@@ -161,15 +154,8 @@ router.post('/', authenticate, upload.fields([
             'first-steps-school/cvs',
             req.files.resume[0].originalname
           );
-          // Store file information object with preview and download URLs
-          profileData.resumePath = {
-            public_id: fileInfo.public_id,
-            secure_url: fileInfo.secure_url,
-            preview_url: fileInfo.preview_url,
-            download_url: fileInfo.download_url,
-            format: fileInfo.format,
-            resource_type: fileInfo.resource_type
-          };
+          // Store only the secure_url string (schema expects String type)
+          profileData.resumePath = fileInfo.secure_url;
         } catch (uploadError) {
           console.error('Error uploading resume:', uploadError);
           return res.status(500).json({ msg: 'Error uploading resume', error: uploadError.message });

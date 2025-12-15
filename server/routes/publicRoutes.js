@@ -90,15 +90,8 @@ router.post('/apply/:jobId', authenticate, upload.single('cv'), async (req, res)
                     'first-steps-school/cvs',
                     req.file.originalname
                 );
-                // Store file information object with preview and download URLs
-                cvPath = {
-                    public_id: fileInfo.public_id,
-                    secure_url: fileInfo.secure_url,
-                    preview_url: fileInfo.preview_url,
-                    download_url: fileInfo.download_url,
-                    format: fileInfo.format,
-                    resource_type: fileInfo.resource_type
-                };
+                // Store only the secure_url string (schema expects String type)
+                cvPath = fileInfo.secure_url;
             } catch (uploadError) {
                 console.error('Error uploading CV:', uploadError);
                 return res.status(500).json({ msg: 'Error uploading CV', error: uploadError.message });
