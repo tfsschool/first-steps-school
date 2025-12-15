@@ -80,11 +80,14 @@ router.post('/apply/:jobId', authenticate, upload.single('cv'), async (req, res)
         // Handle profile-based application (cvPath provided) or file upload
         let cvPath;
         if (req.body.cvPath) {
-            // Using profile resume (already a Cloudinary URL or file object)
+            // Using profile resume (already a Cloudinary URL string from frontend)
+            // Frontend extracts secure_url from profile.resumePath object and sends it as string
             cvPath = req.body.cvPath;
+            console.log('Using profile resume CV:', cvPath);
         } else if (req.file) {
             // Upload file to Cloudinary using new uploadFile function
             try {
+                console.log('Uploading CV file to Cloudinary:', req.file.originalname);
                 const fileInfo = await uploadFile(
                     req.file.buffer,
                     'first-steps-school/cvs',
@@ -92,6 +95,7 @@ router.post('/apply/:jobId', authenticate, upload.single('cv'), async (req, res)
                 );
                 // Store only the secure_url string (schema expects String type)
                 cvPath = fileInfo.secure_url;
+                console.log('CV uploaded successfully:', cvPath);
             } catch (uploadError) {
                 console.error('Error uploading CV:', uploadError);
                 return res.status(500).json({ msg: 'Error uploading CV', error: uploadError.message });

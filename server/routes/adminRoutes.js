@@ -143,10 +143,21 @@ router.get('/candidates', adminAuth, async (req, res) => {
 // 5a. Get All Applications (Protected) - for admin to see all applications
 router.get('/applications', adminAuth, async (req, res) => {
     try {
+        const { normalizeFileData } = require('../config/cloudinary');
         const apps = await Application.find().sort({ appliedAt: -1 })
             .populate('jobId', 'title')
             .populate('profileId');
-        res.json(apps);
+        
+        // Normalize CV paths for all applications
+        const normalizedApps = apps.map(app => {
+            const appData = app.toObject();
+            if (appData.cvPath) {
+                appData.cvPath = normalizeFileData(appData.cvPath) || appData.cvPath;
+            }
+            return appData;
+        });
+        
+        res.json(normalizedApps);
     } catch (err) {
         console.error('Error fetching all applications:', err);
         res.status(500).json({ msg: 'Server Error', error: err.message });
@@ -173,7 +184,14 @@ router.put('/application/:id/status', adminAuth, async (req, res) => {
 
         application.status = status;
         await application.save();
-        res.json(application);
+        
+        // Normalize CV path before returning
+        const { normalizeFileData } = require('../config/cloudinary');
+        const appData = application.toObject();
+        if (appData.cvPath) {
+            appData.cvPath = normalizeFileData(appData.cvPath) || appData.cvPath;
+        }
+        res.json(appData);
     } catch (err) {
         console.error('Error updating application status:', err);
         res.status(500).json({ msg: 'Server Error', error: err.message });
@@ -218,12 +236,22 @@ router.get('/applications/:jobId', adminAuth, async (req, res) => {
             return res.status(400).json({ msg: 'Invalid job ID' });
         }
 
+        const { normalizeFileData } = require('../config/cloudinary');
         const jobId = new mongoose.Types.ObjectId(req.params.jobId);
         const apps = await Application.find({ jobId: jobId })
             .populate('profileId')
             .sort({ appliedAt: -1 });
         
-        res.json(apps);
+        // Normalize CV paths for all applications
+        const normalizedApps = apps.map(app => {
+            const appData = app.toObject();
+            if (appData.cvPath) {
+                appData.cvPath = normalizeFileData(appData.cvPath) || appData.cvPath;
+            }
+            return appData;
+        });
+        
+        res.json(normalizedApps);
     } catch (err) {
         console.error('Error fetching applications:', err);
         res.status(500).json({ msg: 'Server Error', error: err.message });

@@ -474,14 +474,23 @@ const CandidateDetails = ({ application }) => {
             const cvData = application.cvPath || profile.resumePath;
             if (!cvData) return null;
 
-            // Simple logic: if string, use it directly; if object, use secure_url
-            const cvUrl = typeof cvData === 'string' ? cvData : cvData?.secure_url;
-            if (!cvUrl) return null;
+            // Handle both string URLs and normalized objects
+            let cvUrl, downloadUrl;
+            
+            if (typeof cvData === 'object' && cvData !== null) {
+              // It's a normalized object with preview_url and download_url
+              cvUrl = cvData.preview_url || cvData.secure_url;
+              downloadUrl = cvData.download_url || cvData.secure_url || cvUrl;
+            } else if (typeof cvData === 'string') {
+              // It's a string URL - use it for both view and download
+              // The backend should normalize it, but if not, use the string directly
+              cvUrl = cvData;
+              downloadUrl = cvData;
+            } else {
+              return null;
+            }
 
-            // For download, use the same URL (or download_url if available)
-            const downloadUrl = typeof cvData === 'object' && cvData?.download_url 
-              ? cvData.download_url 
-              : cvUrl;
+            if (!cvUrl) return null;
 
             return (
               <div>
