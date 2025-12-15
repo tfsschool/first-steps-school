@@ -199,6 +199,85 @@ const CreateProfile = () => {
     loadProfile();
   }, [isAuthenticated, userEmail, authLoading, navigate]);
 
+  // Auto-save function (saves progress without full validation)
+  const autoSave = useCallback(async (showNotification = false) => {
+    // Don't save if not authenticated
+    if (!isAuthenticated || !userEmail) {
+      return;
+    }
+
+    // Get latest formData from ref
+    const currentFormData = formDataRef.current;
+
+    // Don't save if no meaningful data entered yet
+    if (!currentFormData.fullName && !currentFormData.email && !currentFormData.phone) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const submitData = new FormData();
+      
+      // Add files only if they exist
+      if (currentFormData.profilePicture) {
+        submitData.append('profilePicture', currentFormData.profilePicture);
+      }
+      if (currentFormData.resume) {
+        submitData.append('resume', currentFormData.resume);
+      }
+      
+      // Filter out empty entries before sending
+      const filteredEducation = currentFormData.education.filter(edu => 
+        edu.degree && edu.degree.trim() && 
+        edu.institution && edu.institution.trim()
+      );
+      
+      const filteredWorkExperience = currentFormData.workExperience.filter(exp => 
+        exp.companyName && exp.companyName.trim() && 
+        exp.jobTitle && exp.jobTitle.trim()
+      );
+      
+      const filteredCertifications = currentFormData.certifications.filter(cert => 
+        cert.name && cert.name.trim()
+      );
+      
+      // Add form data as JSON (allow partial data)
+      const profileData = {
+        fullName: currentFormData.fullName || '',
+        dateOfBirth: currentFormData.dateOfBirth || '',
+        gender: currentFormData.gender || '',
+        nationality: currentFormData.nationality || '',
+        cnic: currentFormData.cnic ? currentFormData.cnic.replace(/[-\s]/g, '') : '',
+        phone: currentFormData.phone || '',
+        email: userEmail,
+        address: currentFormData.address || '',
+        education: filteredEducation,
+        workExperience: filteredWorkExperience,
+        skills: currentFormData.skills.filter(s => s && s.trim()),
+        certifications: filteredCertifications
+      };
+      
+      submitData.append('profileData', JSON.stringify(profileData));
+      
+      await axios.post(API_ENDPOINTS.PROFILE.CREATE_UPDATE, submitData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        withCredentials: true
+      });
+      
+      setLastSaved(new Date());
+      if (showNotification) {
+        setPopupMessage('Progress saved!');
+        setShowSuccessPopup(true);
+        setTimeout(() => setShowSuccessPopup(false), 1500);
+      }
+    } catch (err) {
+      // Silently fail for auto-save (don't interrupt user flow)
+      console.error('Auto-save error:', err);
+    } finally {
+      setSaving(false);
+    }
+  }, [isAuthenticated, userEmail]);
+
   // Auto-save on form data changes (debounced)
   useEffect(() => {
     // Only auto-save if profile has been loaded and user has entered some data
@@ -405,85 +484,6 @@ const CreateProfile = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
-  // Auto-save function (saves progress without full validation)
-  const autoSave = useCallback(async (showNotification = false) => {
-    // Don't save if not authenticated
-    if (!isAuthenticated || !userEmail) {
-      return;
-    }
-
-    // Get latest formData from ref
-    const currentFormData = formDataRef.current;
-
-    // Don't save if no meaningful data entered yet
-    if (!currentFormData.fullName && !currentFormData.email && !currentFormData.phone) {
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const submitData = new FormData();
-      
-      // Add files only if they exist
-      if (currentFormData.profilePicture) {
-        submitData.append('profilePicture', currentFormData.profilePicture);
-      }
-      if (currentFormData.resume) {
-        submitData.append('resume', currentFormData.resume);
-      }
-      
-      // Filter out empty entries before sending
-      const filteredEducation = currentFormData.education.filter(edu => 
-        edu.degree && edu.degree.trim() && 
-        edu.institution && edu.institution.trim()
-      );
-      
-      const filteredWorkExperience = currentFormData.workExperience.filter(exp => 
-        exp.companyName && exp.companyName.trim() && 
-        exp.jobTitle && exp.jobTitle.trim()
-      );
-      
-      const filteredCertifications = currentFormData.certifications.filter(cert => 
-        cert.name && cert.name.trim()
-      );
-      
-      // Add form data as JSON (allow partial data)
-      const profileData = {
-        fullName: currentFormData.fullName || '',
-        dateOfBirth: currentFormData.dateOfBirth || '',
-        gender: currentFormData.gender || '',
-        nationality: currentFormData.nationality || '',
-        cnic: currentFormData.cnic ? currentFormData.cnic.replace(/[-\s]/g, '') : '',
-        phone: currentFormData.phone || '',
-        email: userEmail,
-        address: currentFormData.address || '',
-        education: filteredEducation,
-        workExperience: filteredWorkExperience,
-        skills: currentFormData.skills.filter(s => s && s.trim()),
-        certifications: filteredCertifications
-      };
-      
-      submitData.append('profileData', JSON.stringify(profileData));
-      
-      await axios.post(API_ENDPOINTS.PROFILE.CREATE_UPDATE, submitData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        withCredentials: true
-      });
-      
-      setLastSaved(new Date());
-      if (showNotification) {
-        setPopupMessage('Progress saved!');
-        setShowSuccessPopup(true);
-        setTimeout(() => setShowSuccessPopup(false), 1500);
-      }
-    } catch (err) {
-      // Silently fail for auto-save (don't interrupt user flow)
-      console.error('Auto-save error:', err);
-    } finally {
-      setSaving(false);
-    }
-  }, [isAuthenticated, userEmail]);
 
   // Next step
   const nextStep = async () => {
