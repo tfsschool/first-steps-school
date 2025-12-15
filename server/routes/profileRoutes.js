@@ -89,20 +89,33 @@ router.get('/', authenticate, async (req, res) => {
     // SECURITY: Use candidateId from authenticated session, NOT email from frontend
     const candidateId = req.candidate.id;
     
+    console.log('Fetching profile for candidateId:', candidateId);
+    
     // Find profile by candidateId (strict data isolation)
     const profile = await UserProfile.findOne({ candidateId: candidateId });
     
     if (!profile) {
+      console.log('Profile not found for candidateId:', candidateId);
       return res.status(404).json({ msg: 'Profile not found' });
     }
+    
+    console.log('Profile found:', {
+      id: profile._id,
+      fullName: profile.fullName,
+      email: profile.email,
+      hasProfilePicture: !!profile.profilePicture,
+      hasResumePath: !!profile.resumePath
+    });
     
     // Normalize file URLs (handle both old string format and new object format)
     const profileData = profile.toObject();
     if (profileData.profilePicture) {
-      profileData.profilePicture = normalizeFileData(profileData.profilePicture);
+      const normalized = normalizeFileData(profileData.profilePicture);
+      profileData.profilePicture = normalized || profileData.profilePicture;
     }
     if (profileData.resumePath) {
-      profileData.resumePath = normalizeFileData(profileData.resumePath);
+      const normalized = normalizeFileData(profileData.resumePath);
+      profileData.resumePath = normalized || profileData.resumePath;
     }
     
     res.json(profileData);

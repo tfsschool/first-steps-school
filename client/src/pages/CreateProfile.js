@@ -156,23 +156,30 @@ const CreateProfile = () => {
             resume: null // File object, not path
           });
 
-          // Set preview for existing files
+          // Set preview for existing files (handle both string and object format)
           if (existingProfile.profilePicture) {
-            const profilePictureUrl = existingProfile.profilePicture.startsWith('http') 
-              ? existingProfile.profilePicture 
-              : `${API_ENDPOINTS.UPLOADS.BASE}/${existingProfile.profilePicture.replace(/^uploads\//, '')}`;
+            const profilePictureUrl = typeof existingProfile.profilePicture === 'object'
+              ? existingProfile.profilePicture.preview_url || existingProfile.profilePicture.secure_url
+              : existingProfile.profilePicture.startsWith('http')
+                ? existingProfile.profilePicture
+                : `${API_ENDPOINTS.UPLOADS.BASE}/${existingProfile.profilePicture.replace(/^uploads\//, '')}`;
             setPreview(prev => ({
               ...prev,
               profilePicture: profilePictureUrl
             }));
           }
           if (existingProfile.resumePath) {
-            const resumeUrl = existingProfile.resumePath.startsWith('http')
-              ? existingProfile.resumePath
-              : `${API_ENDPOINTS.UPLOADS.BASE}/${existingProfile.resumePath.replace(/^uploads\//, '')}`;
+            const resumeUrl = typeof existingProfile.resumePath === 'object'
+              ? existingProfile.resumePath.preview_url || existingProfile.resumePath.secure_url
+              : existingProfile.resumePath.startsWith('http')
+                ? existingProfile.resumePath
+                : `${API_ENDPOINTS.UPLOADS.BASE}/${existingProfile.resumePath.replace(/^uploads\//, '')}`;
+            const resumeFilename = typeof existingProfile.resumePath === 'object'
+              ? existingProfile.resumePath.original_filename || 'resume.pdf'
+              : existingProfile.resumePath.split('/').pop() || 'resume.pdf';
             setPreview(prev => ({
               ...prev,
-              resume: resumeUrl
+              resume: resumeFilename
             }));
           }
 

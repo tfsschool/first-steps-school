@@ -89,8 +89,13 @@ const getDownloadUrl = (publicId, resourceType, format, originalFilename) => {
  * Returns object with preview_url and download_url
  */
 const normalizeFileData = (fileData) => {
+  // Handle null, undefined, or empty values
+  if (!fileData) {
+    return null;
+  }
+
   // If it's already an object with the new format, return it
-  if (fileData && typeof fileData === 'object' && fileData.public_id) {
+  if (typeof fileData === 'object' && fileData.public_id) {
     return {
       preview_url: fileData.preview_url || fileData.secure_url,
       download_url: fileData.download_url || fileData.secure_url,

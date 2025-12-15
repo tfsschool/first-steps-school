@@ -71,8 +71,10 @@ const Apply = () => {
           const profileRes = await axios.get(API_ENDPOINTS.PROFILE.GET, {
             withCredentials: true
           });
+          console.log('Profile fetched successfully:', profileRes.data);
           setProfile(profileRes.data);
         } catch (profileErr) {
+          console.error('Error fetching profile:', profileErr.response?.data || profileErr.message);
           // Profile not found, redirect to create profile
           if (window.confirm('You need to create a profile first. Would you like to create one now?')) {
             navigate('/create-profile');
@@ -106,9 +108,18 @@ const Apply = () => {
     data.append('fullName', profile.fullName);
     data.append('phone', profile.phone);
     data.append('education', JSON.stringify(profile.education || []));
-    // Use profile's resume path
+    // Use profile's resume path (handle both string and object format)
     if (profile.resumePath) {
-      data.append('cvPath', profile.resumePath);
+      const resumePath = typeof profile.resumePath === 'object' 
+        ? profile.resumePath.secure_url || profile.resumePath.preview_url || profile.resumePath.download_url
+        : profile.resumePath;
+      if (resumePath) {
+        data.append('cvPath', resumePath);
+      } else {
+        setError('Resume not found in profile. Please update your profile.');
+        setSubmitting(false);
+        return;
+      }
     } else {
       setError('Resume not found in profile. Please update your profile.');
       setSubmitting(false);
