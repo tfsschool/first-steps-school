@@ -40,14 +40,7 @@ const CreateProfile = () => {
     skillInput: '',
     
     // Certifications
-    certifications: [{
-      name: '',
-      issuingOrganization: '',
-      issueDate: '',
-      expiryDate: '',
-      credentialId: '',
-      credentialUrl: ''
-    }],
+    certifications: [],
     
     // Resume
     resume: null
@@ -125,14 +118,7 @@ const CreateProfile = () => {
             skillInput: '',
             certifications: existingProfile.certifications && existingProfile.certifications.length > 0
               ? existingProfile.certifications
-              : [{
-                  name: '',
-                  issuingOrganization: '',
-                  issueDate: '',
-                  expiryDate: '',
-                  credentialId: '',
-                  credentialUrl: ''
-                }],
+              : [],
             resume: null // File object, not path
           });
 
@@ -763,15 +749,6 @@ const CreateProfile = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Education Details</h2>
-        {formData.education.length > 0 && (
-          <button
-            type="button"
-            onClick={addEducation}
-            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
-          >
-            + Add Another Education
-          </button>
-        )}
       </div>
 
       {formData.education.length === 0 ? (
@@ -886,15 +863,6 @@ const CreateProfile = () => {
           <h2 className="text-2xl font-bold">Work Experience</h2>
           <p className="text-sm text-gray-600 mt-1">(Optional - You can skip this step if you don't have work experience)</p>
         </div>
-        {formData.workExperience.length > 0 && (
-          <button
-            type="button"
-            onClick={addWorkExperience}
-            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
-          >
-            + Add Another Experience
-          </button>
-        )}
       </div>
 
       {formData.workExperience.length === 0 ? (
@@ -1059,13 +1027,6 @@ const CreateProfile = () => {
       <div>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold">Certifications</h3>
-          <button
-            type="button"
-            onClick={addCertification}
-            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
-          >
-            + Add Certification
-          </button>
         </div>
 
         {formData.certifications.length === 0 ? (
@@ -1080,86 +1041,98 @@ const CreateProfile = () => {
             </button>
           </div>
         ) : (
-          formData.certifications.map((cert, index) => (
-            <div key={index} className="border p-4 rounded space-y-4 mb-4">
-              <div className="flex justify-between items-center">
-                <h4 className="font-semibold">Certification {index + 1}</h4>
-                <button
-                  type="button"
-                  onClick={() => removeCertification(index)}
-                  className="text-red-500 text-sm"
-                >
-                  Remove
-                </button>
+          <>
+            {formData.certifications.map((cert, index) => (
+              <div key={index} className="border p-4 rounded space-y-4 mb-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-semibold">Certification {index + 1}</h4>
+                  <button
+                    type="button"
+                    onClick={() => removeCertification(index)}
+                    className="text-red-500 text-sm"
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Certification Name</label>
+                    <input
+                      type="text"
+                      value={cert.name}
+                      onChange={(e) => updateCertification(index, 'name', e.target.value)}
+                      className="w-full border p-2 rounded"
+                      placeholder="Certification name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Issuing Organization</label>
+                    <input
+                      type="text"
+                      value={cert.issuingOrganization}
+                      onChange={(e) => updateCertification(index, 'issuingOrganization', e.target.value)}
+                      className="w-full border p-2 rounded"
+                      placeholder="Organization name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Issue Date</label>
+                    <input
+                      type="date"
+                      value={cert.issueDate}
+                      onChange={(e) => updateCertification(index, 'issueDate', e.target.value)}
+                      className="w-full border p-2 rounded"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Expiry Date</label>
+                    <input
+                      type="date"
+                      value={cert.expiryDate}
+                      onChange={(e) => updateCertification(index, 'expiryDate', e.target.value)}
+                      className="w-full border p-2 rounded"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Credential ID</label>
+                    <input
+                      type="text"
+                      value={cert.credentialId}
+                      onChange={(e) => updateCertification(index, 'credentialId', e.target.value)}
+                      className="w-full border p-2 rounded"
+                      placeholder="Optional"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Credential URL</label>
+                    <input
+                      type="url"
+                      value={cert.credentialUrl}
+                      onChange={(e) => updateCertification(index, 'credentialUrl', e.target.value)}
+                      className="w-full border p-2 rounded"
+                      placeholder="Optional verification URL"
+                    />
+                  </div>
+                </div>
               </div>
+            ))}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Certification Name</label>
-                  <input
-                    type="text"
-                    value={cert.name}
-                    onChange={(e) => updateCertification(index, 'name', e.target.value)}
-                    className="w-full border p-2 rounded"
-                    placeholder="Certification name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Issuing Organization</label>
-                  <input
-                    type="text"
-                    value={cert.issuingOrganization}
-                    onChange={(e) => updateCertification(index, 'issuingOrganization', e.target.value)}
-                    className="w-full border p-2 rounded"
-                    placeholder="Organization name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Issue Date</label>
-                  <input
-                    type="date"
-                    value={cert.issueDate}
-                    onChange={(e) => updateCertification(index, 'issueDate', e.target.value)}
-                    className="w-full border p-2 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Expiry Date</label>
-                  <input
-                    type="date"
-                    value={cert.expiryDate}
-                    onChange={(e) => updateCertification(index, 'expiryDate', e.target.value)}
-                    className="w-full border p-2 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Credential ID</label>
-                  <input
-                    type="text"
-                    value={cert.credentialId}
-                    onChange={(e) => updateCertification(index, 'credentialId', e.target.value)}
-                    className="w-full border p-2 rounded"
-                    placeholder="Optional"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Credential URL</label>
-                  <input
-                    type="url"
-                    value={cert.credentialUrl}
-                    onChange={(e) => updateCertification(index, 'credentialUrl', e.target.value)}
-                    className="w-full border p-2 rounded"
-                    placeholder="Optional verification URL"
-                  />
-                </div>
-              </div>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={addCertification}
+                className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+              >
+                + Add Another Certification
+              </button>
             </div>
-          ))
+          </>
         )}
       </div>
     </div>
