@@ -101,6 +101,38 @@ const Apply = () => {
           return missing;
         };
 
+        const formatMissingFieldsMessage = (items) => {
+          const personal = [];
+          const education = [];
+          const resume = [];
+
+          (items || []).forEach((item) => {
+            if (item.startsWith('Education')) {
+              education.push(item);
+            } else if (item.toLowerCase().includes('resume')) {
+              resume.push(item);
+            } else {
+              personal.push(item);
+            }
+          });
+
+          const sections = [];
+          sections.push('Please complete the following required fields before submitting your application:');
+          if (personal.length > 0) {
+            sections.push('\nPersonal Information');
+            personal.forEach((f) => sections.push(`- ${f}`));
+          }
+          if (education.length > 0) {
+            sections.push('\nEducation');
+            education.forEach((f) => sections.push(`- ${f}`));
+          }
+          if (resume.length > 0) {
+            sections.push('\nResume');
+            resume.forEach((f) => sections.push(`- ${f}`));
+          }
+          return sections.join('\n');
+        };
+
         // Fetch profile (using authenticated endpoint)
         try {
           const profileRes = await axios.get(API_ENDPOINTS.PROFILE.GET, {
@@ -110,10 +142,7 @@ const Apply = () => {
           const fetchedProfile = profileRes.data;
           const missing = getMissingRequiredFields(fetchedProfile);
           if (missing.length > 0) {
-            alert(`You can save an incomplete profile, but you must complete the following required fields before applying:\n\n${missing.join('\n')}`);
-            navigate('/create-profile');
-            setLoading(false);
-            return;
+            setError(formatMissingFieldsMessage(missing));
           }
           setProfile(fetchedProfile);
         } catch (profileErr) {
@@ -140,6 +169,79 @@ const Apply = () => {
     e.preventDefault();
     if (!profile) {
       setError('Profile not found. Please create a profile first.');
+      return;
+    }
+
+    const getMissingRequiredFields = (p) => {
+      const missing = [];
+      const safe = p || {};
+
+      if (!safe.fullName || !String(safe.fullName).trim()) missing.push('Full Name');
+      if (!safe.dateOfBirth) missing.push('Date of Birth');
+      if (!safe.gender) missing.push('Gender');
+
+      if (!safe.cnic || !String(safe.cnic).trim()) {
+        missing.push('CNIC');
+      } else {
+        const cleanedCnic = String(safe.cnic).replace(/[-\s]/g, '');
+        if (!/^\d{13}$/.test(cleanedCnic)) missing.push('CNIC (must be 13 digits)');
+      }
+
+      if (!safe.phone || !String(safe.phone).trim()) missing.push('Cell Number');
+      if (!safe.email || !String(safe.email).trim()) missing.push('Email');
+      if (!safe.address || !String(safe.address).trim()) missing.push('Address');
+
+      const education = Array.isArray(safe.education) ? safe.education : [];
+      if (education.length === 0) {
+        missing.push('Education (at least one entry)');
+      } else {
+        education.forEach((edu, index) => {
+          const row = index + 1;
+          if (!edu?.degree || !String(edu.degree).trim()) missing.push(`Education #${row}: Degree`);
+          if (!edu?.institution || !String(edu.institution).trim()) missing.push(`Education #${row}: Institution`);
+          if (!edu?.yearOfCompletion || !String(edu.yearOfCompletion).trim()) missing.push(`Education #${row}: Year`);
+        });
+      }
+
+      if (!safe.resumePath) missing.push('Resume');
+      return missing;
+    };
+
+    const formatMissingFieldsMessage = (items) => {
+      const personal = [];
+      const education = [];
+      const resume = [];
+
+      (items || []).forEach((item) => {
+        if (item.startsWith('Education')) {
+          education.push(item);
+        } else if (item.toLowerCase().includes('resume')) {
+          resume.push(item);
+        } else {
+          personal.push(item);
+        }
+      });
+
+      const sections = [];
+      sections.push('Please complete the following required fields before submitting your application:');
+      if (personal.length > 0) {
+        sections.push('\nPersonal Information');
+        personal.forEach((f) => sections.push(`- ${f}`));
+      }
+      if (education.length > 0) {
+        sections.push('\nEducation');
+        education.forEach((f) => sections.push(`- ${f}`));
+      }
+      if (resume.length > 0) {
+        sections.push('\nResume');
+        resume.forEach((f) => sections.push(`- ${f}`));
+      }
+      return sections.join('\n');
+    };
+
+    const missing = getMissingRequiredFields(profile);
+    if (missing.length > 0) {
+      setError(formatMissingFieldsMessage(missing));
       return;
     }
 
@@ -274,7 +376,7 @@ const Apply = () => {
           </div>
 
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 whitespace-pre-line">
               {error}
             </div>
           )}

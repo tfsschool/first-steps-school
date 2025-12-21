@@ -523,12 +523,13 @@ const CreateProfile = () => {
   // Submit form
   const handleSubmit = async () => {
     const missing = getMissingRequiredFields();
-    if (missing.length > 0) {
+
+    const formatMissingFieldsMessage = (items) => {
       const personal = [];
       const education = [];
       const resume = [];
 
-      missing.forEach((item) => {
+      (items || []).forEach((item) => {
         if (item.startsWith('Education')) {
           education.push(item);
         } else if (item.toLowerCase().includes('resume')) {
@@ -539,7 +540,7 @@ const CreateProfile = () => {
       });
 
       const sections = [];
-      sections.push('Please complete the following required fields before submitting:');
+      sections.push('Missing required fields:');
       if (personal.length > 0) {
         sections.push('\nPersonal Information');
         personal.forEach((f) => sections.push(`- ${f}`));
@@ -553,12 +554,8 @@ const CreateProfile = () => {
         resume.forEach((f) => sections.push(`- ${f}`));
       }
 
-      setPopupMessage(sections.join('\n'));
-      setShowErrorPopup(true);
-      return;
-    }
-
-    if (!validateStep()) return;
+      return sections.join('\n');
+    };
 
     // Check authentication
     if (!isAuthenticated || !userEmail) {
@@ -619,8 +616,12 @@ const CreateProfile = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true
       });
-      
-      setPopupMessage('Profile saved successfully!');
+
+      if (missing.length > 0) {
+        setPopupMessage(`Profile saved, but it is incomplete.\n\n${formatMissingFieldsMessage(missing)}`);
+      } else {
+        setPopupMessage('Profile saved successfully!');
+      }
       setShowSuccessPopup(true);
       
       // Redirect to apply page if jobId was provided, otherwise to careers
