@@ -1298,8 +1298,7 @@ const CreateProfile = () => {
           {profileLoaded && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
               <p className="text-blue-800 text-sm">
-                <strong>Good news!</strong> We found your existing profile. All your information has been loaded. 
-                You can review, edit, and update any fields you want, then click "Save Profile" to save your changes.
+                <strong>Your profile has been loaded.</strong> You can review and update your information, then click "Save Profile" to save changes.
               </p>
             </div>
           )}

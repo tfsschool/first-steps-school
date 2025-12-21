@@ -328,33 +328,6 @@ router.post('/', authenticate, upload.fields([
     const isNewProfile = profile.createdAt && 
       (new Date() - new Date(profile.createdAt)) < 5000;
 
-    // Notify admin about new profile creation
-    if (isNewProfile) {
-      const { sendEmail } = require('../config/email');
-      const adminEmail = process.env.ADMIN_EMAIL || 'admin@firststepsschool.com';
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const adminHtml = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #dc2626;">New Candidate Profile Created</h2>
-          <p>A new candidate has completed their profile:</p>
-          <ul>
-            <li><strong>Name:</strong> ${profileData.fullName}</li>
-            <li><strong>Email:</strong> ${profileData.email}</li>
-            <li><strong>CNIC:</strong> ${profileData.cnic}</li>
-            <li><strong>Cell Number:</strong> ${profileData.phone}</li>
-            <li><strong>Date/Time:</strong> ${new Date().toLocaleString()}</li>
-          </ul>
-          <p><a href="${frontendUrl}/admin/registered-emails?search=${encodeURIComponent(profileData.email)}">View in admin dashboard</a></p>
-        </div>
-      `;
-
-      await sendEmail(
-        adminEmail,
-        'New Candidate Profile Created - First Steps School',
-        adminHtml
-      );
-    }
-
     // Return appropriate message based on whether it was created or updated
     const message = isNewProfile ? 'Profile created successfully' : 'Profile updated successfully';
     res.json({ msg: message, profile });

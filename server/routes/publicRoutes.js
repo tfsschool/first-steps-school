@@ -180,29 +180,6 @@ router.post('/apply/:jobId', authenticate, upload.single('cv'), async (req, res)
             candidateEmailHtml
         );
 
-        // Notify admin
-        const adminEmail = process.env.ADMIN_EMAIL || 'admin@firststepsschool.com';
-        const adminEmailHtml = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #dc2626;">New Job Application Received</h2>
-                <p>A new job application has been submitted:</p>
-                <ul>
-                    <li><strong>Candidate Name:</strong> ${req.body.fullName}</li>
-                    <li><strong>Email:</strong> ${email}</li>
-                    <li><strong>Phone:</strong> ${req.body.phone}</li>
-                    <li><strong>Job Title:</strong> ${job.title}</li>
-                    <li><strong>Date & Time:</strong> ${new Date().toLocaleString()}</li>
-                </ul>
-                <p><a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/candidates">View candidate profile in admin dashboard</a></p>
-            </div>
-        `;
-
-        await sendEmail(
-            adminEmail,
-            'New Job Application Received - First Steps School',
-            adminEmailHtml
-        );
-
         res.json({ msg: 'Application submitted successfully!' });
     } catch (err) {
         console.error('Application submission error:', err);

@@ -386,16 +386,8 @@ const CandidateDetails = ({ candidate }) => {
             <span className="ml-2 font-medium">{candidate?.email || 'N/A'}</span>
           </div>
           <div>
-            <span className="text-gray-600">Email Status:</span>
-            <span className="ml-2 font-medium">{candidate?.emailVerified ? 'Verified' : 'Unverified'}</span>
-          </div>
-          <div>
             <span className="text-gray-600">Applications:</span>
             <span className="ml-2 font-medium">{candidate?.applicationCount ?? 0}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Registered:</span>
-            <span className="ml-2 font-medium">{candidate?.registeredAt ? new Date(candidate.registeredAt).toLocaleString() : 'N/A'}</span>
           </div>
         </div>
       </div>

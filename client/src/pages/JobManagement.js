@@ -225,16 +225,15 @@ const JobManagement = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <button
-                        onClick={() => handleToggleStatus(job)}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold inline-block ${
                           job.status === 'Open'
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                            : 'bg-red-100 text-red-800 hover:bg-red-200'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
                         }`}
                       >
                         {job.status}
-                      </button>
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">

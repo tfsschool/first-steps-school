@@ -115,7 +115,7 @@ const Careers = () => {
       if (err.response?.data?.notRegistered) {
         // Email not registered - show message with register button
         setShowNotRegisteredInLogin(true);
-        setLoginMessage('This email is not registered yet.');
+        setLoginMessage('');
       } else if (err.response?.data?.notVerified) {
         // Not verified - show message and resend option
         setLoginMessage('Your email is not verified. Please check your inbox and click the verification link. If you did not receive the email, you can resend it below.');
@@ -406,7 +406,7 @@ const Careers = () => {
                   autoFocus
                   disabled={loggingIn}
                 />
-                {loginMessage && (
+                {loginMessage && !showNotRegisteredInLogin && (
                   <div className={`mb-4 p-3 rounded text-sm ${loginMessage.includes('sent') || loginMessage.includes('successful') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {loginMessage}
                   </div>
@@ -446,42 +446,74 @@ const Careers = () => {
                   </div>
                 )}
 
-                <div className="flex gap-3">
-                  <button
-                    type="submit"
-                    disabled={loggingIn}
-                    className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
-                  >
-                    {loggingIn ? 'Sending...' : 'Send Login Link'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowLoginModal(false);
-                      setEmailInput('');
-                      setLoginMessage('');
-                      setIsUnverified(false);
-                      setShowNotRegisteredInLogin(false);
-                    }}
-                    className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition font-semibold"
-                  >
-                    Cancel
-                  </button>
-                </div>
-                <div className="mt-4 text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowLoginModal(false);
-                      setShowRegisterModal(true);
-                      setIsUnverified(false);
-                      setShowNotRegisteredInLogin(false);
-                    }}
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    Not registered? Register here
-                  </button>
-                </div>
+                {showNotRegisteredInLogin ? (
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowLoginModal(false);
+                        setShowRegisterModal(true);
+                        setShowNotRegisteredInLogin(false);
+                        setLoginMessage('');
+                      }}
+                      className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold"
+                    >
+                      Register First
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowLoginModal(false);
+                        setEmailInput('');
+                        setLoginMessage('');
+                        setIsUnverified(false);
+                        setShowNotRegisteredInLogin(false);
+                      }}
+                      className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition font-semibold"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex gap-3">
+                      <button
+                        type="submit"
+                        disabled={loggingIn}
+                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
+                        {loggingIn ? 'Sending...' : 'Send Login Link'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowLoginModal(false);
+                          setEmailInput('');
+                          setLoginMessage('');
+                          setIsUnverified(false);
+                          setShowNotRegisteredInLogin(false);
+                        }}
+                        className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition font-semibold"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    <div className="mt-4 text-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowLoginModal(false);
+                          setShowRegisterModal(true);
+                          setIsUnverified(false);
+                          setShowNotRegisteredInLogin(false);
+                        }}
+                        className="text-sm text-blue-600 hover:text-blue-800"
+                      >
+                        Not registered? Register here
+                      </button>
+                    </div>
+                  </>
+                )}
               </form>
             </div>
           </div>
