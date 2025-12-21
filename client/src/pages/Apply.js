@@ -66,13 +66,56 @@ const Apply = () => {
           // Continue if check fails
         }
 
+        const getMissingRequiredFields = (p) => {
+          const missing = [];
+          const safe = p || {};
+
+          if (!safe.fullName || !String(safe.fullName).trim()) missing.push('Full Name');
+          if (!safe.dateOfBirth) missing.push('Date of Birth');
+          if (!safe.gender) missing.push('Gender');
+
+          if (!safe.cnic || !String(safe.cnic).trim()) {
+            missing.push('CNIC');
+          } else {
+            const cleanedCnic = String(safe.cnic).replace(/[-\s]/g, '');
+            if (!/^\d{13}$/.test(cleanedCnic)) missing.push('CNIC (must be 13 digits)');
+          }
+
+          if (!safe.phone || !String(safe.phone).trim()) missing.push('Cell Number');
+          if (!safe.email || !String(safe.email).trim()) missing.push('Email');
+          if (!safe.address || !String(safe.address).trim()) missing.push('Address');
+
+          const education = Array.isArray(safe.education) ? safe.education : [];
+          if (education.length === 0) {
+            missing.push('Education (at least one entry)');
+          } else {
+            education.forEach((edu, index) => {
+              const row = index + 1;
+              if (!edu?.degree || !String(edu.degree).trim()) missing.push(`Education #${row}: Degree`);
+              if (!edu?.institution || !String(edu.institution).trim()) missing.push(`Education #${row}: Institution`);
+              if (!edu?.yearOfCompletion || !String(edu.yearOfCompletion).trim()) missing.push(`Education #${row}: Year`);
+            });
+          }
+
+          if (!safe.resumePath) missing.push('Resume');
+          return missing;
+        };
+
         // Fetch profile (using authenticated endpoint)
         try {
           const profileRes = await axios.get(API_ENDPOINTS.PROFILE.GET, {
             withCredentials: true
           });
           console.log('Profile fetched successfully:', profileRes.data);
-          setProfile(profileRes.data);
+          const fetchedProfile = profileRes.data;
+          const missing = getMissingRequiredFields(fetchedProfile);
+          if (missing.length > 0) {
+            alert(`You can save an incomplete profile, but you must complete the following required fields before applying:\n\n${missing.join('\n')}`);
+            navigate('/create-profile');
+            setLoading(false);
+            return;
+          }
+          setProfile(fetchedProfile);
         } catch (profileErr) {
           console.error('Error fetching profile:', profileErr.response?.data || profileErr.message);
           // Profile not found, redirect to create profile
@@ -222,7 +265,7 @@ const Apply = () => {
             </div>
             <p><strong>Name:</strong> {profile.fullName}</p>
             <p><strong>Email:</strong> {profile.email}</p>
-            <p><strong>Phone:</strong> {profile.phone}</p>
+            <p><strong>Cell Number:</strong> {profile.phone}</p>
             <p><strong>Education:</strong> {profile.education?.length || 0} entries</p>
             <p><strong>Experience:</strong> {profile.workExperience?.length || 0} entries</p>
             <p className="text-sm text-gray-600 mt-2">

@@ -261,6 +261,12 @@ router.get('/applications/:jobId', adminAuth, async (req, res) => {
 // 6. Download CSV for Job (Protected)
 router.get('/download-csv/:jobId', adminAuth, async (req, res) => {
     try {
+        const formatCnic = (value) => {
+            const digitsOnly = String(value || '').replace(/[^\d]/g, '').slice(0, 13);
+            if (digitsOnly.length !== 13) return value || 'N/A';
+            return `${digitsOnly.slice(0, 5)}-${digitsOnly.slice(5, 12)}-${digitsOnly.slice(12)}`;
+        };
+
         if (!mongoose.Types.ObjectId.isValid(req.params.jobId)) {
             return res.status(400).json({ msg: 'Invalid job ID' });
         }
@@ -280,11 +286,10 @@ router.get('/download-csv/:jobId', adminAuth, async (req, res) => {
             return {
                 'Full Name': app.fullName,
                 'Email': app.email,
-                'Phone': app.phone,
-                'CNIC': profile.cnic || 'N/A',
+                'Cell Number': app.phone,
+                'CNIC': formatCnic(profile.cnic),
                 'Date of Birth': profile.dateOfBirth || 'N/A',
                 'Gender': profile.gender || 'N/A',
-                'Nationality': profile.nationality || 'N/A',
                 'Address': profile.address || 'N/A',
                 'Education': app.education || 'N/A',
                 'Education Details': profile.education ? JSON.stringify(profile.education) : 'N/A',
@@ -296,7 +301,7 @@ router.get('/download-csv/:jobId', adminAuth, async (req, res) => {
             };
         });
 
-        const fields = ['Full Name', 'Email', 'Phone', 'CNIC', 'Date of Birth', 'Gender', 'Nationality', 
+        const fields = ['Full Name', 'Email', 'Cell Number', 'CNIC', 'Date of Birth', 'Gender', 
                        'Address', 'Education', 'Education Details', 'Work Experience', 'Skills', 
                        'Certifications', 'Status', 'Applied Date'];
         const json2csvParser = new Parser({ fields });
@@ -314,6 +319,12 @@ router.get('/download-csv/:jobId', adminAuth, async (req, res) => {
 // 6b. Download CSV for Single Application (Protected)
 router.get('/download-csv-application/:applicationId', adminAuth, async (req, res) => {
     try {
+        const formatCnic = (value) => {
+            const digitsOnly = String(value || '').replace(/[^\d]/g, '').slice(0, 13);
+            if (digitsOnly.length !== 13) return value || 'N/A';
+            return `${digitsOnly.slice(0, 5)}-${digitsOnly.slice(5, 12)}-${digitsOnly.slice(12)}`;
+        };
+
         if (!mongoose.Types.ObjectId.isValid(req.params.applicationId)) {
             return res.status(400).json({ msg: 'Invalid application ID' });
         }
@@ -330,12 +341,11 @@ router.get('/download-csv-application/:applicationId', adminAuth, async (req, re
         const csvData = [{
             'Full Name': app.fullName,
             'Email': app.email,
-            'Phone': app.phone,
+            'Cell Number': app.phone,
             'Job Applied For': app.jobId?.title || 'N/A',
-            'CNIC': profile.cnic || 'N/A',
+            'CNIC': formatCnic(profile.cnic),
             'Date of Birth': profile.dateOfBirth || 'N/A',
             'Gender': profile.gender || 'N/A',
-            'Nationality': profile.nationality || 'N/A',
             'Address': profile.address || 'N/A',
             'Education': app.education || 'N/A',
             'Education Details': profile.education ? JSON.stringify(profile.education) : 'N/A',
@@ -346,8 +356,8 @@ router.get('/download-csv-application/:applicationId', adminAuth, async (req, re
             'Applied Date': new Date(app.appliedAt).toLocaleString()
         }];
 
-        const fields = ['Full Name', 'Email', 'Phone', 'Job Applied For', 'CNIC', 'Date of Birth', 
-                       'Gender', 'Nationality', 'Address', 'Education', 'Education Details', 
+        const fields = ['Full Name', 'Email', 'Cell Number', 'Job Applied For', 'CNIC', 'Date of Birth', 
+                       'Gender', 'Address', 'Education', 'Education Details', 
                        'Work Experience', 'Skills', 'Certifications', 'Status', 'Applied Date'];
         const json2csvParser = new Parser({ fields });
         const csv = json2csvParser.parse(csvData);
@@ -421,6 +431,37 @@ router.delete('/candidate/:id', adminAuth, async (req, res) => {
         });
     } catch (err) {
         console.error('Error deleting candidate:', err);
+        res.status(500).json({ msg: 'Server Error', error: err.message });
+    }
+});
+
+// 9. Get Single Candidate Details (Protected)
+router.get('/candidate/:id', adminAuth, async (req, res) => {
+    try {
+        const candidateId = req.params.id;
+
+        if (!mongoose.Types.ObjectId.isValid(candidateId)) {
+            return res.status(400).json({ msg: 'Invalid candidate ID' });
+        }
+
+        const candidate = await Candidate.findById(candidateId)
+            .populate('profileId')
+            .lean();
+
+        if (!candidate) {
+            return res.status(404).json({ msg: 'Candidate not found' });
+        }
+
+        const applicationCount = await Application.countDocuments({
+            candidateId: candidate._id
+        });
+
+        res.json({
+            ...candidate,
+            applicationCount
+        });
+    } catch (err) {
+        console.error('Error fetching candidate details:', err);
         res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });

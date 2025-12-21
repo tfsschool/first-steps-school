@@ -136,9 +136,15 @@ router.post('/', authenticate, upload.fields([
     const candidateId = req.candidate.id;
     const email = req.candidate.email;
     
-    // Clean CNIC - remove dashes and spaces, ensure 13 digits
+    // CNIC - accept with/without dashes, store as 12345-1234567-1
+    let cleanedCnic = '';
     if (profileData.cnic) {
-      profileData.cnic = profileData.cnic.replace(/[-\s]/g, '');
+      cleanedCnic = String(profileData.cnic).replace(/[-\s]/g, '');
+      if (cleanedCnic.length === 13) {
+        profileData.cnic = `${cleanedCnic.slice(0, 5)}-${cleanedCnic.slice(5, 12)}-${cleanedCnic.slice(12)}`;
+      } else {
+        profileData.cnic = cleanedCnic;
+      }
     }
     
     // Handle file uploads to Cloudinary
@@ -190,8 +196,7 @@ router.post('/', authenticate, upload.fields([
     if (profileData.workExperience && Array.isArray(profileData.workExperience)) {
       profileData.workExperience = profileData.workExperience.filter(exp => 
         exp && 
-        exp.companyName && exp.companyName.trim() && 
-        exp.jobTitle && exp.jobTitle.trim()
+        exp.companyName && exp.companyName.trim()
       );
     } else {
       profileData.workExperience = [];
@@ -243,8 +248,18 @@ router.post('/', authenticate, upload.fields([
     }
 
     // Security: Check if CNIC is already used by another candidate
-    const cnicCheck = await UserProfile.findOne({ 
-      cnic: profileData.cnic,
+    const cnicVariants = [];
+    if (cleanedCnic) {
+      cnicVariants.push(cleanedCnic);
+      if (cleanedCnic.length === 13) {
+        cnicVariants.push(`${cleanedCnic.slice(0, 5)}-${cleanedCnic.slice(5, 12)}-${cleanedCnic.slice(12)}`);
+      }
+    } else if (profileData.cnic) {
+      cnicVariants.push(profileData.cnic);
+    }
+
+    const cnicCheck = await UserProfile.findOne({
+      cnic: { $in: cnicVariants },
       candidateId: { $exists: true, $ne: candidateId } // Exclude current user's profile and profiles without candidateId
     });
     if (cnicCheck) {
@@ -311,6 +326,7 @@ router.post('/', authenticate, upload.fields([
     if (isNewProfile) {
       const { sendEmail } = require('../config/email');
       const adminEmail = process.env.ADMIN_EMAIL || 'admin@firststepsschool.com';
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const adminHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #dc2626;">New Candidate Profile Created</h2>
@@ -319,10 +335,10 @@ router.post('/', authenticate, upload.fields([
             <li><strong>Name:</strong> ${profileData.fullName}</li>
             <li><strong>Email:</strong> ${profileData.email}</li>
             <li><strong>CNIC:</strong> ${profileData.cnic}</li>
-            <li><strong>Phone:</strong> ${profileData.phone}</li>
+            <li><strong>Cell Number:</strong> ${profileData.phone}</li>
             <li><strong>Date/Time:</strong> ${new Date().toLocaleString()}</li>
           </ul>
-          <p><a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/candidates">View in admin dashboard</a></p>
+          <p><a href="${frontendUrl}/admin/registered-emails?search=${encodeURIComponent(profileData.email)}">View in admin dashboard</a></p>
         </div>
       `;
 

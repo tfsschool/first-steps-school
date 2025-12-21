@@ -1,18 +1,22 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import AdminSidebar from '../components/AdminSidebar';
 import { API_ENDPOINTS } from '../config/api';
 
 const RegisteredEmails = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [filterVerified, setFilterVerified] = useState('All'); // All, Verified, Unverified
   const [deletingId, setDeletingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [candidateToDelete, setCandidateToDelete] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   const token = localStorage.getItem('token');
   const config = useMemo(() => ({ headers: { 'x-auth-token': token } }), [token]);
@@ -46,6 +50,22 @@ const RegisteredEmails = () => {
   const handleDeleteClick = (candidate) => {
     setCandidateToDelete(candidate);
     setShowDeleteModal(true);
+  };
+
+  const handleViewDetails = async (candidate) => {
+    if (!candidate?._id) return;
+    setLoadingDetails(true);
+    try {
+      const res = await axios.get(API_ENDPOINTS.ADMIN.CANDIDATE_DETAILS(candidate._id), config);
+      setSelectedCandidate(res.data);
+      setShowDetailsModal(true);
+    } catch (err) {
+      if (!handleAuthError(err)) {
+        alert('Error loading candidate details: ' + (err.response?.data?.msg || err.message));
+      }
+    } finally {
+      setLoadingDetails(false);
+    }
   };
 
   const handleDeleteConfirm = async () => {
@@ -205,7 +225,18 @@ const RegisteredEmails = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {candidate.profileId?.fullName || 'No profile'}
+                          {candidate.profileId?.fullName ? (
+                            <button
+                              type="button"
+                              onClick={() => handleViewDetails(candidate)}
+                              disabled={loadingDetails}
+                              className="text-blue-600 hover:text-blue-800 font-medium underline disabled:text-gray-400 disabled:cursor-not-allowed"
+                            >
+                              {candidate.profileId.fullName}
+                            </button>
+                          ) : (
+                            'No profile'
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -280,6 +311,99 @@ const RegisteredEmails = () => {
                   Cancel
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Candidate Details Modal */}
+        {showDetailsModal && selectedCandidate && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh]" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-800">Candidate Details</h2>
+                <button
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    setSelectedCandidate(null);
+                  }}
+                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="p-6">
+                <CandidateDetails candidate={selectedCandidate} />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const CandidateDetails = ({ candidate }) => {
+  const profile = candidate?.profileId || {};
+
+  const formatCnic = (value) => {
+    const digitsOnly = String(value || '').replace(/[^\d]/g, '').slice(0, 13);
+    if (digitsOnly.length !== 13) return String(value || 'N/A');
+    return `${digitsOnly.slice(0, 5)}-${digitsOnly.slice(5, 12)}-${digitsOnly.slice(12)}`;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+        <h4 className="font-semibold text-gray-700 mb-3">Account</h4>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-600">Email:</span>
+            <span className="ml-2 font-medium">{candidate?.email || 'N/A'}</span>
+          </div>
+          <div>
+            <span className="text-gray-600">Email Status:</span>
+            <span className="ml-2 font-medium">{candidate?.emailVerified ? 'Verified' : 'Unverified'}</span>
+          </div>
+          <div>
+            <span className="text-gray-600">Applications:</span>
+            <span className="ml-2 font-medium">{candidate?.applicationCount ?? 0}</span>
+          </div>
+          <div>
+            <span className="text-gray-600">Registered:</span>
+            <span className="ml-2 font-medium">{candidate?.registeredAt ? new Date(candidate.registeredAt).toLocaleString() : 'N/A'}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+        <h4 className="font-semibold text-gray-700 mb-3">Profile</h4>
+        {!profile || Object.keys(profile).length === 0 ? (
+          <p className="text-sm text-gray-500">No profile found for this candidate.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-gray-600">Full Name:</span>
+              <span className="ml-2 font-medium">{profile.fullName || 'N/A'}</span>
+            </div>
+            <div>
+              <span className="text-gray-600">Cell Number:</span>
+              <span className="ml-2 font-medium">{profile.phone || 'N/A'}</span>
+            </div>
+            <div>
+              <span className="text-gray-600">CNIC:</span>
+              <span className="ml-2 font-medium">{formatCnic(profile.cnic)}</span>
+            </div>
+            <div>
+              <span className="text-gray-600">Gender:</span>
+              <span className="ml-2 font-medium">{profile.gender || 'N/A'}</span>
+            </div>
+            <div>
+              <span className="text-gray-600">Date of Birth:</span>
+              <span className="ml-2 font-medium">{profile.dateOfBirth || 'N/A'}</span>
+            </div>
+            <div className="col-span-2">
+              <span className="text-gray-600">Address:</span>
+              <span className="ml-2 font-medium">{profile.address || 'N/A'}</span>
             </div>
           </div>
         )}

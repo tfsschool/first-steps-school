@@ -286,6 +286,12 @@ const Candidates = () => {
 const CandidateDetails = ({ application }) => {
   const profile = application.profileId || {};
 
+  const formatCnic = (value) => {
+    const digitsOnly = String(value || '').replace(/[^\d]/g, '').slice(0, 13);
+    if (digitsOnly.length !== 13) return String(value || 'N/A');
+    return `${digitsOnly.slice(0, 5)}-${digitsOnly.slice(5, 12)}-${digitsOnly.slice(12)}`;
+  };
+
   return (
     <div className="space-y-6">
       {/* Personal Information */}
@@ -294,7 +300,7 @@ const CandidateDetails = ({ application }) => {
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-gray-600">CNIC/National ID:</span>
-            <span className="ml-2 font-medium">{profile.cnic || 'N/A'}</span>
+            <span className="ml-2 font-medium">{formatCnic(profile.cnic)}</span>
           </div>
           <div>
             <span className="text-gray-600">Date of Birth:</span>
@@ -304,16 +310,12 @@ const CandidateDetails = ({ application }) => {
             <span className="text-gray-600">Gender:</span>
             <span className="ml-2 font-medium">{profile.gender || 'N/A'}</span>
           </div>
-          <div>
-            <span className="text-gray-600">Nationality:</span>
-            <span className="ml-2 font-medium">{profile.nationality || 'N/A'}</span>
-          </div>
           <div className="col-span-2">
             <span className="text-gray-600">Address:</span>
             <span className="ml-2 font-medium">{profile.address || 'N/A'}</span>
           </div>
           <div>
-            <span className="text-gray-600">Phone:</span>
+            <span className="text-gray-600">Cell Number:</span>
             <span className="ml-2 font-medium">{application.phone || 'N/A'}</span>
           </div>
           <div>

@@ -78,6 +78,7 @@ export const API_ENDPOINTS = {
     DOWNLOAD_CSV_APPLICATION: (applicationId) => `${BASE_URL}/api/admin/download-csv-application/${applicationId}`, // Download CSV for a single application
     STATS: `${BASE_URL}/api/admin/stats`,
     REGISTERED_EMAILS: `${BASE_URL}/api/admin/candidates`, // Get all registered candidates
+    CANDIDATE_DETAILS: (id) => `${BASE_URL}/api/admin/candidate/${id}`,
     DELETE_CANDIDATE: (id) => `${BASE_URL}/api/admin/candidate/${id}` // Delete a candidate
   },
   

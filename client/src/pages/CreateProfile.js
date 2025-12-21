@@ -11,6 +11,12 @@ const CreateProfile = () => {
   const { isAuthenticated, userEmail, loading: authLoading } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 6;
+
+  const formatCnic = (value) => {
+    const digitsOnly = String(value || '').replace(/[^\d]/g, '').slice(0, 13);
+    if (digitsOnly.length !== 13) return String(value || '');
+    return `${digitsOnly.slice(0, 5)}-${digitsOnly.slice(5, 12)}-${digitsOnly.slice(12)}`;
+  };
   
   const [formData, setFormData] = useState({
     // Personal Information
@@ -18,29 +24,16 @@ const CreateProfile = () => {
     fullName: '',
     dateOfBirth: '',
     gender: '',
-    nationality: '',
     cnic: '',
     phone: '',
     email: userEmail || '',
     address: '',
     
     // Education
-    education: [{
-      degree: '',
-      institution: '',
-      yearOfCompletion: '',
-      grade: ''
-    }],
+    education: [],
     
     // Work Experience
-    workExperience: [{
-      companyName: '',
-      jobTitle: '',
-      startDate: '',
-      endDate: '',
-      responsibilities: '',
-      isCurrentJob: false
-    }],
+    workExperience: [],
     
     // Skills
     skills: [],
@@ -116,29 +109,16 @@ const CreateProfile = () => {
             fullName: existingProfile.fullName || '',
             dateOfBirth: existingProfile.dateOfBirth || '',
             gender: existingProfile.gender || '',
-            nationality: existingProfile.nationality || '',
-            cnic: existingProfile.cnic || '',
+            cnic: formatCnic(existingProfile.cnic || ''),
             phone: existingProfile.phone || '',
             email: existingProfile.email || userEmail,
             address: existingProfile.address || '',
             education: existingProfile.education && existingProfile.education.length > 0 
               ? existingProfile.education 
-              : [{
-                  degree: '',
-                  institution: '',
-                  yearOfCompletion: '',
-                  grade: ''
-                }],
+              : [],
             workExperience: existingProfile.workExperience && existingProfile.workExperience.length > 0
               ? existingProfile.workExperience
-              : [{
-                  companyName: '',
-                  jobTitle: '',
-                  startDate: '',
-                  endDate: '',
-                  responsibilities: '',
-                  isCurrentJob: false
-                }],
+              : [],
             skills: existingProfile.skills && existingProfile.skills.length > 0
               ? existingProfile.skills
               : [],
@@ -264,7 +244,6 @@ const CreateProfile = () => {
         fullName: currentFormData.fullName || '',
         dateOfBirth: currentFormData.dateOfBirth || '',
         gender: currentFormData.gender || '',
-        nationality: currentFormData.nationality || '',
         cnic: currentFormData.cnic ? currentFormData.cnic.replace(/[-\s]/g, '') : '',
         phone: currentFormData.phone || '',
         email: userEmail,
@@ -466,7 +445,6 @@ const CreateProfile = () => {
       if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
       if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
       if (!formData.gender) newErrors.gender = 'Gender is required';
-      if (!formData.nationality.trim()) newErrors.nationality = 'Nationality is required';
       if (!formData.cnic.trim()) {
         newErrors.cnic = 'CNIC is required';
       } else {
@@ -476,7 +454,7 @@ const CreateProfile = () => {
           newErrors.cnic = 'CNIC must be exactly 13 digits';
         }
       }
-      if (!formData.phone.trim()) newErrors.phone = 'Phone is required';
+      if (!formData.phone.trim()) newErrors.phone = 'Cell number is required';
       if (!formData.email.trim()) newErrors.email = 'Email is required';
       if (!formData.address.trim()) newErrors.address = 'Address is required';
     } else if (currentStep === 2) {
@@ -488,11 +466,15 @@ const CreateProfile = () => {
           if (!edu.degree.trim()) newErrors[`education_${index}_degree`] = 'Degree is required';
           if (!edu.institution.trim()) newErrors[`education_${index}_institution`] = 'Institution is required';
           if (!edu.yearOfCompletion.trim()) newErrors[`education_${index}_year`] = 'Year is required';
-          if (!edu.grade.trim()) newErrors[`education_${index}_grade`] = 'Grade is required';
         });
       }
     } else if (currentStep === 3) {
-      // Work experience is optional - no validation needed
+      // Work experience is optional, but if an entry exists, company/organization is required
+      formData.workExperience.forEach((exp, index) => {
+        if (!exp.companyName || !exp.companyName.trim()) {
+          newErrors[`work_${index}_companyName`] = 'Company/Organization name is required';
+        }
+      });
     } else if (currentStep === 4) {
       // Skills and certifications are optional - no validation needed
     } else if (currentStep === 5) {
@@ -503,15 +485,45 @@ const CreateProfile = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const getMissingRequiredFields = () => {
+    const missing = [];
+
+    if (!formData.fullName.trim()) missing.push('Full Name');
+    if (!formData.dateOfBirth) missing.push('Date of Birth');
+    if (!formData.gender) missing.push('Gender');
+    if (!formData.cnic.trim()) {
+      missing.push('CNIC');
+    } else {
+      const cleanedCnic = formData.cnic.replace(/[-\s]/g, '');
+      if (!/^\d{13}$/.test(cleanedCnic)) missing.push('CNIC (must be 13 digits)');
+    }
+    if (!formData.phone.trim()) missing.push('Cell Number');
+    if (!formData.email.trim()) missing.push('Email');
+    if (!formData.address.trim()) missing.push('Address');
+
+    if (formData.education.length === 0) {
+      missing.push('Education (at least one entry)');
+    } else {
+      formData.education.forEach((edu, index) => {
+        const row = index + 1;
+        if (!edu.degree.trim()) missing.push(`Education #${row}: Degree`);
+        if (!edu.institution.trim()) missing.push(`Education #${row}: Institution`);
+        if (!edu.yearOfCompletion.trim()) missing.push(`Education #${row}: Year`);
+      });
+    }
+
+    if (!formData.resume) missing.push('Resume');
+
+    return missing;
+  };
+
   // Next step
   const nextStep = async () => {
-    if (validateStep()) {
-      // Auto-save before moving to next step
-      await autoSave(false);
-      
-      if (currentStep < totalSteps) {
-        setCurrentStep(currentStep + 1);
-      }
+    // Allow moving forward even if required fields are missing.
+    // Required fields are enforced on final submit.
+    await autoSave(false);
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -524,6 +536,13 @@ const CreateProfile = () => {
 
   // Submit form
   const handleSubmit = async () => {
+    const missing = getMissingRequiredFields();
+    if (missing.length > 0) {
+      setPopupMessage(`You can save an incomplete profile, but you must complete the following required fields before submitting:\n\n${missing.join('\n')}`);
+      setShowErrorPopup(true);
+      return;
+    }
+
     if (!validateStep()) return;
 
     // Check authentication
@@ -569,7 +588,6 @@ const CreateProfile = () => {
         fullName: formData.fullName,
         dateOfBirth: formData.dateOfBirth,
         gender: formData.gender,
-        nationality: formData.nationality,
         cnic: formData.cnic.replace(/[-\s]/g, ''), // Remove dashes and spaces before sending
         phone: formData.phone,
         email: userEmail, // Use authenticated email
@@ -627,7 +645,7 @@ const CreateProfile = () => {
       </div>
 
       <div>
-        <label className="block text-sm font-semibold mb-2">Full Name *</label>
+        <label className="block text-sm font-semibold mb-2">Full Name (as mentioned in CNIC) *</label>
         <input
           type="text"
           name="fullName"
@@ -671,59 +689,42 @@ const CreateProfile = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold mb-2">Nationality *</label>
-          <input
-            type="text"
-            name="nationality"
-            value={formData.nationality}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-            required
-          />
-          {errors.nationality && <p className="text-red-500 text-sm mt-1">{errors.nationality}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold mb-2">CNIC / National ID * (13 digits)</label>
-          <input
-            type="text"
-            name="cnic"
-            value={formData.cnic}
-            onChange={(e) => {
-              // Allow only digits, dashes, and spaces
-              let value = e.target.value.replace(/[^\d-\s]/g, '');
-              // Count only digits to limit to 13
-              const digitCount = value.replace(/[^\d]/g, '').length;
-              if (digitCount > 13) {
-                // If more than 13 digits, keep only first 13 digits
-                const digits = value.replace(/[^\d]/g, '').substring(0, 13);
-                value = digits;
-              }
-              setFormData({ ...formData, cnic: value });
-              // Clear error for this field
-              if (errors.cnic) {
-                setErrors({ ...errors, cnic: '' });
-              }
-            }}
-            className="w-full border p-2 rounded"
-            placeholder="1234512345671 (13 digits)"
-            required
-          />
-          {errors.cnic && <p className="text-red-500 text-sm mt-1">{errors.cnic}</p>}
-          <p className="text-gray-500 text-xs mt-1">Enter 13 digits (dashes and spaces will be removed automatically)</p>
-        </div>
+      <div>
+        <label className="block text-sm font-semibold mb-2">CNIC / National ID * (13 digits)</label>
+        <input
+          type="text"
+          name="cnic"
+          value={formData.cnic}
+          onChange={(e) => {
+            const digitsOnly = e.target.value.replace(/[^\d]/g, '').slice(0, 13);
+            let formatted = digitsOnly;
+            if (digitsOnly.length > 5) {
+              formatted = `${digitsOnly.slice(0, 5)}-${digitsOnly.slice(5)}`;
+            }
+            if (digitsOnly.length > 12) {
+              formatted = `${digitsOnly.slice(0, 5)}-${digitsOnly.slice(5, 12)}-${digitsOnly.slice(12)}`;
+            }
+            setFormData({ ...formData, cnic: formatted });
+            if (errors.cnic) {
+              setErrors({ ...errors, cnic: '' });
+            }
+          }}
+          className="w-full border p-2 rounded"
+          placeholder="12345-1234567-1"
+          required
+        />
+        {errors.cnic && <p className="text-red-500 text-sm mt-1">{errors.cnic}</p>}
       </div>
 
       <div>
-        <label className="block text-sm font-semibold mb-2">Phone *</label>
+        <label className="block text-sm font-semibold mb-2">Cell Number *</label>
         <input
           type="tel"
           name="phone"
           value={formData.phone}
           onChange={handleChange}
           className="w-full border p-2 rounded"
+          placeholder="03321234567"
           required
         />
         {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
@@ -762,14 +763,29 @@ const CreateProfile = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Education Details</h2>
-        <button
-          type="button"
-          onClick={addEducation}
-          className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
-        >
-          + Add Education
-        </button>
+        {formData.education.length > 0 && (
+          <button
+            type="button"
+            onClick={addEducation}
+            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+          >
+            + Add Another Education
+          </button>
+        )}
       </div>
+
+      {formData.education.length === 0 ? (
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+          <p className="text-gray-500 mb-4">No education added yet.</p>
+          <button
+            type="button"
+            onClick={addEducation}
+            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+          >
+            + Add Education
+          </button>
+        </div>
+      ) : null}
 
       {formData.education.map((edu, index) => (
         <div key={index} className="border p-4 rounded space-y-4">
@@ -832,14 +848,13 @@ const CreateProfile = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2">Grade / CGPA *</label>
+              <label className="block text-sm font-semibold mb-2">Grade / CGPA</label>
               <input
                 type="text"
                 value={edu.grade}
                 onChange={(e) => updateEducation(index, 'grade', e.target.value)}
                 placeholder="e.g., 3.5/4.0 or A"
                 className="w-full border p-2 rounded"
-                required
               />
               {errors[`education_${index}_grade`] && (
                 <p className="text-red-500 text-sm mt-1">{errors[`education_${index}_grade`]}</p>
@@ -848,6 +863,18 @@ const CreateProfile = () => {
           </div>
         </div>
       ))}
+
+      {formData.education.length > 0 && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={addEducation}
+            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+          >
+            + Add Another Education
+          </button>
+        </div>
+      )}
     </div>
   );
 
@@ -859,13 +886,15 @@ const CreateProfile = () => {
           <h2 className="text-2xl font-bold">Work Experience</h2>
           <p className="text-sm text-gray-600 mt-1">(Optional - You can skip this step if you don't have work experience)</p>
         </div>
-        <button
-          type="button"
-          onClick={addWorkExperience}
-          className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
-        >
-          + Add Experience
-        </button>
+        {formData.workExperience.length > 0 && (
+          <button
+            type="button"
+            onClick={addWorkExperience}
+            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+          >
+            + Add Another Experience
+          </button>
+        )}
       </div>
 
       {formData.workExperience.length === 0 ? (
@@ -876,7 +905,7 @@ const CreateProfile = () => {
             onClick={addWorkExperience}
             className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
           >
-            + Add Your First Experience
+            + Add Experience
           </button>
         </div>
       ) : (
@@ -895,14 +924,18 @@ const CreateProfile = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold mb-2">Company Name</label>
+                <label className="block text-sm font-semibold mb-2">Company/Organization Name *</label>
                 <input
                   type="text"
                   value={exp.companyName}
                   onChange={(e) => updateWorkExperience(index, 'companyName', e.target.value)}
                   className="w-full border p-2 rounded"
-                  placeholder="Company name"
+                  placeholder="Company/Organization name"
+                  required
                 />
+                {errors[`work_${index}_companyName`] && (
+                  <p className="text-red-500 text-sm mt-1">{errors[`work_${index}_companyName`]}</p>
+                )}
               </div>
 
               <div>
@@ -959,6 +992,18 @@ const CreateProfile = () => {
             </div>
           </div>
         ))
+      )}
+
+      {formData.workExperience.length > 0 && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={addWorkExperience}
+            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+          >
+            + Add Another Experience
+          </button>
+        </div>
       )}
     </div>
   );
@@ -1153,8 +1198,8 @@ const CreateProfile = () => {
           <h3 className="font-semibold mb-2">Personal Information</h3>
           <p><strong>Name:</strong> {formData.fullName}</p>
           <p><strong>Email:</strong> {formData.email}</p>
-          <p><strong>Phone:</strong> {formData.phone}</p>
-          <p><strong>CNIC:</strong> {formData.cnic}</p>
+          <p><strong>Cell Number:</strong> {formData.phone}</p>
+          <p><strong>CNIC:</strong> {formatCnic(formData.cnic)}</p>
         </div>
 
         <div className="border p-4 rounded">
@@ -1166,9 +1211,18 @@ const CreateProfile = () => {
 
         <div className="border p-4 rounded">
           <h3 className="font-semibold mb-2">Work Experience ({formData.workExperience.length})</h3>
-          {formData.workExperience.map((exp, i) => (
-            <p key={i}>{exp.jobTitle} at {exp.companyName}</p>
-          ))}
+          {formData.workExperience.length === 0 ? (
+            <p>No work experience added</p>
+          ) : (
+            formData.workExperience
+              .filter((exp) => (exp?.jobTitle && exp.jobTitle.trim()) || (exp?.companyName && exp.companyName.trim()))
+              .map((exp, i) => (
+                <p key={i}>
+                  {exp.jobTitle && exp.jobTitle.trim() ? exp.jobTitle : 'N/A'}
+                  {exp.companyName && exp.companyName.trim() ? ` at ${exp.companyName}` : ''}
+                </p>
+              ))
+          )}
         </div>
 
         <div className="border p-4 rounded">

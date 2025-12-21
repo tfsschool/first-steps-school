@@ -4,7 +4,7 @@ const EducationSchema = new mongoose.Schema({
   degree: { type: String, required: true },
   institution: { type: String, required: true },
   yearOfCompletion: { type: String, required: true },
-  grade: { type: String, required: true }
+  grade: { type: String, required: false }
 });
 
 const WorkExperienceSchema = new mongoose.Schema({
@@ -39,7 +39,6 @@ const UserProfileSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   dateOfBirth: { type: String, required: true },
   gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
-  nationality: { type: String, required: true },
   cnic: { 
     type: String, 
     required: true, 
