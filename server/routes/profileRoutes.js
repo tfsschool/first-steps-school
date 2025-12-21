@@ -132,6 +132,12 @@ router.post('/', authenticate, upload.fields([
 ]), async (req, res) => {
   try {
     const profileData = JSON.parse(req.body.profileData || '{}');
+    // Allow saving incomplete profiles: remove empty-string values so Mongoose validators (e.g., enum) don't fail
+    Object.keys(profileData || {}).forEach((key) => {
+      if (profileData[key] === '') {
+        delete profileData[key];
+      }
+    });
     // SECURITY: Get candidateId and email from authenticated session, NOT from frontend
     const candidateId = req.candidate.id;
     const email = req.candidate.email;

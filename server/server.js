@@ -44,24 +44,27 @@ app.use(cors({
     // 1. Allow requests with no origin (like direct browser visits, Postman, or mobile apps)
     if (!origin) return callback(null, true);
 
+    // Normalize origin to prevent mismatches (e.g., trailing slash, casing)
+    const normalizedOrigin = String(origin).trim().replace(/\/+$/, '').toLowerCase();
+
     // 2. Check if the origin is explicitly in our allowed list
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (allowedOrigins.map((o) => String(o).trim().replace(/\/+$/, '').toLowerCase()).indexOf(normalizedOrigin) !== -1) {
       return callback(null, true);
     }
 
     // 3. Dynamic Check: Allow ANY Vercel deployment (Crucial for Vercel previews)
-    if (origin.endsWith('.vercel.app')) {
+    if (normalizedOrigin.endsWith('.vercel.app')) {
       return callback(null, true);
     }
 
     // 4. Local Development: Allow localhost and local network IPs
     if (process.env.NODE_ENV !== 'production') {
       // Allow localhost with any port
-      if (origin.startsWith('http://localhost:') || origin.startsWith('https://localhost:')) {
+      if (normalizedOrigin.startsWith('http://localhost:') || normalizedOrigin.startsWith('https://localhost:')) {
         return callback(null, true);
       }
       // Allow local network IPs (e.g., 192.168.x.x)
-      if (origin.includes('192.168.') || origin.includes('127.0.0.1')) {
+      if (normalizedOrigin.includes('192.168.') || normalizedOrigin.includes('127.0.0.1')) {
         return callback(null, true);
       }
     }
