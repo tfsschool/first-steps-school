@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const EducationSchema = new mongoose.Schema({
-  degree: { type: String, required: true },
-  institution: { type: String, required: true },
-  yearOfCompletion: { type: String, required: true },
+  degree: { type: String, required: false },
+  institution: { type: String, required: false },
+  yearOfCompletion: { type: String, required: false },
   grade: { type: String, required: false }
 });
 
@@ -36,15 +36,17 @@ const UserProfileSchema = new mongoose.Schema({
   
   // Personal Information
   profilePicture: { type: String },
-  fullName: { type: String, required: true },
-  dateOfBirth: { type: String, required: true },
-  gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
+  fullName: { type: String, required: false },
+  dateOfBirth: { type: String, required: false },
+  gender: { type: String, required: false, enum: ['Male', 'Female', 'Other'] },
   cnic: { 
     type: String, 
-    required: true, 
+    required: false, 
     unique: true,
+    sparse: true,
     validate: {
       validator: function(v) {
+        if (!v) return true;
         // Remove any dashes or spaces and check if it's exactly 13 digits
         const cleaned = v.replace(/[-\s]/g, '');
         return /^\d{13}$/.test(cleaned);
@@ -54,9 +56,9 @@ const UserProfileSchema = new mongoose.Schema({
   },
   
   // Contact Details
-  phone: { type: String, required: true },
+  phone: { type: String, required: false },
   email: { type: String, required: true }, // Keep for display, but NOT used for queries
-  address: { type: String, required: true },
+  address: { type: String, required: false },
   
   // Education
   education: [EducationSchema],
@@ -71,7 +73,7 @@ const UserProfileSchema = new mongoose.Schema({
   certifications: [CertificationSchema],
   
   // Resume/CV
-  resumePath: { type: String, required: true },
+  resumePath: { type: String, required: false },
   
   // Metadata
   createdAt: { type: Date, default: Date.now },
