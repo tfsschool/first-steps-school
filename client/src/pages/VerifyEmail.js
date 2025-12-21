@@ -131,7 +131,7 @@ const VerifyEmail = () => {
                     }
                   }}
                   disabled={resending}
-                  className="w-full bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="w-full bg-theme-blue text-white px-6 py-2 rounded-lg hover:brightness-95 transition font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {resending ? 'Sending...' : 'Resend Verification Email'}
                 </button>
@@ -145,7 +145,7 @@ const VerifyEmail = () => {
             
             <button
               onClick={() => navigate('/careers')}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+              className="bg-theme-green text-white px-6 py-2 rounded-lg hover:brightness-95 transition font-semibold"
             >
               Go to Careers
             </button>

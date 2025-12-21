@@ -26,11 +26,12 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center py-12 px-4">
-      <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Login</h1>
-          <p className="text-gray-600">First Steps School</p>
+          <div className="text-xs tracking-[0.35em] uppercase text-theme-dark/60 font-semibold">Admin Portal</div>
+          <h1 className="mt-3 text-3xl font-extrabold text-theme-dark">Admin Login</h1>
+          <p className="mt-2 text-gray-600">The First Steps School</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -41,7 +42,7 @@ const AdminLogin = () => {
               required
               value={credentials.username}
               onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
               placeholder="Enter username"
             />
           </div>
@@ -53,13 +54,13 @@ const AdminLogin = () => {
               required
               value={credentials.password}
               onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
               placeholder="Enter password"
             />
           </div>
 
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
@@ -67,7 +68,7 @@ const AdminLogin = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full bg-theme-blue text-white py-3 rounded-lg font-semibold hover:brightness-95 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>

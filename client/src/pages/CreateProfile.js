@@ -787,7 +787,7 @@ const CreateProfile = () => {
           <button
             type="button"
             onClick={addEducation}
-            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+            className="bg-theme-blue text-white px-4 py-2 rounded text-sm font-semibold hover:brightness-95 transition"
           >
             + Add Education
           </button>
@@ -876,7 +876,7 @@ const CreateProfile = () => {
           <button
             type="button"
             onClick={addEducation}
-            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+            className="bg-theme-blue text-white px-4 py-2 rounded text-sm font-semibold hover:brightness-95 transition"
           >
             + Add Another Education
           </button>
@@ -901,7 +901,7 @@ const CreateProfile = () => {
           <button
             type="button"
             onClick={addWorkExperience}
-            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+            className="bg-theme-blue text-white px-4 py-2 rounded text-sm font-semibold hover:brightness-95 transition"
           >
             + Add Experience
           </button>
@@ -997,7 +997,7 @@ const CreateProfile = () => {
           <button
             type="button"
             onClick={addWorkExperience}
-            className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+            className="bg-theme-blue text-white px-4 py-2 rounded text-sm font-semibold hover:brightness-95 transition"
           >
             + Add Another Experience
           </button>
@@ -1026,7 +1026,7 @@ const CreateProfile = () => {
           <button
             type="button"
             onClick={addSkill}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
+            className="bg-theme-green text-white px-4 py-2 rounded font-semibold hover:brightness-95 transition"
           >
             Add
           </button>
@@ -1036,13 +1036,13 @@ const CreateProfile = () => {
             {formData.skills.map((skill, index) => (
               <span
                 key={index}
-                className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center gap-2"
+                className="bg-theme-blue/10 text-theme-blue px-3 py-1 rounded-full flex items-center gap-2"
               >
                 {skill}
                 <button
                   type="button"
                   onClick={() => removeSkill(index)}
-                  className="text-blue-600 hover:text-blue-800"
+                  className="text-theme-blue hover:text-theme-green transition-colors"
                 >
                   ×
                 </button>
@@ -1065,7 +1065,7 @@ const CreateProfile = () => {
             <button
               type="button"
               onClick={addCertification}
-              className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+              className="bg-theme-blue text-white px-4 py-2 rounded text-sm font-semibold hover:brightness-95 transition"
             >
               + Add Your First Certification
             </button>
@@ -1282,8 +1282,8 @@ const CreateProfile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="container mx-auto">
+        <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-soft border border-gray-100 p-8">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">
@@ -1296,8 +1296,8 @@ const CreateProfile = () => {
             )}
           </div>
           {profileLoaded && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <p className="text-blue-800 text-sm">
+            <div className="bg-theme-blue/5 border border-theme-blue/15 rounded-lg p-4 mb-6">
+              <p className="text-theme-blue text-sm">
                 <strong>Your profile has been loaded.</strong> You can review and update your information, then click "Save Profile" to save changes.
               </p>
             </div>
@@ -1311,7 +1311,7 @@ const CreateProfile = () => {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className="bg-blue-600 h-2 rounded-full transition-all"
+                className="bg-theme-green h-2 rounded-full transition-all"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -1323,13 +1323,13 @@ const CreateProfile = () => {
               <div
                 key={step}
                 className={`flex-1 text-center ${
-                  step <= currentStep ? 'text-blue-600' : 'text-gray-400'
+                  step <= currentStep ? 'text-theme-blue' : 'text-gray-400'
                 }`}
               >
                 <div
                   className={`w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center ${
                     step <= currentStep
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-theme-blue text-white'
                       : 'bg-gray-200 text-gray-500'
                   }`}
                 >
@@ -1361,8 +1361,8 @@ const CreateProfile = () => {
               <div className="flex items-center gap-2">
                 {saving ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                    <span className="text-blue-600">Saving progress...</span>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-theme-green"></div>
+                    <span className="text-theme-blue">Saving progress...</span>
                   </>
                 ) : lastSaved ? (
                   <span className="text-gray-500">
@@ -1376,7 +1376,7 @@ const CreateProfile = () => {
                 type="button"
                 onClick={() => autoSave(true)}
                 disabled={saving || !isAuthenticated}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium underline disabled:text-gray-400 disabled:cursor-not-allowed"
+                className="text-theme-blue hover:text-theme-green text-sm font-semibold underline disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 {saving ? 'Saving...' : 'Save Progress'}
               </button>
@@ -1388,7 +1388,7 @@ const CreateProfile = () => {
                 type="button"
                 onClick={prevStep}
                 disabled={currentStep === 1}
-                className="bg-gray-500 text-white px-6 py-2 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="bg-gray-100 text-theme-dark px-6 py-2 rounded-lg font-semibold hover:bg-gray-200 transition disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
@@ -1398,7 +1398,7 @@ const CreateProfile = () => {
                   type="button"
                   onClick={nextStep}
                   disabled={saving}
-                  className="bg-blue-600 text-white px-6 py-2 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="bg-theme-blue text-white px-6 py-2 rounded-lg font-semibold hover:brightness-95 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {saving ? 'Saving...' : 'Next'}
                 </button>
@@ -1407,7 +1407,7 @@ const CreateProfile = () => {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="bg-green-600 text-white px-6 py-2 rounded disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-green-700 transition"
+                  className="bg-theme-green text-white px-6 py-2 rounded-lg font-semibold hover:brightness-95 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {submitting ? 'Saving...' : 'Save Profile'}
                 </button>
@@ -1419,8 +1419,8 @@ const CreateProfile = () => {
 
       {/* Success Popup */}
       {showSuccessPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-lift border border-gray-100 p-8 max-w-md w-full mx-4 text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -1434,8 +1434,8 @@ const CreateProfile = () => {
 
       {/* Error Popup */}
       {showErrorPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-lift border border-gray-100 p-8 max-w-md w-full mx-4 text-center">
             <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

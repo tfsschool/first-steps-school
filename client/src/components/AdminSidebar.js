@@ -11,14 +11,14 @@ const AdminSidebar = () => {
   };
 
   const isActive = (path) => {
-    return location.pathname === path ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100';
+    return location.pathname === path ? 'bg-theme-blue text-white' : 'text-gray-700 hover:bg-gray-100';
   };
 
   return (
-    <div className="bg-gray-800 text-white w-64 min-h-screen fixed left-0 top-0 flex flex-col">
-      <div className="p-6 border-b border-gray-700">
+    <div className="bg-theme-dark text-white w-64 min-h-screen fixed left-0 top-0 flex flex-col">
+      <div className="p-6 border-b border-white/10">
         <h1 className="text-2xl font-bold">Admin Panel</h1>
-        <p className="text-gray-400 text-sm mt-1">First Steps School</p>
+        <p className="text-gray-400 text-sm mt-1">The First Steps School</p>
       </div>
 
       <nav className="flex-1 p-4">
@@ -48,10 +48,10 @@ const AdminSidebar = () => {
         </Link>
       </nav>
 
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-white/10">
         <button
           onClick={handleLogout}
-          className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
+          className="w-full bg-red-600 hover:brightness-95 text-white px-4 py-2 rounded-lg transition"
         >
           🚪 Logout
         </button>

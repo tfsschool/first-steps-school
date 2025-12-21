@@ -2,9 +2,9 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 const SEO = ({ title, description, canonicalUrl }) => {
-  const siteName = 'First Steps School';
+  const siteName = 'The First Steps School';
   const defaultTitle = `${siteName} - Empowering Young Minds`;
-  const defaultDescription = 'First Steps School is dedicated to providing quality education and nurturing the potential of every student.';
+  const defaultDescription = 'The First Steps School is dedicated to providing quality education and nurturing the potential of every student.';
   const baseUrl = process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3000';
   
   const fullTitle = title ? `${title} - ${siteName}` : defaultTitle;

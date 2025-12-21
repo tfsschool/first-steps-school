@@ -170,13 +170,13 @@ router.post('/apply/:jobId', authenticate, upload.single('cv'), async (req, res)
                 <p>Dear ${req.body.fullName},</p>
                 <p>Your application for <strong>${job.title}</strong> has been received.</p>
                 <p>Our team will review your application and contact you soon.</p>
-                <p>Thank you for your interest in First Steps School!</p>
+                <p>Thank you for your interest in The First Steps School!</p>
             </div>
         `;
 
         await sendEmail(
             email,
-            'Application Submitted - First Steps School',
+            'Application Submitted - The First Steps School',
             candidateEmailHtml
         );
 

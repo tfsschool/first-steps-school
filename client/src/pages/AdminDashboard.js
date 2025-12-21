@@ -78,31 +78,32 @@ const AdminDashboard = () => {
       <AdminSidebar />
       <div className="ml-64 flex-1 p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
+          <div className="text-xs tracking-[0.35em] uppercase text-theme-dark/60 font-semibold">Admin</div>
+          <h1 className="mt-2 text-3xl font-extrabold text-theme-dark mb-2">Dashboard</h1>
           <p className="text-gray-600">Welcome to the Admin Panel</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Total Jobs</p>
                 <p className="text-3xl font-bold text-gray-800 mt-2">{stats.totalJobs}</p>
               </div>
-              <div className="bg-blue-100 p-3 rounded-full">
+              <div className="bg-theme-blue/10 p-3 rounded-full">
                 <span className="text-2xl">💼</span>
               </div>
             </div>
             <button
               onClick={() => navigate('/admin/jobs')}
-              className="mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium"
+              className="mt-4 text-theme-blue hover:text-theme-green text-sm font-semibold transition-colors"
             >
               View All Jobs →
             </button>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Open Jobs</p>
@@ -120,25 +121,25 @@ const AdminDashboard = () => {
             </button>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Total Applications</p>
                 <p className="text-3xl font-bold text-gray-800 mt-2">{stats.totalApplications}</p>
               </div>
-              <div className="bg-purple-100 p-3 rounded-full">
+              <div className="bg-theme-blue/10 p-3 rounded-full">
                 <span className="text-2xl">👥</span>
               </div>
             </div>
             <button
               onClick={() => navigate('/admin/candidates')}
-              className="mt-4 text-purple-600 hover:text-purple-800 text-sm font-medium"
+              className="mt-4 text-theme-blue hover:text-theme-green text-sm font-semibold transition-colors"
             >
               View Candidates →
             </button>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Pending Reviews</p>
@@ -156,20 +157,20 @@ const AdminDashboard = () => {
             </button>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Registered Emails</p>
-                <p className="text-3xl font-bold text-indigo-600 mt-2">{stats.totalRegisteredEmails}</p>
+                <p className="text-3xl font-bold text-theme-blue mt-2">{stats.totalRegisteredEmails}</p>
                 <p className="text-xs text-gray-500 mt-1">{stats.verifiedEmails} verified</p>
               </div>
-              <div className="bg-indigo-100 p-3 rounded-full">
+              <div className="bg-theme-blue/10 p-3 rounded-full">
                 <span className="text-2xl">📧</span>
               </div>
             </div>
             <button
               onClick={() => navigate('/admin/registered-emails')}
-              className="mt-4 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+              className="mt-4 text-theme-blue hover:text-theme-green text-sm font-semibold transition-colors"
             >
               Manage Emails →
             </button>
@@ -177,19 +178,19 @@ const AdminDashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
+        <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6">
+          <h2 className="text-xl font-extrabold text-theme-dark mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
               onClick={() => navigate('/admin/jobs')}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition text-left"
+              className="bg-theme-blue text-white px-6 py-3 rounded-lg hover:brightness-95 transition text-left"
             >
               <div className="font-semibold">Manage Job Posts</div>
               <div className="text-sm opacity-90">Add, edit, or delete job positions</div>
             </button>
             <button
               onClick={() => navigate('/admin/candidates')}
-              className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition text-left"
+              className="bg-theme-blue text-white px-6 py-3 rounded-lg hover:brightness-95 transition text-left"
             >
               <div className="font-semibold">View Candidates</div>
               <div className="text-sm opacity-90">Review all job applications</div>

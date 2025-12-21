@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-theme-dark antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center bg-theme-green text-white px-6 py-3 font-semibold tracking-wide hover:brightness-95 transition;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center border border-white/20 text-white px-6 py-3 font-semibold tracking-wide hover:bg-white/10 transition;
+  }
+
+  .link-nav {
+    @apply text-theme-dark/80 hover:text-theme-green transition-colors;
+  }
+}
+
 /* Hide scrollbars but keep functionality */
 * {
   scrollbar-width: none; /* Firefox */

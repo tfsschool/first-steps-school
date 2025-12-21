@@ -156,12 +156,12 @@ const Candidates = () => {
             placeholder="Search by name, email, or job..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
           />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
           >
             <option value="All">All Status</option>
             <option value="Pending">Pending</option>
@@ -172,7 +172,7 @@ const Candidates = () => {
           <select
             value={jobFilter}
             onChange={(e) => setJobFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
           >
             <option value="All">All Jobs</option>
             {uniqueJobs.map(job => (
@@ -183,8 +183,9 @@ const Candidates = () => {
 
         {/* Applications Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-100">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-gray-100">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Candidate Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Email</th>
@@ -205,7 +206,7 @@ const Candidates = () => {
                 filteredApplications.map(app => (
                   <tr key={app._id} className="hover:bg-gray-50">
                     <td 
-                      className="px-6 py-4 font-medium text-gray-900 cursor-pointer hover:text-blue-600"
+                      className="px-6 py-4 font-medium text-gray-900 cursor-pointer hover:text-theme-blue"
                       onClick={() => handleViewDetails(app)}
                     >
                       {app.fullName}
@@ -231,7 +232,7 @@ const Candidates = () => {
                       <div className="flex gap-3">
                         <button
                           onClick={() => handleViewDetails(app)}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          className="text-theme-blue hover:text-theme-green text-sm font-semibold transition-colors"
                         >
                           View Details
                         </button>
@@ -253,21 +254,29 @@ const Candidates = () => {
                 ))
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
 
         {/* Candidate Details Modal */}
         {showModal && selectedApplication && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh]" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-800">Candidate Details</h2>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div
+              className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] shadow-lift border border-gray-100"
+              style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+                <div>
+                  <div className="text-xs tracking-[0.3em] uppercase text-theme-dark/60 font-semibold">Candidate</div>
+                  <h2 className="mt-1 text-2xl font-extrabold text-theme-dark">Candidate Details</h2>
+                </div>
                 <button
                   onClick={() => {
                     setShowModal(false);
                     setSelectedApplication(null);
                   }}
-                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                  className="h-10 w-10 rounded-full flex items-center justify-center text-theme-dark/60 hover:text-theme-dark hover:bg-gray-100 transition"
+                  aria-label="Close"
                 >
                   ×
                 </button>
@@ -358,7 +367,7 @@ const CandidateDetails = ({ application }) => {
                         href={pictureUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                        className="text-theme-blue hover:text-theme-green text-sm font-semibold underline transition-colors"
                       >
                         👁️ Preview
                       </a>
@@ -368,7 +377,7 @@ const CandidateDetails = ({ application }) => {
                         download
                         target="_blank"
                         rel="noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                        className="text-theme-blue hover:text-theme-green text-sm font-semibold underline transition-colors"
                       >
                         📥 Download
                       </a>
@@ -403,7 +412,7 @@ const CandidateDetails = ({ application }) => {
           <h4 className="font-semibold text-gray-700 mb-3">Education</h4>
           <div className="space-y-3">
             {profile.education.map((edu, idx) => (
-              <div key={idx} className="border-l-4 border-blue-500 pl-4">
+              <div key={idx} className="border-l-4 border-theme-blue pl-4">
                 <div className="font-medium">{edu.degree}</div>
                 <div className="text-sm text-gray-600">{edu.institution}</div>
                 <div className="text-sm text-gray-500">Year: {edu.yearOfCompletion} | Grade: {edu.grade}</div>

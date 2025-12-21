@@ -57,9 +57,10 @@ const Careers = () => {
 
   if (loading || authLoading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center py-12">
-          <div className="text-2xl font-semibold text-gray-700">Loading available positions...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 rounded-full border-2 border-theme-blue/20 border-t-theme-green animate-spin" />
+          <div className="mt-4 text-lg font-semibold text-theme-dark">Loading available positions...</div>
         </div>
       </div>
     );
@@ -307,50 +308,72 @@ const Careers = () => {
     <>
       <SEO 
         title="Careers - Join Our Team" 
-        description="Explore exciting career opportunities at First Steps School. We're always looking for passionate educators and staff members to join our team."
+        description="Explore exciting career opportunities at The First Steps School. We're always looking for passionate educators and staff members to join our team."
         canonicalUrl="/careers"
       />
-      <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-purple-700 mb-2">Join Our Team</h1>
-            <p className="text-gray-600">Explore exciting career opportunities at First Steps School</p>
-          </div>
-          <div className="flex gap-4">
-            {isAuthenticated && userEmail && (
-              <div className="text-right">
-                <p className="text-sm text-gray-600">Logged in as:</p>
-                <p className="text-sm font-semibold">{userEmail}</p>
-                <button
-                  onClick={handleLogout}
-                  className="text-xs text-blue-600 hover:text-blue-800 mt-1"
-                >
-                  Logout
+      <div className="min-h-screen bg-white">
+        <section className="relative bg-theme-blue">
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-20"
+            style={{
+              backgroundImage:
+                'url(https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=2400&q=80)',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-theme-blue via-theme-blue/90 to-theme-blue/70" />
+          <div className="relative container mx-auto px-4 py-14">
+            <div className="max-w-3xl">
+              <div className="text-white/80 text-xs tracking-[0.35em] uppercase font-semibold">
+                Careers
+              </div>
+              <h1 className="mt-3 text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                Join Our Team
+              </h1>
+              <p className="mt-4 text-white/85 text-base md:text-lg leading-relaxed">
+                Explore exciting career opportunities at The First Steps School.
+              </p>
+            </div>
+
+            <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-4">
+                {isAuthenticated && userEmail && (
+                  <div className="text-white/90">
+                    <div className="text-xs uppercase tracking-[0.22em] text-white/70">Logged in as</div>
+                    <div className="text-sm font-semibold">{userEmail}</div>
+                    <button
+                      onClick={handleLogout}
+                      className="mt-2 text-xs font-semibold text-theme-green hover:brightness-95 transition"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div>
+                <button onClick={handleCreateProfile} className="btn-primary">
+                  {isAuthenticated ? 'Update Profile' : 'Create Profile'}
                 </button>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-gray-50 py-12">
+          <div className="container mx-auto px-4">
+
+            {error && (
+              <div className="max-w-3xl mx-auto mb-8 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-lg">
+                {error}
+              </div>
             )}
-            <button
-              onClick={handleCreateProfile}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
-            >
-              {isAuthenticated ? 'Update Profile' : 'Create Profile'}
-            </button>
-          </div>
-        </div>
-        
-        {error && (
-          <div className="max-w-2xl mx-auto mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
 
         {/* Initial Choice Modal - "Have you already registered?" */}
         {showInitialModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
-              <h2 className="text-2xl font-bold mb-4">Have you already registered?</h2>
-              <p className="text-gray-600 mb-6">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-lift border border-gray-100">
+              <div className="text-xs tracking-[0.3em] uppercase text-theme-dark/60 font-semibold">Get Started</div>
+              <h2 className="mt-3 text-2xl font-extrabold text-theme-dark">Have you already registered?</h2>
+              <p className="mt-3 text-gray-600 mb-6">
                 {pendingAction === 'apply' 
                   ? 'Please login or register to apply for this job position.'
                   : 'Please login or register to create your profile.'}
@@ -358,13 +381,13 @@ const Careers = () => {
               <div className="flex flex-col gap-3">
                 <button
                   onClick={handleRegisteredYes}
-                  className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
+                  className="w-full bg-theme-blue text-white px-6 py-3 rounded-lg hover:brightness-95 transition font-semibold"
                 >
                   ✅ Yes, I'm registered
                 </button>
                 <button
                   onClick={handleRegisteredNo}
-                  className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-semibold"
+                  className="w-full bg-theme-green text-white px-6 py-3 rounded-lg hover:brightness-95 transition font-semibold"
                 >
                   ➕ No, I'm new
                 </button>
@@ -373,7 +396,7 @@ const Careers = () => {
                     setShowInitialModal(false);
                     setPendingAction(null);
                   }}
-                  className="w-full bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition font-semibold"
+                  className="w-full bg-gray-100 text-theme-dark px-6 py-2 rounded-lg hover:bg-gray-200 transition font-semibold"
                 >
                   Cancel
                 </button>
@@ -384,10 +407,11 @@ const Careers = () => {
 
         {/* Login Modal */}
         {showLoginModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-              <h2 className="text-2xl font-bold mb-4">Login</h2>
-              <p className="text-gray-600 mb-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-lift border border-gray-100">
+              <div className="text-xs tracking-[0.3em] uppercase text-theme-dark/60 font-semibold">Candidate Login</div>
+              <h2 className="mt-3 text-2xl font-extrabold text-theme-dark mb-2">Login</h2>
+              <p className="text-gray-600 mb-5">
                 Enter your registered email to receive a login link.
               </p>
               <form onSubmit={handleLogin}>
@@ -401,7 +425,7 @@ const Careers = () => {
                     setIsUnverified(false);
                   }}
                   placeholder="your.email@example.com"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
                   required
                   autoFocus
                   disabled={loggingIn}
@@ -418,18 +442,6 @@ const Careers = () => {
                     <p className="text-sm text-yellow-800 mb-3">
                       This email is not registered yet. Please register first to continue.
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowLoginModal(false);
-                        setShowRegisterModal(true);
-                        setShowNotRegisteredInLogin(false);
-                        setLoginMessage('');
-                      }}
-                      className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold"
-                    >
-                      Register First
-                    </button>
                   </div>
                 )}
 
@@ -439,7 +451,7 @@ const Careers = () => {
                       type="button"
                       onClick={handleResendVerification}
                       disabled={registering}
-                      className="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                      className="w-full bg-theme-blue text-white px-4 py-2 rounded-lg hover:brightness-95 transition font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed text-sm"
                     >
                       {registering ? 'Sending...' : 'Resend Verification Email'}
                     </button>
@@ -456,7 +468,7 @@ const Careers = () => {
                         setShowNotRegisteredInLogin(false);
                         setLoginMessage('');
                       }}
-                      className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold"
+                      className="flex-1 bg-theme-green text-white px-4 py-2 rounded-lg hover:brightness-95 transition font-semibold"
                     >
                       Register First
                     </button>
@@ -469,7 +481,7 @@ const Careers = () => {
                         setIsUnverified(false);
                         setShowNotRegisteredInLogin(false);
                       }}
-                      className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition font-semibold"
+                      className="flex-1 bg-gray-100 text-theme-dark px-4 py-2 rounded-lg hover:bg-gray-200 transition font-semibold"
                     >
                       Cancel
                     </button>
@@ -480,7 +492,7 @@ const Careers = () => {
                       <button
                         type="submit"
                         disabled={loggingIn}
-                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="flex-1 bg-theme-blue text-white px-4 py-2 rounded-lg hover:brightness-95 transition font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
                       >
                         {loggingIn ? 'Sending...' : 'Send Login Link'}
                       </button>
@@ -493,7 +505,7 @@ const Careers = () => {
                           setIsUnverified(false);
                           setShowNotRegisteredInLogin(false);
                         }}
-                        className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition font-semibold"
+                        className="flex-1 bg-gray-100 text-theme-dark px-4 py-2 rounded-lg hover:bg-gray-200 transition font-semibold"
                       >
                         Cancel
                       </button>
@@ -507,7 +519,7 @@ const Careers = () => {
                           setIsUnverified(false);
                           setShowNotRegisteredInLogin(false);
                         }}
-                        className="text-sm text-blue-600 hover:text-blue-800"
+                        className="text-sm font-semibold text-theme-blue hover:text-theme-green transition-colors"
                       >
                         Not registered? Register here
                       </button>
@@ -521,8 +533,8 @@ const Careers = () => {
 
         {/* Registration Modal */}
         {showRegisterModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-lift border border-gray-100">
               <h2 className="text-2xl font-bold mb-4">
                 {isUnverified ? 'Resend Verification Email' : 'Register to Apply'}
               </h2>
@@ -540,7 +552,7 @@ const Careers = () => {
                     setRegisterMessage('');
                   }}
                   placeholder="your.email@example.com"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
                   required
                   autoFocus
                   disabled={registering}
@@ -557,7 +569,7 @@ const Careers = () => {
                         type="button"
                         onClick={handleResendVerification}
                         disabled={registering}
-                        className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="flex-1 bg-theme-blue text-white px-4 py-2 rounded-lg hover:brightness-95 transition font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
                       >
                         {registering ? 'Sending...' : 'Resend Verification Email'}
                       </button>
@@ -569,7 +581,7 @@ const Careers = () => {
                           setRegisterMessage('');
                           setIsUnverified(false);
                         }}
-                        className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition font-semibold"
+                        className="flex-1 bg-gray-100 text-theme-dark px-4 py-2 rounded-lg hover:bg-gray-200 transition font-semibold"
                       >
                         Cancel
                       </button>
@@ -579,7 +591,7 @@ const Careers = () => {
                       <button
                         type="submit"
                         disabled={registering}
-                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="flex-1 bg-theme-green text-white px-4 py-2 rounded-lg hover:brightness-95 transition font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
                       >
                         {registering ? 'Sending...' : 'Register'}
                       </button>
@@ -591,7 +603,7 @@ const Careers = () => {
                           setRegisterMessage('');
                           setIsUnverified(false);
                         }}
-                        className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition font-semibold"
+                        className="flex-1 bg-gray-100 text-theme-dark px-4 py-2 rounded-lg hover:bg-gray-200 transition font-semibold"
                       >
                         Cancel
                       </button>
@@ -606,7 +618,7 @@ const Careers = () => {
                       setShowLoginModal(true);
                       setIsUnverified(false);
                     }}
-                    className="text-sm text-blue-600 hover:text-blue-800"
+                    className="text-sm font-semibold text-theme-blue hover:text-theme-green transition-colors"
                   >
                     Already registered? Login here
                   </button>
@@ -618,8 +630,8 @@ const Careers = () => {
 
         {/* Already Applied Modal */}
         {showAlreadyAppliedModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-lift border border-gray-100">
               <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-12 h-12 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -633,7 +645,7 @@ const Careers = () => {
                 onClick={() => {
                   setShowAlreadyAppliedModal(false);
                 }}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
+                className="bg-theme-blue text-white px-6 py-2 rounded-lg hover:brightness-95 transition font-semibold"
               >
                 OK
               </button>
@@ -641,29 +653,56 @@ const Careers = () => {
           </div>
         )}
 
-        <div className="max-w-4xl mx-auto grid gap-6">
+        <div className="max-w-6xl mx-auto">
           {jobs.length === 0 ? (
-            <div className="bg-white border p-8 rounded-lg shadow text-center">
-              <p className="text-xl text-gray-600">No positions available currently.</p>
-              <p className="text-gray-500 mt-2">Please check back later for new opportunities.</p>
+            <div className="bg-white border border-gray-100 p-10 rounded-2xl shadow-soft text-center">
+              <p className="text-xl font-semibold text-theme-dark">No positions available currently.</p>
+              <p className="text-gray-600 mt-2">Please check back later for new opportunities.</p>
             </div>
           ) : (
-            jobs.map(job => (
-              <div key={job._id} className="bg-white border p-6 rounded-lg shadow-sm hover:shadow-md transition">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">{job.title}</h2>
-                <p className="text-gray-600 my-4">{job.description}</p>
-                <button
-                  onClick={() => handleApply(job._id)}
-                  className="inline-block bg-orange-500 text-white px-6 py-2 rounded mt-4 hover:bg-orange-600 transition font-semibold"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+              {jobs.map((job) => (
+                <div
+                  key={job._id}
+                  className="group bg-white border border-gray-100 rounded-2xl shadow-soft hover:shadow-lift transition-shadow"
                 >
-                  Apply Now
-                </button>
-              </div>
-            ))
+                  <div className="p-7">
+                    <div className="text-xs tracking-[0.25em] uppercase text-theme-dark/50 font-semibold">
+                      Open Position
+                    </div>
+                    <h2 className="mt-3 text-xl font-extrabold text-theme-dark leading-snug">
+                      {job.title}
+                    </h2>
+                    <p
+                      className="mt-4 text-gray-600 leading-relaxed"
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 4,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {job.description}
+                    </p>
+
+                    <div className="mt-6">
+                      <button
+                        onClick={() => handleApply(job._id)}
+                        className="w-full bg-theme-green text-white px-6 py-3 rounded-lg font-semibold hover:brightness-95 transition"
+                      >
+                        Apply Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
+
+          </div>
+        </section>
       </div>
-    </div>
     </>
   );
 };

@@ -64,20 +64,21 @@ router.post('/register', async (req, res) => {
     
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #7c3aed;">Welcome to First Steps School</h2>
+        <h2 style="color: #7c3aed;">Welcome to The First Steps School</h2>
         <p>Thank you for your interest in joining our team!</p>
         <p>Please verify your email address by clicking the link below:</p>
         <a href="${verificationUrl}" style="display: inline-block; background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0;">
           Verify Email Address
         </a>
-        <p>This link will expire in 24 hours.</p>
-        <p>If you didn't request this, please ignore this email.</p>
+        <p>If the button doesn't work, copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; color: #666;">${verificationUrl}</p>
+        <p>This verification link will expire in 24 hours.</p>
       </div>
     `;
 
     await sendEmail(
       email,
-      'Verify Your Email - First Steps School',
+      'Verify Your Email - The First Steps School',
       emailHtml
     );
 
@@ -278,18 +279,19 @@ router.get('/verify-email', async (req, res) => {
     const welcomeHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #7c3aed;">Registration Successful!</h2>
-        <p>Your account has been created successfully. You can now apply for jobs.</p>
+        <p>Your email has been verified successfully.</p>
+        <p>You can now login and start applying for jobs at The First Steps School.</p>
         <a href="${frontendUrl}/careers" 
            style="display: inline-block; background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0;">
           Click here to apply for jobs
         </a>
-        <p>Thank you for joining First Steps School!</p>
+        <p>Thank you for joining The First Steps School!</p>
       </div>
     `;
 
     await sendEmail(
       candidate.email,
-      'Registration Successful - First Steps School',
+      'Registration Successful - The First Steps School',
       welcomeHtml
     );
 
@@ -316,7 +318,7 @@ router.get('/verify-email', async (req, res) => {
 
       await sendEmail(
         adminEmail,
-        'New Candidate Registered & Verified - First Steps School',
+        'New Candidate Registered & Verified - The First Steps School',
         adminHtml
       );
     }
@@ -402,19 +404,20 @@ router.post('/login', async (req, res) => {
     
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #7c3aed;">Login to First Steps School</h2>
+        <h2 style="color: #7c3aed;">Login to The First Steps School</h2>
         <p>Click the link below to securely login to your account:</p>
         <a href="${loginUrl}" style="display: inline-block; background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0;">
           Login to Your Account
         </a>
-        <p style="color: #666; font-size: 14px;">This link will expire in 15 minutes.</p>
-        <p style="color: #666; font-size: 14px;">If you didn't request this login, please ignore this email.</p>
+        <p>If the button doesn't work, copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; color: #666;">${loginUrl}</p>
+        <p>This login link will expire in 15 minutes.</p>
       </div>
     `;
 
     await sendEmail(
       email,
-      'Login Link - First Steps School',
+      'Login Link - The First Steps School',
       emailHtml
     );
 

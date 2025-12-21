@@ -168,7 +168,7 @@ const JobManagement = () => {
       });
               setShowModal(true);
             }}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="bg-theme-blue text-white px-6 py-2 rounded-lg hover:brightness-95 transition font-semibold"
           >
             + Add New Job
           </button>
@@ -181,12 +181,12 @@ const JobManagement = () => {
             placeholder="Search jobs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
           />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
           >
             <option value="All">All Status</option>
             <option value="Open">Open</option>
@@ -196,8 +196,9 @@ const JobManagement = () => {
 
         {/* Jobs Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-100">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-gray-100">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Title</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Applicants</th>
@@ -220,7 +221,7 @@ const JobManagement = () => {
                       <div className="text-sm text-gray-500 truncate max-w-xs">{job.description}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-theme-blue/10 text-theme-blue">
                         {applicantCounts[job._id] !== undefined ? applicantCounts[job._id] : 0} applicant{applicantCounts[job._id] !== 1 ? 's' : ''}
                       </span>
                     </td>
@@ -239,7 +240,7 @@ const JobManagement = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(job)}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          className="text-theme-blue hover:text-theme-green text-sm font-semibold transition-colors"
                         >
                           Edit
                         </button>
@@ -255,47 +256,54 @@ const JobManagement = () => {
                 ))
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
 
         {/* Add/Edit Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh]" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div
+              className="bg-white rounded-2xl shadow-lift border border-gray-100 p-8 max-w-2xl w-full mx-4 max-h-[90vh]"
+              style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
               <h2 className="text-2xl font-bold mb-6">
                 {editingJob ? 'Edit Job' : 'Add New Job'}
               </h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
+
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
                   <input
                     type="text"
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Job Description</label>
                   <textarea
-                    required
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows="3"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salary</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Salary Range</label>
                   <input
                     type="text"
                     value={formData.salary}
                     onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
                     placeholder="e.g., $50,000 - $70,000"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
                   />
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Requirements</label>
                   <textarea
@@ -303,34 +311,36 @@ const JobManagement = () => {
                     onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
                     rows="3"
                     placeholder="List job requirements..."
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
                   />
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
                   >
                     <option value="Open">Open</option>
                     <option value="Closed">Closed</option>
                   </select>
                 </div>
-                <div className="flex justify-end gap-4 pt-4">
+
+                <div className="flex justify-end gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => {
                       setShowModal(false);
                       setEditingJob(null);
                     }}
-                    className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    className="px-6 py-2 bg-theme-blue text-white rounded-lg hover:brightness-95 font-semibold transition"
                   >
                     {editingJob ? 'Update' : 'Create'} Job
                   </button>

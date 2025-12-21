@@ -23,7 +23,7 @@ transporter.verify(function (error, success) {
 const sendEmail = async (to, subject, html, text) => {
   try {
     const mailOptions = {
-      from: `"First Steps School" <${process.env.EMAIL_USER}>`,
+      from: `"The First Steps School" <${process.env.EMAIL_USER}>`,
       to: to,
       subject: subject,
       html: html,

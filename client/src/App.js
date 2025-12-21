@@ -2,7 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './context/AuthContext';
-import Navbar from './components/Navbar';
+import Header from './components/Header';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Contact from './pages/Contact';
 import Careers from './pages/Careers';
@@ -25,7 +26,7 @@ function AppContent() {
 
   return (
     <>
-      {!hideNavbar && <Navbar />}
+      {!hideNavbar && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/careers" element={<Careers />} />
@@ -67,6 +68,7 @@ function AppContent() {
             </PrivateRoute>
         } />
       </Routes>
+      {!hideNavbar && <Footer />}
     </>
   );
 }

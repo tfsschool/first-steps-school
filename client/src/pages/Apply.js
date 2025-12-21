@@ -300,10 +300,10 @@ const Apply = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <div className="text-2xl font-semibold text-gray-700">Loading...</div>
+          <div className="mx-auto h-12 w-12 rounded-full border-2 border-theme-blue/20 border-t-theme-green animate-spin" />
+          <div className="mt-4 text-lg font-semibold text-theme-dark">Loading...</div>
         </div>
       </div>
     );
@@ -311,12 +311,12 @@ const Apply = () => {
 
   if (error && !job) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
-          <div className="text-red-600 text-xl font-semibold mb-4">{error}</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center bg-white p-10 rounded-2xl shadow-soft border border-gray-100 max-w-md">
+          <div className="text-red-700 text-lg font-semibold mb-4">{error}</div>
           <button
             onClick={() => navigate('/careers')}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+            className="bg-theme-blue text-white px-6 py-3 rounded-lg font-semibold hover:brightness-95 transition"
           >
             Back to Careers
           </button>
@@ -327,9 +327,9 @@ const Apply = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
-          <div className="text-red-600 text-xl font-semibold mb-4">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center bg-white p-10 rounded-2xl shadow-soft border border-gray-100 max-w-md">
+          <div className="text-red-700 text-lg font-semibold mb-4">
             {error || 'Loading profile...'}
           </div>
           {!error && <div className="text-gray-600">Please wait...</div>}
@@ -341,68 +341,106 @@ const Apply = () => {
   return (
     <>
       <SEO 
-        title={job ? `Apply for ${job.title} - First Steps School` : 'Apply - First Steps School'} 
-        description={job ? `Apply for the ${job.title} position at First Steps School. Join our team of passionate educators.` : 'Apply for a position at First Steps School.'}
+        title={job ? `Apply for ${job.title} - The First Steps School` : 'Apply - The First Steps School'} 
+        description={job ? `Apply for the ${job.title} position at The First Steps School. Join our team of passionate educators.` : 'Apply for a position at The First Steps School.'}
         canonicalUrl={`/apply/${jobId}`}
       />
-      <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Job Application</h2>
-            <p className="text-gray-600">Position: <span className="font-semibold text-blue-600">{job?.title}</span></p>
-          </div>
-
-          {/* Profile Summary */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 relative">
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="font-semibold">Your Profile Information</h3>
-              <button
-                type="button"
-                onClick={() => navigate('/create-profile')}
-                className="bg-gray-500 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-600 transition"
-              >
-                Edit Profile
-              </button>
-            </div>
-            <p><strong>Name:</strong> {profile.fullName}</p>
-            <p><strong>Email:</strong> {profile.email}</p>
-            <p><strong>Cell Number:</strong> {profile.phone}</p>
-            <p><strong>Education:</strong> {profile.education?.length || 0} entries</p>
-            <p><strong>Experience:</strong> {profile.workExperience?.length || 0} entries</p>
-            <p className="text-sm text-gray-600 mt-2">
-              Your application will be submitted using your profile information.
-            </p>
-          </div>
-
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 whitespace-pre-line">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-gray-50 p-4 rounded">
-              <p className="text-sm text-gray-600 mb-4">
-                Review your profile information above. Click submit to apply for this position using your profile.
+      <div className="min-h-screen bg-white">
+        <section className="relative bg-theme-blue">
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-20"
+            style={{
+              backgroundImage:
+                'url(https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=2400&q=80)',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-theme-blue via-theme-blue/90 to-theme-blue/70" />
+          <div className="relative container mx-auto px-4 py-14">
+            <div className="max-w-3xl">
+              <div className="text-white/80 text-xs tracking-[0.35em] uppercase font-semibold">
+                Application
+              </div>
+              <h1 className="mt-3 text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                Job Application
+              </h1>
+              <p className="mt-4 text-white/85 text-base md:text-lg leading-relaxed">
+                Position: <span className="font-semibold text-white">{job?.title}</span>
               </p>
             </div>
+          </div>
+        </section>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full bg-purple-700 text-white py-3 rounded-lg font-semibold hover:bg-purple-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              {submitting ? 'Submitting...' : 'Submit Application'}
-            </button>
-          </form>
-        </div>
+        <section className="bg-gray-50 py-12">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8 md:p-10">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                  <div>
+                    <div className="text-xs tracking-[0.25em] uppercase text-theme-dark/50 font-semibold">
+                      Candidate Profile
+                    </div>
+                    <h2 className="mt-2 text-2xl font-extrabold text-theme-dark">Your Profile</h2>
+                    <p className="mt-2 text-gray-600">
+                      Your application will be submitted using your saved profile information.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/create-profile')}
+                    className="bg-theme-blue text-white px-6 py-3 rounded-lg font-semibold hover:brightness-95 transition"
+                  >
+                    Edit Profile
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
+                    <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Name</div>
+                    <div className="mt-2 font-semibold text-theme-dark">{profile.fullName}</div>
+                  </div>
+                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
+                    <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Email</div>
+                    <div className="mt-2 font-semibold text-theme-dark break-all">{profile.email}</div>
+                  </div>
+                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
+                    <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Cell Number</div>
+                    <div className="mt-2 font-semibold text-theme-dark">{profile.phone}</div>
+                  </div>
+                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
+                    <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Education / Experience</div>
+                    <div className="mt-2 text-theme-dark">
+                      <span className="font-semibold">{profile.education?.length || 0}</span> education entries
+                      <span className="mx-2 text-gray-300">|</span>
+                      <span className="font-semibold">{profile.workExperience?.length || 0}</span> experience entries
+                    </div>
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="mt-8 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-lg whitespace-pre-line">
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="mt-8">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full bg-theme-green text-white py-3.5 rounded-lg font-semibold hover:brightness-95 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Application'}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
       {/* Thank You Popup */}
       {showThankYou && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4 text-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-lift p-8 max-w-md w-full mx-4 text-center border border-gray-100">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -410,13 +448,12 @@ const Apply = () => {
             </div>
             <h2 className="text-2xl font-bold text-green-600 mb-2">Application Submitted!</h2>
             <p className="text-gray-600 mb-4">
-              Your application has been submitted successfully and sent to the admin. You will receive a confirmation email shortly.
+              Your application has been submitted successfully. You will receive a confirmation email shortly.
             </p>
             <p className="text-sm text-gray-500">Redirecting to thank you page...</p>
           </div>
         </div>
       )}
-    </div>
     </>
   );
 };
