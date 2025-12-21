@@ -524,7 +524,36 @@ const CreateProfile = () => {
   const handleSubmit = async () => {
     const missing = getMissingRequiredFields();
     if (missing.length > 0) {
-      setPopupMessage(`You can save an incomplete profile, but you must complete the following required fields before submitting:\n\n${missing.join('\n')}`);
+      const personal = [];
+      const education = [];
+      const resume = [];
+
+      missing.forEach((item) => {
+        if (item.startsWith('Education')) {
+          education.push(item);
+        } else if (item.toLowerCase().includes('resume')) {
+          resume.push(item);
+        } else {
+          personal.push(item);
+        }
+      });
+
+      const sections = [];
+      sections.push('Please complete the following required fields before submitting:');
+      if (personal.length > 0) {
+        sections.push('\nPersonal Information');
+        personal.forEach((f) => sections.push(`- ${f}`));
+      }
+      if (education.length > 0) {
+        sections.push('\nEducation');
+        education.forEach((f) => sections.push(`- ${f}`));
+      }
+      if (resume.length > 0) {
+        sections.push('\nResume');
+        resume.forEach((f) => sections.push(`- ${f}`));
+      }
+
+      setPopupMessage(sections.join('\n'));
       setShowErrorPopup(true);
       return;
     }
@@ -1176,10 +1205,43 @@ const CreateProfile = () => {
         </div>
 
         <div className="border p-4 rounded">
-          <h3 className="font-semibold mb-2">Education ({formData.education.length})</h3>
-          {formData.education.map((edu, i) => (
-            <p key={i}>{edu.degree} - {edu.institution} ({edu.yearOfCompletion})</p>
-          ))}
+          <h3 className="font-semibold mb-2">
+            Education (
+            {
+              formData.education.filter(
+                (edu) =>
+                  (edu?.degree && edu.degree.trim()) ||
+                  (edu?.institution && edu.institution.trim()) ||
+                  (edu?.yearOfCompletion && String(edu.yearOfCompletion).trim())
+              ).length
+            }
+            )
+          </h3>
+          {formData.education.filter(
+            (edu) =>
+              (edu?.degree && edu.degree.trim()) ||
+              (edu?.institution && edu.institution.trim()) ||
+              (edu?.yearOfCompletion && String(edu.yearOfCompletion).trim())
+          ).length === 0 ? (
+            <p>No education added</p>
+          ) : (
+            formData.education
+              .filter(
+                (edu) =>
+                  (edu?.degree && edu.degree.trim()) ||
+                  (edu?.institution && edu.institution.trim()) ||
+                  (edu?.yearOfCompletion && String(edu.yearOfCompletion).trim())
+              )
+              .map((edu, i) => (
+                <p key={i}>
+                  {edu.degree && edu.degree.trim() ? edu.degree : 'N/A'}
+                  {edu.institution && edu.institution.trim() ? ` - ${edu.institution}` : ''}
+                  {edu.yearOfCompletion && String(edu.yearOfCompletion).trim()
+                    ? ` (${edu.yearOfCompletion})`
+                    : ''}
+                </p>
+              ))
+          )}
         </div>
 
         <div className="border p-4 rounded">
@@ -1365,7 +1427,7 @@ const CreateProfile = () => {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-green-600 mb-2">Success!</h2>
-            <p className="text-gray-600 mb-4">{popupMessage}</p>
+            <div className="text-gray-600 mb-4 whitespace-pre-line">{popupMessage}</div>
           </div>
         </div>
       )}
@@ -1380,7 +1442,7 @@ const CreateProfile = () => {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-red-600 mb-2">Error</h2>
-            <p className="text-gray-600 mb-4">{popupMessage}</p>
+            <div className="text-gray-600 mb-4 whitespace-pre-line text-left">{popupMessage}</div>
             <button
               onClick={() => {
                 setShowErrorPopup(false);

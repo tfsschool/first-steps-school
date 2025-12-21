@@ -345,6 +345,31 @@ const RegisteredEmails = () => {
 const CandidateDetails = ({ candidate }) => {
   const profile = candidate?.profileId || {};
 
+  const resolveFileUrls = (fileValue) => {
+    if (!fileValue) return { previewUrl: null, downloadUrl: null, filename: null };
+
+    if (typeof fileValue === 'object' && fileValue !== null) {
+      const previewUrl = fileValue.preview_url || fileValue.secure_url || null;
+      const downloadUrl = fileValue.download_url || fileValue.secure_url || previewUrl;
+      const filename = fileValue.original_filename || null;
+      return { previewUrl, downloadUrl, filename };
+    }
+
+    if (typeof fileValue === 'string') {
+      if (fileValue.startsWith('http://') || fileValue.startsWith('https://')) {
+        const filename = fileValue.split('/').pop() || null;
+        return { previewUrl: fileValue, downloadUrl: fileValue, filename };
+      }
+
+      const normalized = fileValue.replace(/^uploads[\\/]/, '');
+      const previewUrl = `${API_ENDPOINTS.UPLOADS.BASE}/${normalized}`;
+      const filename = normalized.split('/').pop() || null;
+      return { previewUrl, downloadUrl: previewUrl, filename };
+    }
+
+    return { previewUrl: null, downloadUrl: null, filename: null };
+  };
+
   const formatCnic = (value) => {
     const digitsOnly = String(value || '').replace(/[^\d]/g, '').slice(0, 13);
     if (digitsOnly.length !== 13) return String(value || 'N/A');
@@ -405,6 +430,86 @@ const CandidateDetails = ({ candidate }) => {
               <span className="text-gray-600">Address:</span>
               <span className="ml-2 font-medium">{profile.address || 'N/A'}</span>
             </div>
+
+            {(profile.profilePicture || profile.resumePath) && (
+              <div className="col-span-2 border-t pt-4 mt-2">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-sm">
+                    <span className="text-gray-600">Profile Picture:</span>
+                    {(() => {
+                      const { previewUrl, downloadUrl } = resolveFileUrls(profile.profilePicture);
+                      if (!previewUrl) return <span className="ml-2 font-medium">N/A</span>;
+
+                      return (
+                        <div className="mt-2">
+                          <img
+                            src={previewUrl}
+                            alt="Profile"
+                            className="w-20 h-20 rounded-full object-cover border"
+                          />
+                          <div className="mt-2 flex items-center gap-2">
+                            <a
+                              href={previewUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                            >
+                              Preview
+                            </a>
+                            <span className="text-gray-400">|</span>
+                            <a
+                              href={downloadUrl}
+                              download
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                            >
+                              Download
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="text-sm">
+                    <span className="text-gray-600">CV / Resume:</span>
+                    {(() => {
+                      const { previewUrl, downloadUrl, filename } = resolveFileUrls(profile.resumePath);
+                      if (!previewUrl) return <span className="ml-2 font-medium">N/A</span>;
+
+                      return (
+                        <div className="mt-2">
+                          {filename ? (
+                            <div className="text-gray-700 font-medium mb-2 break-all">{filename}</div>
+                          ) : null}
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={previewUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                            >
+                              Open
+                            </a>
+                            <span className="text-gray-400">|</span>
+                            <a
+                              href={downloadUrl}
+                              download
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                            >
+                              Download
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
