@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import HeroSection from '../components/home/HeroSection';
 import FeaturesStrip from '../components/home/FeaturesStrip';
-import { FaBookOpen, FaChalkboardTeacher, FaFlask, FaPalette, FaShieldAlt } from 'react-icons/fa';
+import { FaBookOpen, FaChalkboardTeacher, FaFlask, FaPalette } from 'react-icons/fa';
 
 const Home = () => {
   const navigate = useNavigate();

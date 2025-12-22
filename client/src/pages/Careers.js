@@ -370,36 +370,68 @@ const Careers = () => {
         {/* Initial Choice Modal - "Have you already registered?" */}
         {showInitialModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-lift border border-gray-100 max-h-[90vh] overflow-y-auto">
-              <div className="text-xs tracking-[0.3em] uppercase text-theme-dark/60 font-semibold">Get Started</div>
-              <h2 className="mt-3 text-2xl font-extrabold text-theme-dark">Have you already registered?</h2>
-              <p className="mt-3 text-gray-600 mb-6">
-                {pendingAction === 'apply' 
-                  ? 'Please login or register to apply for this job position.'
-                  : 'Please login or register to create your profile.'}
-              </p>
-              <div className="flex flex-col gap-3">
+            <div className="bg-white rounded-2xl shadow-lift border border-gray-100 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-start justify-between">
+                <div>
+                  <div className="text-[11px] tracking-[0.32em] uppercase text-theme-dark/60 font-semibold">Get Started</div>
+                  <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold text-theme-dark leading-tight">Have you already registered?</h2>
+                  <p className="mt-2 text-gray-600">
+                    {pendingAction === 'apply'
+                      ? 'Please login or register to apply for this job position.'
+                      : 'Please login or register to create your profile.'}
+                  </p>
+                </div>
                 <button
-                  onClick={handleRegisteredYes}
-                  className="w-full bg-theme-blue text-white px-6 py-3 rounded-lg hover:brightness-95 transition font-semibold"
-                >
-                  ✅ Yes, I'm registered
-                </button>
-                <button
-                  onClick={handleRegisteredNo}
-                  className="w-full bg-theme-green text-white px-6 py-3 rounded-lg hover:brightness-95 transition font-semibold"
-                >
-                  ➕ No, I'm new
-                </button>
-                <button
+                  type="button"
                   onClick={() => {
                     setShowInitialModal(false);
                     setPendingAction(null);
                   }}
-                  className="w-full bg-gray-100 text-theme-dark px-6 py-2 rounded-lg hover:bg-gray-200 transition font-semibold"
+                  className="h-10 w-10 rounded-full grid place-items-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition"
+                  aria-label="Close"
                 >
-                  Cancel
+                  ×
                 </button>
+              </div>
+
+              <div className="p-6">
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={handleRegisteredYes}
+                    className="w-full bg-theme-blue text-white px-6 py-3 rounded-xl hover:brightness-95 transition font-semibold shadow-sm flex items-center justify-center gap-3"
+                  >
+                    <span className="h-8 w-8 rounded-full bg-white/15 border border-white/15 grid place-items-center">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                    Yes, I'm registered
+                  </button>
+                  <button
+                    onClick={handleRegisteredNo}
+                    className="w-full bg-theme-green text-white px-6 py-3 rounded-xl hover:brightness-95 transition font-semibold shadow-sm flex items-center justify-center gap-3"
+                  >
+                    <span className="h-8 w-8 rounded-full bg-white/15 border border-white/15 grid place-items-center">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                    </span>
+                    No, I'm new
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowInitialModal(false);
+                      setPendingAction(null);
+                    }}
+                    className="w-full bg-gray-100 text-theme-dark px-6 py-3 rounded-xl hover:bg-gray-200 transition font-semibold"
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                <div className="mt-5 text-xs text-gray-500 leading-relaxed">
+                  By continuing, you agree to receive emails related to verification and login.
+                </div>
               </div>
             </div>
           </div>
