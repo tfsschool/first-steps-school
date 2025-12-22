@@ -1,22 +1,27 @@
-import React from 'react';
-import { FaUniversity, FaGraduationCap, FaFutbol, FaUsers } from 'react-icons/fa';
+import React, { useMemo, useState } from 'react';
 
 const HeroSection = () => {
-  const heroImage =
-    'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=2400&q=80';
+  const slides = useMemo(
+    () => [
+      {
+        image:
+          'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=2400&q=80',
+      },
+      {
+        image:
+          'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2400&q=80',
+      },
+    ],
+    []
+  );
 
-  const items = [
-    { label: 'University Life', Icon: FaUniversity },
-    { label: 'Graduation', Icon: FaGraduationCap },
-    { label: 'Athletics', Icon: FaFutbol },
-    { label: 'Social', Icon: FaUsers },
-  ];
+  const [activeSlide, setActiveSlide] = useState(0);
 
   return (
     <section className="relative">
       <div
-        className="h-[600px] bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        className="h-[600px] bg-cover bg-center transition-opacity"
+        style={{ backgroundImage: `url(${slides[activeSlide]?.image})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-theme-blue/80 via-theme-blue/55 to-theme-blue/25" />
 
@@ -42,36 +47,29 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-4">
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-24 md:bottom-8 z-20">
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            aria-label="Slide 1"
-            className="w-4 h-4 rounded-full bg-white/35 hover:bg-white/60 transition-colors"
-          />
-          <button
-            type="button"
-            aria-label="Slide 2"
-            className="w-4 h-4 rounded-full border-2 border-white bg-transparent"
-          />
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4">
-        <div className="-mt-16 bg-white rounded-lg shadow-[0_18px_45px_-30px_rgba(0,0,0,0.55)] border border-gray-100">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-gray-100">
-            {items.map(({ label, Icon }) => (
-              <div
-                key={label}
-                className="group p-7 flex items-center gap-4 justify-center md:justify-start hover:bg-gray-50 transition-colors"
+          {slides.map((_, index) => {
+            const isActive = index === activeSlide;
+            return (
+              <button
+                key={index}
+                type="button"
+                aria-label={`Slide ${index + 1}`}
+                onClick={() => setActiveSlide(index)}
+                className={
+                  isActive
+                    ? 'relative w-5 h-5 rounded-full border-2 border-white bg-transparent'
+                    : 'w-4 h-4 rounded-full bg-white/45 hover:bg-white/70 transition-colors'
+                }
               >
-                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border border-gray-100 shadow-sm">
-                  <Icon className="text-theme-blue text-2xl group-hover:text-theme-green transition-colors duration-200" />
-                </div>
-                <div className="font-semibold text-gray-800">{label}</div>
-              </div>
-            ))}
-          </div>
+                {isActive ? (
+                  <span className="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
+                ) : null}
+                <span className="sr-only">{`Go to slide ${index + 1}`}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </section>

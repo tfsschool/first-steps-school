@@ -20,14 +20,14 @@ const AdmissionSection = () => {
           <div className="lg:w-1/2 bg-theme-blue text-white p-10 flex items-center">
             <div>
               <div className="text-theme-green font-semibold tracking-wide">
-                Fall 2025 Applications
+                Admissions 2025
               </div>
               <h2 className="mt-2 text-3xl md:text-4xl font-extrabold">
-                Apply for Admission
+                Enroll Your Child
               </h2>
               <p className="mt-4 text-white/90 leading-relaxed">
-                Start your journey with The First Steps School. Our admission process is designed to be
-                clear and supportive — helping you take the next step with confidence.
+                Begin your child’s learning journey with The First Steps School. Our admissions process is
+                clear and supportive — helping parents make the best choice with confidence.
               </p>
 
               <div className="mt-8">

@@ -46,7 +46,7 @@ const Navbar = ({ isShrunk = false }) => {
                       [
                         'relative text-[13px] font-bold tracking-[0.12em] uppercase text-theme-dark/80',
                         'hover:text-theme-dark transition-colors',
-                        'after:content-[\"\"] after:absolute after:left-0 after:-bottom-4 after:h-[3px] after:w-full after:bg-theme-green',
+                        "after:content-[''] after:absolute after:left-0 after:-bottom-4 after:h-[3px] after:w-full after:bg-theme-green",
                         'after:origin-left after:scale-x-0 after:transition-transform after:duration-200',
                         'hover:after:scale-x-100',
                         isActive ? 'text-theme-dark after:scale-x-100' : '',

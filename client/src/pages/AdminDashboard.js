@@ -66,7 +66,7 @@ const AdminDashboard = () => {
     return (
       <div className="flex">
         <AdminSidebar />
-        <div className="ml-64 flex-1 p-8">
+        <div className="flex-1 p-6 pt-20 lg:pt-8 lg:ml-64">
           <div className="text-center">Loading...</div>
         </div>
       </div>
@@ -76,7 +76,7 @@ const AdminDashboard = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
-      <div className="ml-64 flex-1 p-8">
+      <div className="flex-1 p-6 pt-20 lg:pt-8 lg:ml-64">
         <div className="mb-8">
           <div className="text-xs tracking-[0.35em] uppercase text-theme-dark/60 font-semibold">Admin</div>
           <h1 className="mt-2 text-3xl font-extrabold text-theme-dark mb-2">Dashboard</h1>

@@ -72,8 +72,8 @@ const VerifyEmail = () => {
   }, [token, email, navigate, setAuthenticated]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center py-12 px-4">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8 max-w-md w-full text-center">
         {status === 'verifying' && (
           <>
             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">

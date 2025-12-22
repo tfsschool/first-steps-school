@@ -117,20 +117,6 @@ const JobManagement = () => {
     }
   };
 
-  const handleToggleStatus = async (job) => {
-    try {
-      await axios.put(API_ENDPOINTS.ADMIN.JOB(job._id), {
-        ...job,
-        status: job.status === 'Open' ? 'Closed' : 'Open'
-      }, config);
-      fetchJobs();
-    } catch (err) {
-      if (!handleAuthError(err)) {
-        alert('Error updating status: ' + (err.response?.data?.msg || err.message));
-      }
-    }
-  };
-
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -143,7 +129,7 @@ const JobManagement = () => {
     return (
       <div className="flex">
         <AdminSidebar />
-        <div className="ml-64 flex-1 p-8">
+        <div className="flex-1 p-6 pt-20 lg:pt-8 lg:ml-64">
           <div className="text-center">Loading...</div>
         </div>
       </div>
@@ -153,9 +139,12 @@ const JobManagement = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
-      <div className="ml-64 flex-1 p-8">
-        <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-800">Job Management</h1>
+      <div className="flex-1 p-6 pt-20 lg:pt-8 lg:ml-64">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Job Management</h1>
+            <p className="text-gray-600 mt-1">Create, update, and manage job postings</p>
+          </div>
           <button
             onClick={() => {
               setEditingJob(null);
@@ -175,7 +164,7 @@ const JobManagement = () => {
         </div>
 
         {/* Search and Filter */}
-        <div className="bg-white p-4 rounded-lg shadow mb-6 flex gap-4">
+        <div className="bg-white p-4 rounded-lg shadow mb-6 flex flex-col md:flex-row gap-4">
           <input
             type="text"
             placeholder="Search jobs..."
@@ -197,8 +186,8 @@ const JobManagement = () => {
         {/* Jobs Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead className="bg-gray-100">
+            <table className="min-w-[760px] w-full">
+            <thead className="bg-gray-100">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Title</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Applicants</th>
@@ -210,7 +199,7 @@ const JobManagement = () => {
               {filteredJobs.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
-                    No jobs found
+                    No jobs found. Try adjusting your search or filters.
                   </td>
                 </tr>
               ) : (
@@ -262,16 +251,29 @@ const JobManagement = () => {
 
         {/* Add/Edit Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div
-              className="bg-white rounded-2xl shadow-lift border border-gray-100 p-8 max-w-2xl w-full mx-4 max-h-[90vh]"
+              className="bg-white rounded-2xl shadow-soft border border-gray-100 max-w-2xl w-full max-h-[90vh]"
               style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              <h2 className="text-2xl font-bold mb-6">
-                {editingJob ? 'Edit Job' : 'Add New Job'}
-              </h2>
+              <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                  {editingJob ? 'Edit Job' : 'Add New Job'}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditingJob(null);
+                  }}
+                  className="h-10 w-10 rounded-full grid place-items-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6 p-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
                   <input

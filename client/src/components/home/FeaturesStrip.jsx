@@ -4,23 +4,23 @@ import { FaChalkboardTeacher, FaGlobe, FaUserGraduate, FaHandsHelping } from 're
 const FeaturesStrip = () => {
   const items = [
     {
-      title: 'Education Services',
-      subtitle: 'Academic support & guidance',
+      title: 'Strong Academics',
+      subtitle: 'Structured learning & progress',
       Icon: FaChalkboardTeacher,
     },
     {
-      title: 'International Hub',
-      subtitle: 'Diverse and welcoming community',
+      title: 'Safe & Caring Campus',
+      subtitle: 'A nurturing school environment',
       Icon: FaGlobe,
     },
     {
-      title: "Bachelor's & Master's",
-      subtitle: 'Programs designed for success',
+      title: 'Co-curricular Growth',
+      subtitle: 'Sports, arts, and clubs',
       Icon: FaUserGraduate,
     },
     {
-      title: 'Alumni Services',
-      subtitle: 'Lifelong network & mentorship',
+      title: 'Parent Partnership',
+      subtitle: 'Communication & support',
       Icon: FaHandsHelping,
     },
   ];

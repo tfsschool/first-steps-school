@@ -103,7 +103,7 @@ const RegisteredEmails = () => {
     return (
       <div className="flex">
         <AdminSidebar />
-        <div className="ml-64 flex-1 p-8">
+        <div className="flex-1 p-6 pt-20 lg:pt-8 lg:ml-64">
           <div className="text-center">Loading registered emails...</div>
         </div>
       </div>
@@ -113,8 +113,8 @@ const RegisteredEmails = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
-      <div className="ml-64 flex-1 p-8">
-        <div className="mb-8">
+      <div className="flex-1 p-6 pt-20 lg:pt-8 lg:ml-64">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Registered Emails</h1>
           <p className="text-gray-600">Manage all registered candidate emails</p>
         </div>
@@ -127,7 +127,7 @@ const RegisteredEmails = () => {
                 <p className="text-gray-600 text-sm font-medium">Total Registered</p>
                 <p className="text-3xl font-bold text-gray-800 mt-2">{candidates.length}</p>
               </div>
-              <div className="bg-blue-100 p-3 rounded-full">
+              <div className="bg-theme-blue/10 p-3 rounded-full">
                 <span className="text-2xl">📧</span>
               </div>
             </div>
@@ -214,7 +214,7 @@ const RegisteredEmails = () => {
                 {filteredCandidates.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                      No registered emails found
+                      No registered emails found. Try adjusting your search or filters.
                     </td>
                   </tr>
                 ) : (
@@ -277,8 +277,8 @@ const RegisteredEmails = () => {
 
         {/* Delete Confirmation Modal */}
         {showDeleteModal && candidateToDelete && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-lift border border-gray-100 p-8 max-w-md w-full mx-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8 max-w-md w-full max-h-[90vh]" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               <h2 className="text-2xl font-bold text-red-600 mb-4">Confirm Deletion</h2>
               <p className="text-gray-700 mb-4">
                 Are you sure you want to delete the candidate <strong>{candidateToDelete.email}</strong>?
@@ -296,7 +296,7 @@ const RegisteredEmails = () => {
                 <button
                   onClick={handleDeleteConfirm}
                   disabled={deletingId === candidateToDelete._id}
-                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:brightness-95 transition font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   {deletingId === candidateToDelete._id ? 'Deleting...' : 'Delete'}
                 </button>
@@ -306,7 +306,7 @@ const RegisteredEmails = () => {
                     setCandidateToDelete(null);
                   }}
                   disabled={deletingId === candidateToDelete._id}
-                  className="flex-1 bg-gray-100 text-theme-dark px-4 py-2 rounded-lg hover:bg-gray-200 transition font-semibold disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
@@ -317,23 +317,16 @@ const RegisteredEmails = () => {
 
         {/* Candidate Details Modal */}
         {showDetailsModal && selectedCandidate && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div
-              className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] shadow-lift border border-gray-100"
-              style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-soft border border-gray-100 max-w-4xl w-full max-h-[90vh]" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-                <div>
-                  <div className="text-xs tracking-[0.3em] uppercase text-theme-dark/60 font-semibold">Candidate</div>
-                  <h2 className="mt-1 text-2xl font-extrabold text-theme-dark">Candidate Details</h2>
-                </div>
+                <h2 className="text-2xl font-bold text-gray-800">Candidate Details</h2>
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
                     setSelectedCandidate(null);
                   }}
-                  className="h-10 w-10 rounded-full flex items-center justify-center text-theme-dark/60 hover:text-theme-dark hover:bg-gray-100 transition"
-                  aria-label="Close"
+                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
                 >
                   ×
                 </button>

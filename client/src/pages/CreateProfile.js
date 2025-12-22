@@ -144,18 +144,6 @@ const CreateProfile = () => {
             }
           }
           if (existingProfile.resumePath) {
-            let resumeUrl;
-            if (existingProfile.resumePath && typeof existingProfile.resumePath === 'object' && existingProfile.resumePath !== null) {
-              resumeUrl = existingProfile.resumePath.preview_url || existingProfile.resumePath.secure_url || '';
-            } else if (typeof existingProfile.resumePath === 'string') {
-              if (existingProfile.resumePath.startsWith('http://') || existingProfile.resumePath.startsWith('https://')) {
-                resumeUrl = existingProfile.resumePath;
-              } else {
-                resumeUrl = `${API_ENDPOINTS.UPLOADS.BASE}/${existingProfile.resumePath.replace(/^uploads\//, '')}`;
-              }
-            } else {
-              resumeUrl = '';
-            }
             const resumeFilename = existingProfile.resumePath && typeof existingProfile.resumePath === 'object' && existingProfile.resumePath !== null
               ? existingProfile.resumePath.original_filename || 'resume.pdf'
               : typeof existingProfile.resumePath === 'string'
@@ -421,54 +409,6 @@ const CreateProfile = () => {
     const updated = [...formData.certifications];
     updated[index][field] = value;
     setFormData({ ...formData, certifications: updated });
-  };
-
-  // Validate current step
-  const validateStep = () => {
-    const newErrors = {};
-    
-    if (currentStep === 1) {
-      if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
-      if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-      if (!formData.gender) newErrors.gender = 'Gender is required';
-      if (!formData.cnic.trim()) {
-        newErrors.cnic = 'CNIC is required';
-      } else {
-        // Remove dashes and spaces, then validate 13 digits
-        const cleanedCnic = formData.cnic.replace(/[-\s]/g, '');
-        if (!/^\d{13}$/.test(cleanedCnic)) {
-          newErrors.cnic = 'CNIC must be exactly 13 digits';
-        }
-      }
-      if (!formData.phone.trim()) newErrors.phone = 'Cell number is required';
-      if (!formData.email.trim()) newErrors.email = 'Email is required';
-      if (!formData.address.trim()) newErrors.address = 'Address is required';
-    } else if (currentStep === 2) {
-      // Education is required - at least one entry
-      if (formData.education.length === 0) {
-        newErrors.education = 'At least one education entry is required';
-      } else {
-        formData.education.forEach((edu, index) => {
-          if (!edu.degree.trim()) newErrors[`education_${index}_degree`] = 'Degree is required';
-          if (!edu.institution.trim()) newErrors[`education_${index}_institution`] = 'Institution is required';
-          if (!edu.yearOfCompletion.trim()) newErrors[`education_${index}_year`] = 'Year is required';
-        });
-      }
-    } else if (currentStep === 3) {
-      // Work experience is optional, but if an entry exists, company/organization is required
-      formData.workExperience.forEach((exp, index) => {
-        if (!exp.companyName || !exp.companyName.trim()) {
-          newErrors[`work_${index}_companyName`] = 'Company/Organization name is required';
-        }
-      });
-    } else if (currentStep === 4) {
-      // Skills and certifications are optional - no validation needed
-    } else if (currentStep === 5) {
-      if (!formData.resume) newErrors.resume = 'Resume is required';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const getMissingRequiredFields = () => {
@@ -1157,7 +1097,7 @@ const CreateProfile = () => {
               <button
                 type="button"
                 onClick={addCertification}
-                className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+                className="bg-theme-blue text-white px-4 py-2 rounded text-sm font-semibold hover:brightness-95 transition"
               >
                 + Add Another Certification
               </button>
@@ -1282,8 +1222,8 @@ const CreateProfile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto">
-        <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-soft border border-gray-100 p-8">
+      <div className="container mx-auto px-4">
+        <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-soft border border-gray-100 p-6 sm:p-8">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">

@@ -311,8 +311,8 @@ const Apply = () => {
 
   if (error && !job) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center bg-white p-10 rounded-2xl shadow-soft border border-gray-100 max-w-md">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="text-center bg-white p-6 sm:p-10 rounded-2xl shadow-soft border border-gray-100 max-w-md w-full">
           <div className="text-red-700 text-lg font-semibold mb-4">{error}</div>
           <button
             onClick={() => navigate('/careers')}
@@ -327,8 +327,8 @@ const Apply = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center bg-white p-10 rounded-2xl shadow-soft border border-gray-100 max-w-md">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="text-center bg-white p-6 sm:p-10 rounded-2xl shadow-soft border border-gray-100 max-w-md w-full">
           <div className="text-red-700 text-lg font-semibold mb-4">
             {error || 'Loading profile...'}
           </div>
@@ -439,8 +439,8 @@ const Apply = () => {
 
       {/* Thank You Popup */}
       {showThankYou && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-lift p-8 max-w-md w-full mx-4 text-center border border-gray-100">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-lift p-8 max-w-md w-full mx-4 text-center border border-gray-100 max-h-[90vh] overflow-y-auto">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

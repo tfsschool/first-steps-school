@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
@@ -369,8 +369,8 @@ const Careers = () => {
 
         {/* Initial Choice Modal - "Have you already registered?" */}
         {showInitialModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-lift border border-gray-100">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-lift border border-gray-100 max-h-[90vh] overflow-y-auto">
               <div className="text-xs tracking-[0.3em] uppercase text-theme-dark/60 font-semibold">Get Started</div>
               <h2 className="mt-3 text-2xl font-extrabold text-theme-dark">Have you already registered?</h2>
               <p className="mt-3 text-gray-600 mb-6">
@@ -407,8 +407,8 @@ const Careers = () => {
 
         {/* Login Modal */}
         {showLoginModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-lift border border-gray-100">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-lift border border-gray-100 max-h-[90vh] overflow-y-auto">
               <div className="text-xs tracking-[0.3em] uppercase text-theme-dark/60 font-semibold">Candidate Login</div>
               <h2 className="mt-3 text-2xl font-extrabold text-theme-dark mb-2">Login</h2>
               <p className="text-gray-600 mb-5">
@@ -533,8 +533,8 @@ const Careers = () => {
 
         {/* Registration Modal */}
         {showRegisterModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-lift border border-gray-100">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-lift border border-gray-100 max-h-[90vh] overflow-y-auto">
               <h2 className="text-2xl font-bold mb-4">
                 {isUnverified ? 'Resend Verification Email' : 'Register to Apply'}
               </h2>
@@ -630,8 +630,8 @@ const Careers = () => {
 
         {/* Already Applied Modal */}
         {showAlreadyAppliedModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-lift border border-gray-100">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-lift border border-gray-100 max-h-[90vh] overflow-y-auto">
               <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-12 h-12 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
