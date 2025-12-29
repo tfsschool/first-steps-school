@@ -279,6 +279,8 @@ const uploadFile = async (buffer, folder, originalFilename) => {
     const uploadOptions = {
       folder: folder,
       resource_type: forcedResourceType,
+      type: 'upload',
+      access_mode: 'public',
       use_filename: true,
       unique_filename: true,
       overwrite: false
@@ -320,6 +322,8 @@ const cvStorage = new CloudinaryStorage({
     folder: 'first-steps-school/cvs',
     allowed_formats: ['pdf', 'doc', 'docx'],
     resource_type: 'auto',
+    type: 'upload',
+    access_mode: 'public',
     use_filename: true,
     unique_filename: true
   }
@@ -331,6 +335,8 @@ const imageStorage = new CloudinaryStorage({
     folder: 'first-steps-school/profile-pictures',
     allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
     resource_type: 'auto',
+    type: 'upload',
+    access_mode: 'public',
     use_filename: true,
     unique_filename: true
   }
