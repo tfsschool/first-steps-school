@@ -723,47 +723,49 @@ const Careers = () => {
               <p className="text-gray-600 mt-2">Please check back later for new opportunities.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
-              {jobs.map((job) => (
-                <div
-                  key={job._id}
-                  className="group bg-white border border-gray-100 rounded-2xl shadow-soft hover:shadow-lift transition-shadow"
-                >
-                  <div className="p-7">
-                    <div className="text-xs tracking-[0.25em] uppercase text-theme-dark/50 font-semibold">
-                      Open Position
-                    </div>
-                    <h2 className="mt-3 text-xl font-extrabold text-theme-dark leading-snug">
-                      {job.title}
-                    </h2>
-                    <p
-                      className="mt-4 text-gray-600 leading-relaxed"
-                      style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 4,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      {job.description}
-                    </p>
-
-                    <div className="mt-6">
-                      <button
-                        onClick={() => handleApply(job._id)}
-                        className="w-full bg-theme-green text-white px-6 py-3 rounded-lg font-semibold hover:brightness-95 transition"
+            <div className="max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+                {jobs.map((job) => (
+                  <div
+                    key={job._id}
+                    className="group bg-white border border-gray-100 rounded-2xl shadow-soft hover:shadow-lift transition-shadow"
+                  >
+                    <div className="p-7">
+                      <div className="text-xs tracking-[0.25em] uppercase text-theme-dark/50 font-semibold">
+                        Open Position
+                      </div>
+                      <h2 className="mt-3 text-xl font-extrabold text-theme-dark leading-snug">
+                        {job.title}
+                      </h2>
+                      <p
+                        className="mt-4 text-gray-600 leading-relaxed"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 4,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
                       >
-                        Apply Now
-                      </button>
+                        {job.description}
+                      </p>
+
+                      <div className="mt-6">
+                        <button
+                          onClick={() => handleApply(job._id)}
+                          className="w-full bg-theme-green text-white px-6 py-3 rounded-lg font-semibold hover:brightness-95 transition"
+                        >
+                          Apply Now
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-          </div>
+        </div>
         </section>
       </div>
     </>
