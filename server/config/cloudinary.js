@@ -127,6 +127,16 @@ const normalizeFileData = (fileData) => {
     return null;
   }
 
+  const stripAttachmentFlagFromCloudinaryUrl = (url) => {
+    if (typeof url !== 'string') return url;
+    if (!url.includes('cloudinary.com')) return url;
+    // Normalize URLs that were accidentally saved with download/attachment flag.
+    // Example: .../upload/fl_attachment/v1/... -> .../upload/v1/...
+    return url
+      .replace('/upload/fl_attachment/', '/upload/')
+      .replace('/upload/fl_attachment:', '/upload/');
+  };
+
   // If it's already an object with the new format, return it
   if (typeof fileData === 'object' && fileData.public_id) {
     return {
@@ -142,8 +152,10 @@ const normalizeFileData = (fileData) => {
   // If it's a string URL (old format), try to extract public_id and generate URLs
   if (typeof fileData === 'string' && fileData.includes('cloudinary.com')) {
     try {
+      const cleanUrl = stripAttachmentFlagFromCloudinaryUrl(fileData);
+
       // Extract public_id from Cloudinary URL
-      const urlParts = fileData.split('/');
+      const urlParts = cleanUrl.split('/');
       const uploadIndex = urlParts.findIndex(part => part === 'upload');
       if (uploadIndex !== -1 && uploadIndex < urlParts.length - 1) {
         // Determine resource type from URL path (preferred, avoids 404 from wrong resource type)
@@ -167,7 +179,7 @@ const normalizeFileData = (fileData) => {
         let format = null;
         
         // Extract format from URL if present (check both URL path and query params)
-        const formatMatch = fileData.match(/\.(jpg|jpeg|png|gif|pdf|doc|docx)(\?|$)/i);
+        const formatMatch = cleanUrl.match(/\.(jpg|jpeg|png|gif|pdf|doc|docx)(\?|$)/i);
         if (formatMatch) {
           format = formatMatch[1].toLowerCase();
         }
@@ -180,7 +192,7 @@ const normalizeFileData = (fileData) => {
         return {
           preview_url: getPreviewUrl(finalPublicId, resourceType, format),
           download_url: getDownloadUrl(finalPublicId, resourceType, format, null),
-          secure_url: fileData,
+          secure_url: cleanUrl,
           public_id: finalPublicId,
           format: format,
           resource_type: resourceType
@@ -191,10 +203,11 @@ const normalizeFileData = (fileData) => {
     }
     
     // Fallback: return as-is
+    const cleanUrl = stripAttachmentFlagFromCloudinaryUrl(fileData);
     return {
-      preview_url: fileData,
-      download_url: fileData,
-      secure_url: fileData
+      preview_url: cleanUrl,
+      download_url: cleanUrl,
+      secure_url: cleanUrl
     };
   }
   
