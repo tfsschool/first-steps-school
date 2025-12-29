@@ -724,11 +724,11 @@ const Careers = () => {
             </div>
           ) : (
             <div className="max-w-5xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+              <div className="grid grid-cols-1 gap-7">
                 {jobs.map((job) => (
                   <div
                     key={job._id}
-                    className="group bg-white border border-gray-100 rounded-2xl shadow-soft hover:shadow-lift transition-shadow"
+                    className="group w-full bg-white border border-gray-100 rounded-2xl shadow-soft hover:shadow-lift transition-shadow"
                   >
                     <div className="p-7">
                       <div className="text-xs tracking-[0.25em] uppercase text-theme-dark/50 font-semibold">
