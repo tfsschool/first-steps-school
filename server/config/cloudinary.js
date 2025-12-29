@@ -31,6 +31,24 @@ console.log('✅ Cloudinary configured successfully');
  * - PDFs: Original URL (no transformation for PDFs)
  */
 const getPreviewUrl = (publicId, resourceType, format) => {
+  if (format === 'pdf') {
+    // Return a direct PDF URL (no image transformations).
+    // Ensure public_id does not include .pdf to avoid ".pdf.pdf" when format is set.
+    const options = {
+      resource_type: resourceType || 'auto',
+      secure: true,
+      format: 'pdf'
+    };
+
+    let pdfPublicId = String(publicId || '').trim();
+    const lowerPublicId = pdfPublicId.toLowerCase();
+    if (lowerPublicId.endsWith('.pdf')) {
+      pdfPublicId = pdfPublicId.slice(0, -4);
+    }
+
+    return cloudinary.url(pdfPublicId, options);
+  }
+
   if (resourceType === 'image') {
     // Optimized preview for images: high quality but optimized size
     return cloudinary.url(publicId, {
@@ -128,6 +146,15 @@ const normalizeFileData = (fileData) => {
       const urlParts = fileData.split('/');
       const uploadIndex = urlParts.findIndex(part => part === 'upload');
       if (uploadIndex !== -1 && uploadIndex < urlParts.length - 1) {
+        // Determine resource type from URL path (preferred, avoids 404 from wrong resource type)
+        // Typical Cloudinary URLs: /<cloud_name>/<resource_type>/upload/...
+        // e.g. https://res.cloudinary.com/<cloud>/image/upload/... or /raw/upload/...
+        let resourceType = 'auto';
+        const resourceTypeCandidate = urlParts[uploadIndex - 1];
+        if (resourceTypeCandidate === 'image' || resourceTypeCandidate === 'raw' || resourceTypeCandidate === 'video') {
+          resourceType = resourceTypeCandidate;
+        }
+
         // Find the folder and filename
         const versionIndex = urlParts.findIndex(part => part.match(/^v\d+$/));
         const startIndex = versionIndex !== -1 ? versionIndex + 1 : uploadIndex + 2;
@@ -136,27 +163,13 @@ const normalizeFileData = (fileData) => {
         // For PDFs, we normalize to public_id WITHOUT the .pdf extension to avoid ".pdf.pdf" in generated URLs.
         const publicIdWithExt = publicIdParts.join('/');
         
-        // Determine resource type and format from URL
-        let resourceType = 'auto';
+        // Determine format from URL
         let format = null;
-        
-        if (fileData.includes('/image/')) {
-          resourceType = 'image';
-        } else if (fileData.includes('/raw/') || fileData.includes('/pdf') || fileData.includes('resource_type=raw')) {
-          resourceType = 'raw';
-          format = 'pdf';
-        }
         
         // Extract format from URL if present (check both URL path and query params)
         const formatMatch = fileData.match(/\.(jpg|jpeg|png|gif|pdf|doc|docx)(\?|$)/i);
         if (formatMatch) {
           format = formatMatch[1].toLowerCase();
-        }
-
-        // If it's a PDF, always treat it as a raw resource so the browser opens the actual multi-page PDF.
-        // Older uploads might be stored under /image/upload and show only the first page.
-        if (format === 'pdf') {
-          resourceType = 'raw';
         }
 
         let finalPublicId = publicIdWithExt;
