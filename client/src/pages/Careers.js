@@ -333,33 +333,64 @@ const Careers = () => {
                 Explore exciting career opportunities at The First Steps School.
               </p>
             </div>
-
-            <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center gap-4">
-                {isAuthenticated && userEmail && (
-                  <div className="text-white/90">
-                    <div className="text-xs uppercase tracking-[0.22em] text-white/70">Logged in as</div>
-                    <div className="text-sm font-semibold">{userEmail}</div>
-                    <button
-                      onClick={handleLogout}
-                      className="mt-2 text-xs font-semibold text-theme-green hover:brightness-95 transition"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div>
-                <button onClick={handleCreateProfile} className="btn-primary">
-                  {isAuthenticated ? 'Edit Profile' : 'Create Profile'}
-                </button>
-              </div>
-            </div>
           </div>
         </section>
 
         <section className="bg-gray-50 py-12">
           <div className="container mx-auto px-4">
+
+            {(isAuthenticated && userEmail) ? (
+              <div className="max-w-5xl mx-auto mb-8">
+                <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-5 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="text-[11px] tracking-[0.32em] uppercase text-theme-dark/60 font-semibold">
+                        Logged in as
+                      </div>
+                      <div className="mt-1 text-sm sm:text-base font-semibold text-theme-dark truncate">
+                        {userEmail}
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="mt-2 text-xs font-semibold text-theme-blue hover:text-theme-green transition"
+                      >
+                        Logout
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col xs:flex-row gap-3 sm:items-center">
+                      <button
+                        onClick={handleCreateProfile}
+                        className="btn-primary w-full sm:w-auto"
+                      >
+                        Edit Profile
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="max-w-5xl mx-auto mb-8">
+                <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-5 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <div className="text-[11px] tracking-[0.32em] uppercase text-theme-dark/60 font-semibold">
+                        Get Started
+                      </div>
+                      <div className="mt-1 text-sm sm:text-base text-gray-700">
+                        Create your profile to apply for jobs.
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleCreateProfile}
+                      className="btn-primary w-full sm:w-auto"
+                    >
+                      Create Profile
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {error && (
               <div className="max-w-3xl mx-auto mb-8 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-lg">

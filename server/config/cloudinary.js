@@ -150,12 +150,26 @@ const normalizeFileData = (fileData) => {
       .replace('/upload/fl_attachment:', '/upload/');
   };
 
+  const addAttachmentFlagToCloudinaryUrl = (url) => {
+    if (typeof url !== 'string') return url;
+    if (!url.includes('cloudinary.com')) return url;
+    if (url.includes('/upload/fl_attachment/')) return url;
+    // Insert fl_attachment right after /upload/ to force download.
+    // Keep the existing resource type (image/raw/video), version, and filename intact.
+    return url.replace('/upload/', '/upload/fl_attachment/');
+  };
+
   // If it's already an object with the new format, return it
   if (typeof fileData === 'object' && fileData.public_id) {
+    const secureUrlClean = stripAttachmentFlagFromCloudinaryUrl(fileData.secure_url);
+    const previewUrlClean = stripAttachmentFlagFromCloudinaryUrl(fileData.preview_url || fileData.secure_url);
+    const downloadUrlWithAttachment = addAttachmentFlagToCloudinaryUrl(
+      stripAttachmentFlagFromCloudinaryUrl(fileData.download_url || fileData.secure_url || previewUrlClean)
+    );
     return {
-      preview_url: fileData.preview_url || fileData.secure_url,
-      download_url: fileData.download_url || fileData.secure_url,
-      secure_url: fileData.secure_url,
+      preview_url: previewUrlClean,
+      download_url: downloadUrlWithAttachment,
+      secure_url: secureUrlClean,
       public_id: fileData.public_id,
       format: fileData.format,
       resource_type: fileData.resource_type
@@ -166,6 +180,16 @@ const normalizeFileData = (fileData) => {
   if (typeof fileData === 'string' && fileData.includes('cloudinary.com')) {
     try {
       const cleanUrl = stripAttachmentFlagFromCloudinaryUrl(fileData);
+
+      // Most robust approach:
+      // - Use the stored Cloudinary secure URL directly for viewing (works for image/raw PDFs and docs)
+      // - Derive the download URL by adding fl_attachment to the *same* URL
+      // This avoids resource_type/format/public_id mismatches which cause 404s.
+      return {
+        preview_url: cleanUrl,
+        download_url: addAttachmentFlagToCloudinaryUrl(cleanUrl),
+        secure_url: cleanUrl
+      };
 
       // Extract public_id from Cloudinary URL
       const urlParts = cleanUrl.split('/');
@@ -244,18 +268,27 @@ const normalizeFileData = (fileData) => {
  */
 const uploadFile = async (buffer, folder, originalFilename) => {
   return new Promise((resolve, reject) => {
-    const lowerName = String(originalFilename || '').toLowerCase();
-    const isPdf = lowerName.endsWith('.pdf');
-    const forcedResourceType = isPdf ? 'raw' : 'auto';
+    const name = String(originalFilename || '').trim();
+    const lowerName = name.toLowerCase();
+    const ext = lowerName.includes('.') ? lowerName.split('.').pop() : '';
+    const isDocType = ext === 'pdf' || ext === 'doc' || ext === 'docx';
+    const forcedResourceType = isDocType ? 'raw' : 'auto';
+
+    // Cloudinary sometimes stores raw uploads with format = N/A when streaming buffers.
+    // Passing 'format' explicitly (for pdf/doc/docx) ensures Cloudinary records the correct format.
+    const uploadOptions = {
+      folder: folder,
+      resource_type: forcedResourceType,
+      use_filename: true,
+      unique_filename: true,
+      overwrite: false
+    };
+    if (isDocType) {
+      uploadOptions.format = ext;
+    }
 
     const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: folder,
-        resource_type: forcedResourceType,
-        use_filename: true,
-        unique_filename: true,
-        overwrite: false
-      },
+      uploadOptions,
       (error, result) => {
         if (error) {
           reject(error);
