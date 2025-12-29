@@ -737,15 +737,7 @@ const Careers = () => {
                       <h2 className="mt-3 text-xl font-extrabold text-theme-dark leading-snug">
                         {job.title}
                       </h2>
-                      <p
-                        className="mt-4 text-gray-600 leading-relaxed"
-                        style={{
-                          display: '-webkit-box',
-                          WebkitLineClamp: 4,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                        }}
-                      >
+                      <p className="mt-4 text-gray-600 leading-relaxed">
                         {job.description}
                       </p>
 
