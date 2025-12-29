@@ -9,14 +9,22 @@ const CreateProfile = () => {
   const [searchParams] = useSearchParams();
   const jobIdParam = searchParams.get('jobId');
   const { isAuthenticated, userEmail, loading: authLoading } = useAuth();
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 6;
 
   const formatCnic = (value) => {
     const digitsOnly = String(value || '').replace(/[^\d]/g, '').slice(0, 13);
     if (digitsOnly.length !== 13) return String(value || '');
     return `${digitsOnly.slice(0, 5)}-${digitsOnly.slice(5, 12)}-${digitsOnly.slice(12)}`;
   };
+
+  const renderSinglePageForm = () => (
+    <div className="space-y-10">
+      {renderStep1()}
+      {renderStep2()}
+      {renderStep3()}
+      {renderStep4()}
+      {renderStep5()}
+    </div>
+  );
   
   const [formData, setFormData] = useState({
     // Personal Information
@@ -269,9 +277,6 @@ const CreateProfile = () => {
     return () => clearTimeout(timer);
   }, [formData, profileLoaded, isAuthenticated, userEmail, autoSave]);
 
-  // Calculate progress
-  const progress = (currentStep / totalSteps) * 100;
-
   // Handle input changes
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
@@ -441,23 +446,6 @@ const CreateProfile = () => {
     if (!formData.resume) missing.push('Resume');
 
     return missing;
-  };
-
-  // Next step
-  const nextStep = async () => {
-    // Allow moving forward even if required fields are missing.
-    // Required fields are enforced on final submit.
-    await autoSave(false);
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  // Previous step
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
   };
 
   // Submit form
@@ -1227,7 +1215,7 @@ const CreateProfile = () => {
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">
-              {profileLoaded ? 'Update Your Profile' : 'Create Your Profile'}
+              {profileLoaded ? 'Edit Your Profile' : 'Create Your Profile'}
             </h1>
             {profileLoaded && (
               <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold">
@@ -1243,58 +1231,9 @@ const CreateProfile = () => {
             </div>
           )}
 
-          {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex justify-between mb-2">
-              <span className="text-sm font-semibold">Step {currentStep} of {totalSteps}</span>
-              <span className="text-sm font-semibold">{Math.round(progress)}% Complete</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-theme-green h-2 rounded-full transition-all"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Step Indicator */}
-          <div className="flex justify-between mb-8">
-            {[1, 2, 3, 4, 5, 6].map((step) => (
-              <div
-                key={step}
-                className={`flex-1 text-center ${
-                  step <= currentStep ? 'text-theme-blue' : 'text-gray-400'
-                }`}
-              >
-                <div
-                  className={`w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center ${
-                    step <= currentStep
-                      ? 'bg-theme-blue text-white'
-                      : 'bg-gray-200 text-gray-500'
-                  }`}
-                >
-                  {step}
-                </div>
-                <div className="text-xs">
-                  {step === 1 && 'Personal'}
-                  {step === 2 && 'Education'}
-                  {step === 3 && 'Experience'}
-                  {step === 4 && 'Skills'}
-                  {step === 5 && 'Resume'}
-                  {step === 6 && 'Review'}
-                </div>
-              </div>
-            ))}
-          </div>
-
           {/* Form Content */}
           <form onSubmit={(e) => e.preventDefault()}>
-            {currentStep === 1 && renderStep1()}
-            {currentStep === 2 && renderStep2()}
-            {currentStep === 3 && renderStep3()}
-            {currentStep === 4 && renderStep4()}
-            {currentStep === 5 && renderStep5()}
-            {currentStep === 6 && renderStep6()}
+            {renderSinglePageForm()}
 
             {/* Save Progress Indicator */}
             <div className="mt-4 flex items-center justify-between text-sm">
@@ -1322,36 +1261,15 @@ const CreateProfile = () => {
               </button>
             </div>
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-between mt-8">
+            <div className="flex justify-end mt-8">
               <button
                 type="button"
-                onClick={prevStep}
-                disabled={currentStep === 1}
-                className="bg-gray-100 text-theme-dark px-6 py-2 rounded-lg font-semibold hover:bg-gray-200 transition disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="bg-theme-green text-white px-6 py-2 rounded-lg font-semibold hover:brightness-95 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
-                Previous
+                {submitting ? 'Saving...' : 'Save Profile'}
               </button>
-
-              {currentStep < totalSteps ? (
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  disabled={saving}
-                  className="bg-theme-blue text-white px-6 py-2 rounded-lg font-semibold hover:brightness-95 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  {saving ? 'Saving...' : 'Next'}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                  className="bg-theme-green text-white px-6 py-2 rounded-lg font-semibold hover:brightness-95 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  {submitting ? 'Saving...' : 'Save Profile'}
-                </button>
-              )}
             </div>
           </form>
         </div>

@@ -351,7 +351,7 @@ const Careers = () => {
               </div>
               <div>
                 <button onClick={handleCreateProfile} className="btn-primary">
-                  {isAuthenticated ? 'Update Profile' : 'Create Profile'}
+                  {isAuthenticated ? 'Edit Profile' : 'Create Profile'}
                 </button>
               </div>
             </div>

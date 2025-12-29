@@ -261,12 +261,12 @@ const Apply = () => {
       if (resumePath) {
         data.append('cvPath', resumePath);
       } else {
-        setError('Resume not found in profile. Please update your profile.');
+        setError('Resume not found in profile. Please edit your profile.');
         setSubmitting(false);
         return;
       }
     } else {
-      setError('Resume not found in profile. Please update your profile.');
+      setError('Resume not found in profile. Please edit your profile.');
       setSubmitting(false);
       return;
     }
