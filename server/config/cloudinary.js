@@ -42,10 +42,23 @@ const getPreviewUrl = (publicId, resourceType, format) => {
     });
   } else {
     // For PDFs and other files, return original (no preview transformation)
-    return cloudinary.url(publicId, {
+    // For PDFs, also force format=pdf and ensure public_id does not include .pdf to avoid ".pdf.pdf".
+    const options = {
       resource_type: resourceType || 'auto',
       secure: true
-    });
+    };
+
+    if (format === 'pdf') {
+      let pdfPublicId = String(publicId || '').trim();
+      const lowerPublicId = pdfPublicId.toLowerCase();
+      if (lowerPublicId.endsWith('.pdf')) {
+        pdfPublicId = pdfPublicId.slice(0, -4);
+      }
+      options.format = 'pdf';
+      return cloudinary.url(pdfPublicId, options);
+    }
+
+    return cloudinary.url(publicId, options);
   }
 };
 
@@ -62,19 +75,18 @@ const getDownloadUrl = (publicId, resourceType, format, originalFilename) => {
   };
 
   // For PDFs and other raw files, ensure correct extension
-  if (resourceType === 'raw' || format === 'pdf' || 
+  if (resourceType === 'raw' || format === 'pdf' ||
       (originalFilename && originalFilename.toLowerCase().endsWith('.pdf'))) {
-    // For raw files (PDFs), Cloudinary needs the extension in the public_id
-    // Also need to ensure proper content-type by using the format parameter
+    // IMPORTANT:
+    // When using cloudinary.url(..., { format: 'pdf' }), the SDK will append ".pdf".
+    // So the public_id MUST NOT already include ".pdf", otherwise the URL becomes ".pdf.pdf".
     let pdfPublicId = String(publicId || '').trim();
-    
-    // CRITICAL: Check if it already ends with .pdf (case-insensitive) to avoid double extension
     const lowerPublicId = pdfPublicId.toLowerCase();
-    if (!lowerPublicId.endsWith('.pdf')) {
-      pdfPublicId = pdfPublicId + '.pdf';
+    if (lowerPublicId.endsWith('.pdf')) {
+      pdfPublicId = pdfPublicId.slice(0, -4);
     }
-    
-    // Use format: 'pdf' to ensure proper content-type header
+
+    // Use format: 'pdf' to ensure proper content-type header and correct extension
     options.format = 'pdf';
     return cloudinary.url(pdfPublicId, options);
   }
@@ -120,8 +132,9 @@ const normalizeFileData = (fileData) => {
         const versionIndex = urlParts.findIndex(part => part.match(/^v\d+$/));
         const startIndex = versionIndex !== -1 ? versionIndex + 1 : uploadIndex + 2;
         const publicIdParts = urlParts.slice(startIndex);
-        // Keep the full public_id including extension - Cloudinary stores it with extension for raw files
-        const publicId = publicIdParts.join('/');
+        // Build public_id from URL path.
+        // For PDFs, we normalize to public_id WITHOUT the .pdf extension to avoid ".pdf.pdf" in generated URLs.
+        const publicIdWithExt = publicIdParts.join('/');
         
         // Determine resource type and format from URL
         let resourceType = 'auto';
@@ -139,16 +152,16 @@ const normalizeFileData = (fileData) => {
         if (formatMatch) {
           format = formatMatch[1].toLowerCase();
         }
-        
-        // For raw files (PDFs), ensure public_id has .pdf extension if format is pdf
-        // This prevents getDownloadUrl from adding it again
-        let finalPublicId = publicId;
-        if (resourceType === 'raw' && format === 'pdf') {
-          // Only add .pdf if it doesn't already end with it (case-insensitive check)
-          const lowerPublicId = publicId.toLowerCase();
-          if (!lowerPublicId.endsWith('.pdf')) {
-            finalPublicId = publicId + '.pdf';
-          }
+
+        // If it's a PDF, always treat it as a raw resource so the browser opens the actual multi-page PDF.
+        // Older uploads might be stored under /image/upload and show only the first page.
+        if (format === 'pdf') {
+          resourceType = 'raw';
+        }
+
+        let finalPublicId = publicIdWithExt;
+        if (format && String(finalPublicId).toLowerCase().endsWith(`.${format}`)) {
+          finalPublicId = finalPublicId.slice(0, -(format.length + 1));
         }
         
         return {
@@ -190,10 +203,14 @@ const normalizeFileData = (fileData) => {
  */
 const uploadFile = async (buffer, folder, originalFilename) => {
   return new Promise((resolve, reject) => {
+    const lowerName = String(originalFilename || '').toLowerCase();
+    const isPdf = lowerName.endsWith('.pdf');
+    const forcedResourceType = isPdf ? 'raw' : 'auto';
+
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: folder,
-        resource_type: 'auto', // Automatically detects image, video, or raw (PDF)
+        resource_type: forcedResourceType,
         use_filename: true,
         unique_filename: true,
         overwrite: false
@@ -202,15 +219,8 @@ const uploadFile = async (buffer, folder, originalFilename) => {
         if (error) {
           reject(error);
         } else {
-          // For raw files (PDFs), ensure public_id includes the extension
+          // Normalize stored public_id to NOT include extension.
           let publicId = result.public_id;
-          if (result.resource_type === 'raw' && originalFilename && originalFilename.toLowerCase().endsWith('.pdf')) {
-            // If public_id doesn't end with .pdf, add it
-            if (!publicId.toLowerCase().endsWith('.pdf')) {
-              publicId = publicId + '.pdf';
-            }
-          }
-          
           const fileInfo = {
             public_id: publicId,
             secure_url: result.secure_url,

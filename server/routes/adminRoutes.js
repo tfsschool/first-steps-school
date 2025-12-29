@@ -154,6 +154,9 @@ router.get('/applications', adminAuth, async (req, res) => {
             if (appData.cvPath) {
                 appData.cvPath = normalizeFileData(appData.cvPath) || appData.cvPath;
             }
+            if (appData.profileId && appData.profileId.resumePath) {
+                appData.profileId.resumePath = normalizeFileData(appData.profileId.resumePath) || appData.profileId.resumePath;
+            }
             return appData;
         });
         
@@ -190,6 +193,9 @@ router.put('/application/:id/status', adminAuth, async (req, res) => {
         const appData = application.toObject();
         if (appData.cvPath) {
             appData.cvPath = normalizeFileData(appData.cvPath) || appData.cvPath;
+        }
+        if (appData.profileId && appData.profileId.resumePath) {
+            appData.profileId.resumePath = normalizeFileData(appData.profileId.resumePath) || appData.profileId.resumePath;
         }
         res.json(appData);
     } catch (err) {
@@ -247,6 +253,9 @@ router.get('/applications/:jobId', adminAuth, async (req, res) => {
             const appData = app.toObject();
             if (appData.cvPath) {
                 appData.cvPath = normalizeFileData(appData.cvPath) || appData.cvPath;
+            }
+            if (appData.profileId && appData.profileId.resumePath) {
+                appData.profileId.resumePath = normalizeFileData(appData.profileId.resumePath) || appData.profileId.resumePath;
             }
             return appData;
         });
