@@ -92,9 +92,8 @@ const getDownloadUrl = (publicId, resourceType, format, originalFilename) => {
     flags: ['attachment'] // Forces download instead of inline display
   };
 
-  // For PDFs and other raw files, ensure correct extension
-  if (resourceType === 'raw' || format === 'pdf' ||
-      (originalFilename && originalFilename.toLowerCase().endsWith('.pdf'))) {
+  // For PDFs, ensure correct extension
+  if (format === 'pdf' || (originalFilename && originalFilename.toLowerCase().endsWith('.pdf'))) {
     // IMPORTANT:
     // When using cloudinary.url(..., { format: 'pdf' }), the SDK will append ".pdf".
     // So the public_id MUST NOT already include ".pdf", otherwise the URL becomes ".pdf.pdf".
@@ -107,6 +106,20 @@ const getDownloadUrl = (publicId, resourceType, format, originalFilename) => {
     // Use format: 'pdf' to ensure proper content-type header and correct extension
     options.format = 'pdf';
     return cloudinary.url(pdfPublicId, options);
+  }
+
+  // For other raw files (doc/docx, etc), keep their format if known
+  if (resourceType === 'raw' && format) {
+    // Similar to PDFs: if we set options.format, Cloudinary will append the extension,
+    // so avoid duplicating it in public_id.
+    let rawPublicId = String(publicId || '').trim();
+    const lowerPublicId = rawPublicId.toLowerCase();
+    const lowerFormat = String(format).toLowerCase();
+    if (lowerFormat && lowerPublicId.endsWith(`.${lowerFormat}`)) {
+      rawPublicId = rawPublicId.slice(0, -(lowerFormat.length + 1));
+    }
+    options.format = lowerFormat;
+    return cloudinary.url(rawPublicId, options);
   }
 
   // For images, return original format
@@ -185,7 +198,9 @@ const normalizeFileData = (fileData) => {
         }
 
         let finalPublicId = publicIdWithExt;
-        if (format && String(finalPublicId).toLowerCase().endsWith(`.${format}`)) {
+        // Only strip the extension for PDFs.
+        // For doc/docx we keep the extension in public_id to avoid serving/downloading as the wrong type.
+        if (format === 'pdf' && String(finalPublicId).toLowerCase().endsWith(`.${format}`)) {
           finalPublicId = finalPublicId.slice(0, -(format.length + 1));
         }
         
