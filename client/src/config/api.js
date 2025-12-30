@@ -6,7 +6,7 @@
 const getBaseURL = () => {
   // Use environment variable if set (for production)
   if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
+    return String(process.env.REACT_APP_API_URL).trim().replace(/\/+$/, '');
   }
   
   // In browser environment, detect hostname dynamically

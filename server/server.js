@@ -37,7 +37,13 @@ app.use(mongoSanitize());
 app.use(xss());
 
 // --- ROBUST CORS CONFIGURATION ---
-const allowedOrigins = ['https://first-steps-school-frontend.vercel.app'];
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:3000',
+  'https://www.tfs.school',
+  'https://tfs.school',
+  'https://first-steps-school-frontend.vercel.app'
+].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {

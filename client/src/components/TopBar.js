@@ -14,9 +14,9 @@ const TopBar = () => {
   const phoneHref = 'tel:03123880000';
 
   const socialLinks = {
-    facebook: 'https://www.facebook.com/your-profile',
+    facebook: 'https://www.facebook.com/school.tfs/',
     instagram: 'https://www.instagram.com/your-profile',
-    youtube: 'https://www.youtube.com/@your-channel',
+    youtube: 'https://www.youtube.com/@thefirststeps1143',
     linkedin: 'https://www.linkedin.com/company/your-profile',
   };
 
