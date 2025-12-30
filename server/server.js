@@ -3,11 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const compression = require('compression');
 const connectDB = require('./config/db');
+const { globalLimiter, authLimiter, applicationLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -86,23 +86,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // --- RATE LIMITERS ---
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-  validate: { xForwardedForHeader: false }
-});
 app.use('/api', globalLimiter);
-
-const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 5,
-  message: 'Too many authentication attempts from this IP, please try again after an hour.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
 // --- ROUTES ---
 

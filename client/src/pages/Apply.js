@@ -4,6 +4,7 @@ import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import SEO from '../components/SEO';
+import { showWarning } from '../utils/toast';
 
 const Apply = () => {
   const { jobId } = useParams();
@@ -55,8 +56,8 @@ const Apply = () => {
           });
           if (checkAppRes.data.applied) {
             setError('You have already applied for this job position.');
+            showWarning('You have already applied for this job.');
             setTimeout(() => {
-              alert('You have already applied for this job.');
               navigate('/careers');
             }, 2000);
             setLoading(false);
@@ -286,10 +287,10 @@ const Apply = () => {
       const errorMsg = err.response?.data?.msg || 'Error submitting application. Please try again.';
       setError(errorMsg);
       
-      // If already applied, show alert and redirect
+      // If already applied, show warning and redirect
       if (errorMsg.includes('already applied')) {
+        showWarning('You have already applied for this job.');
         setTimeout(() => {
-          alert('You have already applied for this job.');
           navigate('/careers');
         }, 2000);
       }

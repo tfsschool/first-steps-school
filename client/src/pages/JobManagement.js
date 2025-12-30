@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AdminSidebar from '../components/AdminSidebar';
 import { API_ENDPOINTS } from '../config/api';
+import { showSuccess, showError } from '../utils/toast';
 
 const JobManagement = () => {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ const JobManagement = () => {
       setApplicantCounts(counts);
     } catch (err) {
       if (!handleAuthError(err)) {
-        alert('Error loading jobs: ' + (err.response?.data?.msg || err.message));
+        showError('Error loading jobs: ' + (err.response?.data?.msg || err.message));
       }
     } finally {
       setLoading(false);
@@ -70,10 +71,10 @@ const JobManagement = () => {
     try {
       if (editingJob) {
         await axios.put(API_ENDPOINTS.ADMIN.JOB(editingJob._id), formData, config);
-        alert('Job updated successfully!');
+        showSuccess('Job updated successfully!');
       } else {
         await axios.post(API_ENDPOINTS.ADMIN.JOB(), formData, config);
-        alert('Job posted successfully!');
+        showSuccess('Job posted successfully!');
       }
       setShowModal(false);
       setEditingJob(null);
@@ -87,7 +88,7 @@ const JobManagement = () => {
       fetchJobs();
     } catch (err) {
       if (!handleAuthError(err)) {
-        alert('Error saving job: ' + (err.response?.data?.msg || err.message));
+        showError('Error saving job: ' + (err.response?.data?.msg || err.message));
       }
     }
   };
@@ -108,11 +109,11 @@ const JobManagement = () => {
     if (!window.confirm('Are you sure you want to delete this job posting?')) return;
     try {
       await axios.delete(API_ENDPOINTS.ADMIN.JOB(id), config);
-      alert('Job deleted successfully!');
+      showSuccess('Job deleted successfully!');
       fetchJobs();
     } catch (err) {
       if (!handleAuthError(err)) {
-        alert('Error deleting job: ' + (err.response?.data?.msg || err.message));
+        showError('Error deleting job: ' + (err.response?.data?.msg || err.message));
       }
     }
   };

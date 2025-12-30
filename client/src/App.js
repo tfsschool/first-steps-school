@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -88,6 +89,7 @@ function App() {
     <HelmetProvider>
       <AuthProvider>
         <Router>
+          <Toaster />
           <AppContent />
         </Router>
       </AuthProvider>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AdminSidebar from '../components/AdminSidebar';
 import { API_ENDPOINTS } from '../config/api';
+import { showSuccess, showError } from '../utils/toast';
 
 const Candidates = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const Candidates = () => {
       setApplications(res.data);
     } catch (err) {
       if (!handleAuthError(err)) {
-        alert('Error loading applications: ' + (err.response?.data?.msg || err.message));
+        showError('Error loading applications: ' + (err.response?.data?.msg || err.message));
       }
     } finally {
       setLoading(false);
@@ -53,7 +54,7 @@ const Candidates = () => {
       fetchApplications();
     } catch (err) {
       if (!handleAuthError(err)) {
-        alert('Error updating status: ' + (err.response?.data?.msg || err.message));
+        showError('Error updating status: ' + (err.response?.data?.msg || err.message));
       }
     }
   };
@@ -65,7 +66,7 @@ const Candidates = () => {
     
     try {
       await axios.delete(API_ENDPOINTS.ADMIN.APPLICATION(applicationId), config);
-      alert('Application deleted successfully!');
+      showSuccess('Application deleted successfully!');
       // Close modal if it was open
       if (selectedApplication && selectedApplication._id === applicationId) {
         setShowModal(false);
@@ -74,7 +75,7 @@ const Candidates = () => {
       fetchApplications();
     } catch (err) {
       if (!handleAuthError(err)) {
-        alert('Error deleting application: ' + (err.response?.data?.msg || err.message));
+        showError('Error deleting application: ' + (err.response?.data?.msg || err.message));
       }
     }
   };
@@ -94,7 +95,7 @@ const Candidates = () => {
       link.remove();
     } catch (err) {
       if (!handleAuthError(err)) {
-        alert('Error downloading CSV: ' + (err.response?.data?.msg || err.message));
+        showError('Error downloading CSV: ' + (err.response?.data?.msg || err.message));
       }
     }
   };

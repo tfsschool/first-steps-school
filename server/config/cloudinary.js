@@ -47,7 +47,7 @@ const getPreviewUrl = (publicId, resourceType, format) => {
     }
     
     return cloudinary.url(cleanPublicId, {
-      resource_type: resourceType === 'raw' ? 'raw' : 'image', // PDFs usually 'image', but handle 'raw' legacy
+      resource_type: 'image', // ALWAYS use 'image' for PDFs to enable browser preview (even for legacy 'raw' uploads)
       secure: true,
       format: 'pdf' // Force .pdf extension so browser treats it as a document
       // NO transformations (quality/crop) here - we want the full PDF
@@ -85,7 +85,7 @@ const getDownloadUrl = (publicId, resourceType, format, originalFilename) => {
       cleanPublicId = cleanPublicId.slice(0, -4);
     }
     return cloudinary.url(cleanPublicId, {
-      resource_type: resourceType === 'raw' ? 'raw' : 'image',
+      resource_type: 'image', // ALWAYS use 'image' for PDFs (even legacy 'raw' uploads)
       secure: true,
       format: 'pdf',
       flags: ['attachment'] // Force download

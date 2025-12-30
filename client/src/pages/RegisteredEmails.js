@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import AdminSidebar from '../components/AdminSidebar';
 import { API_ENDPOINTS } from '../config/api';
+import { showSuccess, showError } from '../utils/toast';
 
 const RegisteredEmails = () => {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ const RegisteredEmails = () => {
       setCandidates(res.data);
     } catch (err) {
       if (!handleAuthError(err)) {
-        alert('Error loading registered emails: ' + (err.response?.data?.msg || err.message));
+        showError('Error loading registered emails: ' + (err.response?.data?.msg || err.message));
       }
     } finally {
       setLoading(false);
@@ -61,7 +62,7 @@ const RegisteredEmails = () => {
       setShowDetailsModal(true);
     } catch (err) {
       if (!handleAuthError(err)) {
-        alert('Error loading candidate details: ' + (err.response?.data?.msg || err.message));
+        showError('Error loading candidate details: ' + (err.response?.data?.msg || err.message));
       }
     } finally {
       setLoadingDetails(false);
@@ -74,13 +75,13 @@ const RegisteredEmails = () => {
     setDeletingId(candidateToDelete._id);
     try {
       await axios.delete(API_ENDPOINTS.ADMIN.DELETE_CANDIDATE(candidateToDelete._id), config);
-      alert('Candidate and all associated data deleted successfully!');
+      showSuccess('Candidate and all associated data deleted successfully!');
       setShowDeleteModal(false);
       setCandidateToDelete(null);
       fetchCandidates(); // Refresh the list
     } catch (err) {
       if (!handleAuthError(err)) {
-        alert('Error deleting candidate: ' + (err.response?.data?.msg || err.message));
+        showError('Error deleting candidate: ' + (err.response?.data?.msg || err.message));
       }
     } finally {
       setDeletingId(null);
