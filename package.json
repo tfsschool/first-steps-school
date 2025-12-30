@@ -1,0 +1,17 @@
+{
+  "name": "first-steps-school",
+  "version": "1.0.0",
+  "description": "MERN Stack Application for The First Steps School",
+  "engines": {
+    "node": "20.x"
+  },
+  "scripts": {
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "server": "cd server && npm start",
+    "client": "cd client && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
