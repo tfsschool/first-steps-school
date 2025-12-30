@@ -29,34 +29,60 @@ const AdminDashboard = () => {
     return false;
   }, [navigate]);
 
-  const fetchStats = useCallback(async () => {
+  const fetchJobs = useCallback(async () => {
     try {
-      const [jobsRes, appsRes, candidatesRes] = await Promise.all([
-        axios.get(API_ENDPOINTS.ADMIN.JOBS, config),
-        axios.get(API_ENDPOINTS.ADMIN.APPLICATIONS, config),
-        axios.get(API_ENDPOINTS.ADMIN.REGISTERED_EMAILS, config).catch(() => ({ data: [] })) // Don't fail if endpoint doesn't exist
-      ]);
-
-      const jobs = jobsRes.data;
-      const applications = appsRes.data;
-      const candidates = candidatesRes.data || [];
-
-      setStats({
+      const res = await axios.get(API_ENDPOINTS.ADMIN.JOBS, config);
+      const jobs = res.data;
+      setStats(prev => ({
+        ...prev,
         totalJobs: jobs.length,
-        openJobs: jobs.filter(j => j.status === 'Open').length,
-        totalApplications: applications.length,
-        pendingApplications: applications.filter(a => a.status === 'Pending').length,
-        totalRegisteredEmails: candidates.length,
-        verifiedEmails: candidates.filter(c => c.emailVerified).length
-      });
+        openJobs: jobs.filter(j => j.status === 'Open').length
+      }));
     } catch (err) {
       if (!handleAuthError(err)) {
-        console.error('Error loading stats:', err);
+        console.error('Error loading jobs:', err);
       }
-    } finally {
-      setLoading(false);
     }
   }, [config, handleAuthError]);
+
+  const fetchApplications = useCallback(async () => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.ADMIN.APPLICATIONS, config);
+      const applications = res.data;
+      setStats(prev => ({
+        ...prev,
+        totalApplications: applications.length,
+        pendingApplications: applications.filter(a => a.status === 'Pending').length
+      }));
+    } catch (err) {
+      if (!handleAuthError(err)) {
+        console.error('Error loading applications:', err);
+      }
+    }
+  }, [config, handleAuthError]);
+
+  const fetchCandidates = useCallback(async () => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.ADMIN.REGISTERED_EMAILS, config);
+      const candidates = res.data || [];
+      setStats(prev => ({
+        ...prev,
+        totalRegisteredEmails: candidates.length,
+        verifiedEmails: candidates.filter(c => c.emailVerified).length
+      }));
+    } catch (err) {
+      if (!handleAuthError(err)) {
+        console.error('Error loading candidates:', err);
+      }
+    }
+  }, [config, handleAuthError]);
+
+  const fetchStats = useCallback(async () => {
+    setLoading(false);
+    fetchJobs();
+    fetchApplications();
+    fetchCandidates();
+  }, [fetchJobs, fetchApplications, fetchCandidates]);
 
   useEffect(() => {
     fetchStats();

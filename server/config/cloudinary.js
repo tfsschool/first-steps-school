@@ -8,11 +8,6 @@ const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 if (missingVars.length > 0) {
   console.error('❌ Cloudinary Configuration Error:');
   console.error(`Missing required environment variables: ${missingVars.join(', ')}`);
-  console.error('\n📝 Please add the following to your .env file:');
-  console.error('CLOUDINARY_CLOUD_NAME=your_cloud_name');
-  console.error('CLOUDINARY_API_KEY=your_api_key');
-  console.error('CLOUDINARY_API_SECRET=your_api_secret');
-  console.error('\n🔗 Get your credentials from: https://cloudinary.com/console');
   throw new Error(`Missing Cloudinary environment variables: ${missingVars.join(', ')}`);
 }
 
@@ -26,256 +21,112 @@ cloudinary.config({
 console.log('✅ Cloudinary configured successfully');
 
 /**
- * Get preview URL (optimized for display)
- * - Images: Optimized with quality auto, format auto, max width 800px
- * - PDFs: Original URL (no transformation for PDFs)
+ * Helper to determine if a file is a PDF based on format or filename
+ */
+const isPdf = (format, publicId) => {
+  if (format === 'pdf') return true;
+  if (typeof publicId === 'string' && publicId.toLowerCase().endsWith('.pdf')) return true;
+  return false;
+};
+
+/**
+ * Get preview URL (Optimized for display)
+ * - PDFs: Returns the direct PDF URL (allows multi-page scrolling in browser)
+ * - Images: Returns an optimized version (800px width)
+ * - Docs: Returns the raw URL
  */
 const getPreviewUrl = (publicId, resourceType, format) => {
-  if (format === 'pdf') {
-    // Return a direct PDF URL (no image transformations).
-    // Ensure public_id does not include .pdf to avoid ".pdf.pdf" when format is set.
-    const options = {
-      resource_type: resourceType || 'auto',
-      secure: true,
-      format: 'pdf'
-    };
-
-    let pdfPublicId = String(publicId || '').trim();
-    const lowerPublicId = pdfPublicId.toLowerCase();
-    if (lowerPublicId.endsWith('.pdf')) {
-      pdfPublicId = pdfPublicId.slice(0, -4);
+  // CLEANUP: Ensure public_id doesn't already have extension to avoid double extension (e.g., file.pdf.pdf)
+  let cleanPublicId = String(publicId || '').trim();
+  
+  // 1. Handle PDF specific logic (Crucial for multi-page viewing)
+  if (isPdf(format, cleanPublicId)) {
+    // If public_id has .pdf, strip it because we will enforce format: 'pdf'
+    if (cleanPublicId.toLowerCase().endsWith('.pdf')) {
+      cleanPublicId = cleanPublicId.slice(0, -4);
     }
-
-    return cloudinary.url(pdfPublicId, options);
+    
+    return cloudinary.url(cleanPublicId, {
+      resource_type: resourceType === 'raw' ? 'raw' : 'image', // PDFs usually 'image', but handle 'raw' legacy
+      secure: true,
+      format: 'pdf' // Force .pdf extension so browser treats it as a document
+      // NO transformations (quality/crop) here - we want the full PDF
+    });
   }
 
+  // 2. Handle Images (Optimize them)
   if (resourceType === 'image') {
-    // Optimized preview for images: high quality but optimized size
-    return cloudinary.url(publicId, {
+    return cloudinary.url(cleanPublicId, {
       resource_type: 'image',
       transformation: [
         { quality: 'auto:good', fetch_format: 'auto', width: 800, crop: 'limit' }
       ],
       secure: true
     });
-  } else {
-    // For PDFs and other files, return original (no preview transformation)
-    // For PDFs, also force format=pdf and ensure public_id does not include .pdf to avoid ".pdf.pdf".
-    const options = {
-      resource_type: resourceType || 'auto',
-      secure: true
-    };
-
-    if (format === 'pdf') {
-      let pdfPublicId = String(publicId || '').trim();
-      const lowerPublicId = pdfPublicId.toLowerCase();
-      if (lowerPublicId.endsWith('.pdf')) {
-        pdfPublicId = pdfPublicId.slice(0, -4);
-      }
-      options.format = 'pdf';
-      return cloudinary.url(pdfPublicId, options);
-    }
-
-    return cloudinary.url(publicId, options);
   }
+
+  // 3. Handle Raw Files (Word docs, etc.)
+  // Don't add extension for raw files if not needed, they usually rely on the stored filename
+  return cloudinary.url(cleanPublicId, {
+    resource_type: 'raw',
+    secure: true
+  });
 };
 
 /**
- * Get download URL (original file with attachment flag)
- * - Forces download with correct file extension
- * - Uses fl_attachment for proper file download
+ * Get download URL (Forces browser to download file)
  */
 const getDownloadUrl = (publicId, resourceType, format, originalFilename) => {
-  const options = {
+  let cleanPublicId = String(publicId || '').trim();
+
+  // 1. Handle PDFs
+  if (isPdf(format, cleanPublicId) || (originalFilename && originalFilename.toLowerCase().endsWith('.pdf'))) {
+    if (cleanPublicId.toLowerCase().endsWith('.pdf')) {
+      cleanPublicId = cleanPublicId.slice(0, -4);
+    }
+    return cloudinary.url(cleanPublicId, {
+      resource_type: resourceType === 'raw' ? 'raw' : 'image',
+      secure: true,
+      format: 'pdf',
+      flags: ['attachment'] // Force download
+    });
+  }
+
+  // 2. Handle Word Docs / Others
+  const lowerFormat = String(format || '').toLowerCase();
+  if (resourceType === 'raw' && lowerFormat) {
+     // For raw files, we generally just return the URL with attachment flag
+     // If we try to force format on raw, Cloudinary might error or append incorrectly
+     return cloudinary.url(cleanPublicId, {
+       resource_type: 'raw',
+       secure: true,
+       flags: ['attachment']
+     });
+  }
+
+  // 3. Handle Images
+  return cloudinary.url(cleanPublicId, {
     resource_type: resourceType || 'auto',
     secure: true,
-    flags: ['attachment'] // Forces download instead of inline display
-  };
-
-  // For PDFs, ensure correct extension
-  if (format === 'pdf' || (originalFilename && originalFilename.toLowerCase().endsWith('.pdf'))) {
-    // IMPORTANT:
-    // When using cloudinary.url(..., { format: 'pdf' }), the SDK will append ".pdf".
-    // So the public_id MUST NOT already include ".pdf", otherwise the URL becomes ".pdf.pdf".
-    let pdfPublicId = String(publicId || '').trim();
-    const lowerPublicId = pdfPublicId.toLowerCase();
-    if (lowerPublicId.endsWith('.pdf')) {
-      pdfPublicId = pdfPublicId.slice(0, -4);
-    }
-
-    // Use format: 'pdf' to ensure proper content-type header and correct extension
-    options.format = 'pdf';
-    return cloudinary.url(pdfPublicId, options);
-  }
-
-  // For other raw files (doc/docx, etc), keep their format if known
-  if (resourceType === 'raw' && format) {
-    // Similar to PDFs: if we set options.format, Cloudinary will append the extension,
-    // so avoid duplicating it in public_id.
-    let rawPublicId = String(publicId || '').trim();
-    const lowerPublicId = rawPublicId.toLowerCase();
-    const lowerFormat = String(format).toLowerCase();
-    if (lowerFormat && lowerPublicId.endsWith(`.${lowerFormat}`)) {
-      rawPublicId = rawPublicId.slice(0, -(lowerFormat.length + 1));
-    }
-    options.format = lowerFormat;
-    return cloudinary.url(rawPublicId, options);
-  }
-
-  // For images, return original format
-  if (format && resourceType === 'image') {
-    options.format = format;
-  }
-
-  return cloudinary.url(publicId, options);
+    flags: ['attachment']
+  });
 };
 
 /**
- * Helper function to normalize file data (handles both old string URLs and new object format)
- * Returns object with preview_url and download_url
- */
-const normalizeFileData = (fileData) => {
-  // Handle null, undefined, or empty values
-  if (!fileData) {
-    return null;
-  }
-
-  const stripAttachmentFlagFromCloudinaryUrl = (url) => {
-    if (typeof url !== 'string') return url;
-    if (!url.includes('cloudinary.com')) return url;
-    // Normalize URLs that were accidentally saved with download/attachment flag.
-    // Example: .../upload/fl_attachment/v1/... -> .../upload/v1/...
-    return url
-      .replace('/upload/fl_attachment/', '/upload/')
-      .replace('/upload/fl_attachment:', '/upload/');
-  };
-
-  const addAttachmentFlagToCloudinaryUrl = (url) => {
-    if (typeof url !== 'string') return url;
-    if (!url.includes('cloudinary.com')) return url;
-    if (url.includes('/upload/fl_attachment/')) return url;
-    // Insert fl_attachment right after /upload/ to force download.
-    // Keep the existing resource type (image/raw/video), version, and filename intact.
-    return url.replace('/upload/', '/upload/fl_attachment/');
-  };
-
-  // If it's already an object with the new format, return it
-  if (typeof fileData === 'object' && fileData.public_id) {
-    const secureUrlClean = stripAttachmentFlagFromCloudinaryUrl(fileData.secure_url);
-    const previewUrlClean = stripAttachmentFlagFromCloudinaryUrl(fileData.preview_url || fileData.secure_url);
-    const downloadUrlWithAttachment = addAttachmentFlagToCloudinaryUrl(
-      stripAttachmentFlagFromCloudinaryUrl(fileData.download_url || fileData.secure_url || previewUrlClean)
-    );
-    return {
-      preview_url: previewUrlClean,
-      download_url: downloadUrlWithAttachment,
-      secure_url: secureUrlClean,
-      public_id: fileData.public_id,
-      format: fileData.format,
-      resource_type: fileData.resource_type
-    };
-  }
-  
-  // If it's a string URL (old format), try to extract public_id and generate URLs
-  if (typeof fileData === 'string' && fileData.includes('cloudinary.com')) {
-    try {
-      const cleanUrl = stripAttachmentFlagFromCloudinaryUrl(fileData);
-
-      // Most robust approach:
-      // - Use the stored Cloudinary secure URL directly for viewing (works for image/raw PDFs and docs)
-      // - Derive the download URL by adding fl_attachment to the *same* URL
-      // This avoids resource_type/format/public_id mismatches which cause 404s.
-      return {
-        preview_url: cleanUrl,
-        download_url: addAttachmentFlagToCloudinaryUrl(cleanUrl),
-        secure_url: cleanUrl
-      };
-
-      // Extract public_id from Cloudinary URL
-      const urlParts = cleanUrl.split('/');
-      const uploadIndex = urlParts.findIndex(part => part === 'upload');
-      if (uploadIndex !== -1 && uploadIndex < urlParts.length - 1) {
-        // Determine resource type from URL path (preferred, avoids 404 from wrong resource type)
-        // Typical Cloudinary URLs: /<cloud_name>/<resource_type>/upload/...
-        // e.g. https://res.cloudinary.com/<cloud>/image/upload/... or /raw/upload/...
-        let resourceType = 'auto';
-        const resourceTypeCandidate = urlParts[uploadIndex - 1];
-        if (resourceTypeCandidate === 'image' || resourceTypeCandidate === 'raw' || resourceTypeCandidate === 'video') {
-          resourceType = resourceTypeCandidate;
-        }
-
-        // Find the folder and filename
-        const versionIndex = urlParts.findIndex(part => part.match(/^v\d+$/));
-        const startIndex = versionIndex !== -1 ? versionIndex + 1 : uploadIndex + 2;
-        const publicIdParts = urlParts.slice(startIndex);
-        // Build public_id from URL path.
-        // For PDFs, we normalize to public_id WITHOUT the .pdf extension to avoid ".pdf.pdf" in generated URLs.
-        const publicIdWithExt = publicIdParts.join('/');
-        
-        // Determine format from URL
-        let format = null;
-        
-        // Extract format from URL if present (check both URL path and query params)
-        const formatMatch = cleanUrl.match(/\.(jpg|jpeg|png|gif|pdf|doc|docx)(\?|$)/i);
-        if (formatMatch) {
-          format = formatMatch[1].toLowerCase();
-        }
-
-        let finalPublicId = publicIdWithExt;
-        // Only strip the extension for PDFs.
-        // For doc/docx we keep the extension in public_id to avoid serving/downloading as the wrong type.
-        if (format === 'pdf' && String(finalPublicId).toLowerCase().endsWith(`.${format}`)) {
-          finalPublicId = finalPublicId.slice(0, -(format.length + 1));
-        }
-        
-        return {
-          preview_url: getPreviewUrl(finalPublicId, resourceType, format),
-          download_url: getDownloadUrl(finalPublicId, resourceType, format, null),
-          secure_url: cleanUrl,
-          public_id: finalPublicId,
-          format: format,
-          resource_type: resourceType
-        };
-      }
-    } catch (error) {
-      console.error('Error parsing Cloudinary URL:', error);
-    }
-    
-    // Fallback: return as-is
-    const cleanUrl = stripAttachmentFlagFromCloudinaryUrl(fileData);
-    return {
-      preview_url: cleanUrl,
-      download_url: cleanUrl,
-      secure_url: cleanUrl
-    };
-  }
-  
-  // If it's a string but not a Cloudinary URL, return as-is
-  if (typeof fileData === 'string') {
-    return {
-      preview_url: fileData,
-      download_url: fileData,
-      secure_url: fileData
-    };
-  }
-  
-  return null;
-};
-
-/**
- * Upload file to Cloudinary with resource_type: "auto"
- * Returns object with public_id, secure_url, preview_url, download_url, format, resource_type
+ * Upload file to Cloudinary
+ * FIX: Uploads PDFs as 'auto' (image) instead of 'raw' to allow browser viewing
  */
 const uploadFile = async (buffer, folder, originalFilename) => {
   return new Promise((resolve, reject) => {
     const name = String(originalFilename || '').trim();
     const lowerName = name.toLowerCase();
     const ext = lowerName.includes('.') ? lowerName.split('.').pop() : '';
-    const isDocType = ext === 'pdf' || ext === 'doc' || ext === 'docx';
-    const forcedResourceType = isDocType ? 'raw' : 'auto';
+    
+    // FIX: Only force 'raw' for Word documents. 
+    // PDFs should be 'auto' (which becomes 'image' type) to allow proper viewing/thumbnails.
+    const isWordDoc = ext === 'doc' || ext === 'docx';
+    const forcedResourceType = isWordDoc ? 'raw' : 'auto';
 
-    // Cloudinary sometimes stores raw uploads with format = N/A when streaming buffers.
-    // Passing 'format' explicitly (for pdf/doc/docx) ensures Cloudinary records the correct format.
     const uploadOptions = {
       folder: folder,
       resource_type: forcedResourceType,
@@ -285,7 +136,9 @@ const uploadFile = async (buffer, folder, originalFilename) => {
       unique_filename: true,
       overwrite: false
     };
-    if (isDocType) {
+
+    // Explicitly set format for non-raw files to ensure correct extension
+    if (!isWordDoc && ext) {
       uploadOptions.format = ext;
     }
 
@@ -295,17 +148,15 @@ const uploadFile = async (buffer, folder, originalFilename) => {
         if (error) {
           reject(error);
         } else {
-          // Normalize stored public_id to NOT include extension.
-          let publicId = result.public_id;
           const fileInfo = {
-            public_id: publicId,
+            public_id: result.public_id,
             secure_url: result.secure_url,
             format: result.format,
             resource_type: result.resource_type,
             original_filename: originalFilename || result.original_filename,
-            // Generate preview and download URLs
-            preview_url: getPreviewUrl(publicId, result.resource_type, result.format),
-            download_url: getDownloadUrl(publicId, result.resource_type, result.format, originalFilename)
+            // Generate preview and download URLs immediately
+            preview_url: getPreviewUrl(result.public_id, result.resource_type, result.format || ext),
+            download_url: getDownloadUrl(result.public_id, result.resource_type, result.format || ext, originalFilename)
           };
           resolve(fileInfo);
         }
@@ -315,17 +166,53 @@ const uploadFile = async (buffer, folder, originalFilename) => {
   });
 };
 
-// Legacy storage configurations (kept for backward compatibility if needed)
+/**
+ * Normalize file data from DB to ensure it has preview/download URLs
+ */
+const normalizeFileData = (fileData) => {
+  if (!fileData) return null;
+
+  // 1. Handle New Object Format (already has data)
+  if (typeof fileData === 'object' && fileData.public_id) {
+    // Regenerate URLs to ensure they use the latest logic (e.g. fixing broken PDF links)
+    const format = fileData.format || (fileData.secure_url.endsWith('.pdf') ? 'pdf' : undefined);
+    
+    return {
+      ...fileData,
+      preview_url: getPreviewUrl(fileData.public_id, fileData.resource_type, format),
+      download_url: getDownloadUrl(fileData.public_id, fileData.resource_type, format, fileData.original_filename)
+    };
+  }
+  
+  // 2. Handle Old String URLs (Legacy support)
+  if (typeof fileData === 'string') {
+    // Strip existing flags if present
+    const cleanUrl = fileData
+      .replace('/upload/fl_attachment/', '/upload/')
+      .replace('/upload/fl_attachment:', '/upload/');
+
+    // Basic heuristic for download URL
+    const downloadUrl = cleanUrl.includes('/upload/') 
+      ? cleanUrl.replace('/upload/', '/upload/fl_attachment/') 
+      : cleanUrl;
+
+    return {
+      preview_url: cleanUrl,
+      download_url: downloadUrl,
+      secure_url: cleanUrl
+    };
+  }
+  
+  return null;
+};
+
+// Legacy storage configs (kept for compatibility)
 const cvStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'first-steps-school/cvs',
     allowed_formats: ['pdf', 'doc', 'docx'],
-    resource_type: 'auto',
-    type: 'upload',
-    access_mode: 'public',
-    use_filename: true,
-    unique_filename: true
+    resource_type: 'auto'
   }
 });
 
@@ -334,11 +221,7 @@ const imageStorage = new CloudinaryStorage({
   params: {
     folder: 'first-steps-school/profile-pictures',
     allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    resource_type: 'auto',
-    type: 'upload',
-    access_mode: 'public',
-    use_filename: true,
-    unique_filename: true
+    resource_type: 'auto'
   }
 });
 

@@ -13,6 +13,8 @@ const Candidates = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [jobFilter, setJobFilter] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const token = localStorage.getItem('token');
   const config = useMemo(() => ({ headers: { 'x-auth-token': token } }), [token]);
@@ -120,6 +122,15 @@ const Candidates = () => {
     return matchesSearch && matchesStatus && matchesJob;
   });
 
+  const totalPages = Math.ceil(filteredApplications.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedApplications = filteredApplications.slice(startIndex, endIndex);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, jobFilter]);
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'Selected': return 'bg-green-100 text-green-800';
@@ -196,14 +207,14 @@ const Candidates = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredApplications.length === 0 ? (
+              {paginatedApplications.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                     No applications found. Try adjusting your search or filters.
                   </td>
                 </tr>
               ) : (
-                filteredApplications.map(app => (
+                paginatedApplications.map(app => (
                   <tr key={app._id} className="hover:bg-gray-50">
                     <td 
                       className="px-6 py-4 font-medium text-gray-900 cursor-pointer hover:text-theme-blue"
@@ -256,6 +267,48 @@ const Candidates = () => {
             </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {filteredApplications.length > 0 && (
+            <div className="mt-4 flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200">
+              <div className="text-sm text-gray-700">
+                Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
+                <span className="font-medium">{Math.min(endIndex, filteredApplications.length)}</span> of{' '}
+                <span className="font-medium">{filteredApplications.length}</span> results
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        currentPage === page
+                          ? 'bg-theme-blue text-white'
+                          : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Candidate Details Modal */}

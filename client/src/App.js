@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './context/AuthContext';
@@ -11,14 +11,15 @@ import Apply from './pages/Apply';
 import CreateProfile from './pages/CreateProfile';
 import VerifyEmail from './pages/VerifyEmail';
 import LoginVerify from './pages/LoginVerify';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
-import JobManagement from './pages/JobManagement';
-import Candidates from './pages/Candidates';
-import RegisteredEmails from './pages/RegisteredEmails';
 import ThankYou from './pages/ThankYou';
 import PrivateRoute from './components/PrivateRoute';
 import ProtectedRoute from './components/ProtectedRoute';
+
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const JobManagement = lazy(() => import('./pages/JobManagement'));
+const Candidates = lazy(() => import('./pages/Candidates'));
+const RegisteredEmails = lazy(() => import('./pages/RegisteredEmails'));
 
 function AppContent() {
   const location = useLocation();
@@ -27,6 +28,14 @@ function AppContent() {
   return (
     <>
       {!hideNavbar && <Header />}
+      <Suspense fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-theme-blue"></div>
+            <p className="mt-4 text-gray-600">Loading...</p>
+          </div>
+        </div>
+      }>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/careers" element={<Careers />} />
@@ -68,6 +77,7 @@ function AppContent() {
             </PrivateRoute>
         } />
       </Routes>
+      </Suspense>
       {!hideNavbar && <Footer />}
     </>
   );
