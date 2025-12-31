@@ -38,11 +38,10 @@ app.use(xss());
 
 // --- ROBUST CORS CONFIGURATION ---
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'http://localhost:3000',
   'https://www.tfs.school',
   'https://tfs.school',
-  'https://first-steps-school-frontend.vercel.app'
+  'https://first-steps-school.vercel.app', // Fallback for testing
+  process.env.FRONTEND_URL
 ].filter(Boolean);
 
 app.use(cors({
@@ -102,6 +101,16 @@ app.use('/api/profile', require('./routes/profileRoutes'));
 app.use('/api/candidate/login', authLimiter);
 app.use('/api/candidate/register', authLimiter);
 app.use('/api/candidate', require('./routes/candidateRoutes'));
+
+// --- GLOBAL ERROR HANDLING MIDDLEWARE ---
+// This must be at the very end, before app.listen/module.exports
+app.use((err, req, res, next) => {
+  console.error("🔥 SERVER CRASH:", err.stack); // This will show in Vercel logs
+  res.status(500).json({ 
+    message: "Internal Server Error", 
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+  });
+});
 
 // --- SERVER STARTUP (VERCEL COMPATIBLE) ---
 const PORT = process.env.PORT || 5000;

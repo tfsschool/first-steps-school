@@ -16,6 +16,7 @@ const connectDB = async () => {
         console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err.message);
+        console.error('❌ MongoDB Connection Stack:', err.stack);
         console.log('\n📋 Troubleshooting Steps:');
         console.log('1. Make sure MongoDB is installed and running');
         console.log('2. Check your .env file has the correct MONGO_URI');

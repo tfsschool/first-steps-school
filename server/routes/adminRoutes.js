@@ -140,11 +140,50 @@ router.get('/candidates', adminAuth, async (req, res) => {
     }
 });
 
-// 5a. Get All Applications (Protected) - for admin to see all applications
+// 5a. Get All Applications (Protected) - for admin to see all applications with pagination and filtering
 router.get('/applications', adminAuth, async (req, res) => {
     try {
         const { normalizeFileData } = require('../config/cloudinary');
-        const apps = await Application.find().sort({ appliedAt: -1 })
+        
+        // Extract query parameters
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search || '';
+        const status = req.query.status || '';
+        const jobId = req.query.jobId || '';
+        
+        // Build query object
+        const query = {};
+        
+        // Search filter (name or email)
+        if (search) {
+            query.$or = [
+                { fullName: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } }
+            ];
+        }
+        
+        // Status filter
+        if (status && status !== 'All') {
+            query.status = status;
+        }
+        
+        // Job filter
+        if (jobId && jobId !== 'All' && mongoose.Types.ObjectId.isValid(jobId)) {
+            query.jobId = new mongoose.Types.ObjectId(jobId);
+        }
+        
+        // Calculate pagination
+        const skip = (page - 1) * limit;
+        
+        // Get total count for pagination
+        const totalApplications = await Application.countDocuments(query);
+        
+        // Fetch applications with pagination
+        const apps = await Application.find(query)
+            .sort({ appliedAt: -1 })
+            .skip(skip)
+            .limit(limit)
             .populate('jobId', 'title')
             .populate('profileId');
         
@@ -160,7 +199,15 @@ router.get('/applications', adminAuth, async (req, res) => {
             return appData;
         });
         
-        res.json(normalizedApps);
+        // Calculate total pages
+        const totalPages = Math.ceil(totalApplications / limit);
+        
+        res.json({
+            applications: normalizedApps,
+            totalApplications,
+            totalPages,
+            currentPage: page
+        });
     } catch (err) {
         console.error('Error fetching all applications:', err);
         res.status(500).json({ msg: 'Server Error', error: err.message });

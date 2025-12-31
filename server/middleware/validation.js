@@ -45,13 +45,36 @@ const validateApplication = [
  */
 const validateProfile = [
   body('profileData')
-    .custom((value) => {
-      try {
-        const parsed = JSON.parse(value);
-        return typeof parsed === 'object';
-      } catch (e) {
-        throw new Error('Profile data must be valid JSON');
+    .custom((value, { req }) => {
+      let parsed;
+      
+      // Handle both string and object formats
+      if (typeof value === 'string') {
+        try {
+          parsed = JSON.parse(value);
+        } catch (e) {
+          throw new Error('Profile data must be valid JSON');
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        parsed = value;
+      } else {
+        throw new Error('Profile data must be a valid JSON object or string');
       }
+      
+      // Ensure it's an object
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+        throw new Error('Profile data must be a valid object');
+      }
+      
+      // Require fullName
+      if (!parsed.fullName || typeof parsed.fullName !== 'string' || parsed.fullName.trim().length === 0) {
+        throw new Error('Full name is required');
+      }
+      
+      // Store parsed data in req.body for use in controllers
+      req.body.parsedProfileData = parsed;
+      
+      return true;
     }),
   
   handleValidationErrors

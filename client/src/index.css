@@ -24,6 +24,10 @@
   .link-nav {
     @apply text-theme-dark/80 hover:text-theme-green transition-colors;
   }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden;
+  }
 }
 
 /* Hide scrollbars but keep functionality */

@@ -30,6 +30,13 @@ module.exports = {
         sans: ['ui-sans-serif', 'system-ui', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
         serif: ['ui-serif', 'Georgia', 'Times New Roman', 'serif'],
       },
+      borderRadius: {
+        none: '0',
+        sm: '0.25rem',
+        DEFAULT: '0.5rem',  // Standard cards
+        lg: '1rem',         // Larger cards
+        xl: '1.5rem',
+      },
       boxShadow: {
         soft: '0 10px 30px -18px rgba(0,0,0,0.35)',
         lift: '0 18px 50px -30px rgba(0,0,0,0.55)',

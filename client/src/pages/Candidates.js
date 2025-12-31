@@ -12,9 +12,12 @@ const Candidates = () => {
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [jobFilter, setJobFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalApplications, setTotalApplications] = useState(0);
   const itemsPerPage = 10;
 
   const token = localStorage.getItem('token');
@@ -32,8 +35,25 @@ const Candidates = () => {
 
   const fetchApplications = useCallback(async () => {
     try {
-      const res = await axios.get(API_ENDPOINTS.ADMIN.APPLICATIONS, config);
-      setApplications(res.data);
+      setLoading(true);
+      // Build query parameters
+      const params = new URLSearchParams();
+      params.append('page', currentPage.toString());
+      params.append('limit', itemsPerPage.toString());
+      if (debouncedSearchTerm) {
+        params.append('search', debouncedSearchTerm);
+      }
+      if (statusFilter && statusFilter !== 'All') {
+        params.append('status', statusFilter);
+      }
+      if (jobFilter && jobFilter !== 'All') {
+        params.append('jobId', jobFilter);
+      }
+      
+      const res = await axios.get(`${API_ENDPOINTS.ADMIN.APPLICATIONS}?${params.toString()}`, config);
+      setApplications(res.data.applications || []);
+      setTotalPages(res.data.totalPages || 1);
+      setTotalApplications(res.data.totalApplications || 0);
     } catch (err) {
       if (!handleAuthError(err)) {
         showError('Error loading applications: ' + (err.response?.data?.msg || err.message));
@@ -41,7 +61,16 @@ const Candidates = () => {
     } finally {
       setLoading(false);
     }
-  }, [config, handleAuthError]);
+  }, [config, handleAuthError, currentPage, debouncedSearchTerm, statusFilter, jobFilter, itemsPerPage]);
+
+  // Debounce search term to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   useEffect(() => {
     fetchApplications();
@@ -105,32 +134,27 @@ const Candidates = () => {
     setShowModal(true);
   };
 
-  // Get unique jobs for filter
-  const uniqueJobs = useMemo(() => {
-    const jobs = applications.map(app => app.jobId).filter(Boolean);
-    return [...new Set(jobs.map(job => job._id))].map(id => 
-      jobs.find(j => j._id === id)
-    );
-  }, [applications]);
+  // Fetch unique jobs for filter dropdown (separate API call or use existing data)
+  const [uniqueJobs, setUniqueJobs] = useState([]);
+  
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const res = await axios.get(API_ENDPOINTS.ADMIN.JOBS, config);
+        setUniqueJobs(res.data || []);
+      } catch (err) {
+        if (!handleAuthError(err)) {
+          console.error('Error fetching jobs:', err);
+        }
+      }
+    };
+    fetchJobs();
+  }, [config, handleAuthError]);
 
-  const filteredApplications = applications.filter(app => {
-    const matchesSearch = 
-      app.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (app.jobId?.title && app.jobId.title.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = statusFilter === 'All' || app.status === statusFilter;
-    const matchesJob = jobFilter === 'All' || app.jobId?._id === jobFilter;
-    return matchesSearch && matchesStatus && matchesJob;
-  });
-
-  const totalPages = Math.ceil(filteredApplications.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedApplications = filteredApplications.slice(startIndex, endIndex);
-
+  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, jobFilter]);
+  }, [debouncedSearchTerm, statusFilter, jobFilter]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -208,14 +232,14 @@ const Candidates = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {paginatedApplications.length === 0 ? (
+              {applications.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                     No applications found. Try adjusting your search or filters.
                   </td>
                 </tr>
               ) : (
-                paginatedApplications.map(app => (
+                applications.map(app => (
                   <tr key={app._id} className="hover:bg-gray-50">
                     <td 
                       className="px-6 py-4 font-medium text-gray-900 cursor-pointer hover:text-theme-blue"
@@ -270,12 +294,12 @@ const Candidates = () => {
           </div>
 
           {/* Pagination Controls */}
-          {filteredApplications.length > 0 && (
+          {totalApplications > 0 && (
             <div className="mt-4 flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200">
               <div className="text-sm text-gray-700">
-                Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
-                <span className="font-medium">{Math.min(endIndex, filteredApplications.length)}</span> of{' '}
-                <span className="font-medium">{filteredApplications.length}</span> results
+                Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
+                <span className="font-medium">{Math.min(currentPage * itemsPerPage, totalApplications)}</span> of{' '}
+                <span className="font-medium">{totalApplications}</span> results
               </div>
               <div className="flex gap-2">
                 <button
