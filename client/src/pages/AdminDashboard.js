@@ -53,9 +53,9 @@ const AdminDashboard = () => {
   const fetchApplications = useCallback(async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.ADMIN.APPLICATIONS, config);
-      const applications = Array.isArray(res.data) ? res.data : [];
-      if (!Array.isArray(res.data)) {
-        console.warn('Warning: fetchApplications received non-array data:', res.data);
+      const applications = Array.isArray(res.data.applications) ? res.data.applications : [];
+      if (!Array.isArray(res.data.applications)) {
+        console.warn('Warning: fetchApplications received non-array data:', res.data.applications);
       }
       const totalApplications = applications.length;
       const pendingApplications = applications.filter(a => a.status === 'Pending').length;
