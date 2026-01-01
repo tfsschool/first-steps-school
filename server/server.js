@@ -8,11 +8,15 @@ const xss = require('xss-clean');
 const compression = require('compression');
 const connectDB = require('./config/db');
 const { globalLimiter, authLimiter, applicationLimiter } = require('./middleware/rateLimiter');
+const { checkDatabaseConnection } = require('./middleware/dbCheck');
 
 const app = express();
 app.set('trust proxy', 1);
-// Connect Database
-connectDB();
+
+// Connect Database (await for Vercel cold starts)
+(async () => {
+  await connectDB();
+})();
 
 // Security Middleware
 app.use(helmet());
@@ -86,6 +90,10 @@ app.use(cookieParser());
 
 // --- RATE LIMITERS ---
 app.use('/api', globalLimiter);
+
+// --- DATABASE HEALTH CHECK ---
+// Apply to all API routes to gracefully handle DB unavailability
+app.use('/api', checkDatabaseConnection);
 
 // --- ROUTES ---
 

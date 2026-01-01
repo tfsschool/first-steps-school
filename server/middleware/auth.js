@@ -18,10 +18,31 @@ const authenticate = async (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (jwtErr) {
+      if (jwtErr.name === 'JsonWebTokenError' || jwtErr.name === 'TokenExpiredError') {
+        return res.status(401).json({ 
+          msg: 'Session expired. Please login again.',
+          authenticated: false,
+          expired: true 
+        });
+      }
+      throw jwtErr;
+    }
     
-    // Check if candidate exists and is verified
-    const candidate = await Candidate.findById(decoded.candidateId);
+    // Check if candidate exists and is verified (use lean() for performance)
+    let candidate;
+    try {
+      candidate = await Candidate.findById(decoded.candidateId).lean();
+    } catch (dbErr) {
+      console.error('Database error in auth middleware:', dbErr);
+      return res.status(503).json({ 
+        msg: 'Service temporarily unavailable. Please try again.',
+        authenticated: false 
+      });
+    }
     
     if (!candidate) {
       return res.status(401).json({ 
@@ -47,14 +68,6 @@ const authenticate = async (req, res, next) => {
 
     next();
   } catch (err) {
-    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
-      return res.status(401).json({ 
-        msg: 'Session expired. Please login again.',
-        authenticated: false,
-        expired: true 
-      });
-    }
-    
     console.error('Auth middleware error:', err);
     return res.status(500).json({ 
       msg: 'Authentication error',
@@ -73,21 +86,25 @@ const optionalAuth = async (req, res, next) => {
     }
 
     if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const candidate = await Candidate.findById(decoded.candidateId);
-      
-      if (candidate && candidate.emailVerified) {
-        req.candidate = {
-          id: candidate._id,
-          email: candidate.email,
-          emailVerified: candidate.emailVerified
-        };
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const candidate = await Candidate.findById(decoded.candidateId).lean();
+        
+        if (candidate && candidate.emailVerified) {
+          req.candidate = {
+            id: candidate._id,
+            email: candidate.email,
+            emailVerified: candidate.emailVerified
+          };
+        }
+      } catch (err) {
+        // Continue without authentication if token is invalid or DB error
       }
     }
 
     next();
   } catch (err) {
-    // Continue without authentication if token is invalid
+    // Continue without authentication if any error occurs
     next();
   }
 };
