@@ -407,7 +407,7 @@ const Careers = () => {
                           </button>
                           <button
                             onClick={handleRegisteredYes}
-                            className="bg-theme-blue text-white px-6 py-3 rounded-lg font-semibold hover:brightness-95 transition w-full sm:w-auto"
+                            className="bg-theme-blue text-white px-6 py-3 font-semibold hover:brightness-95 transition w-full sm:w-auto"
                           >
                             Already have an account? Log in
                           </button>
@@ -530,7 +530,7 @@ const Careers = () => {
                 <div className="flex flex-col gap-3">
                   <button
                     onClick={handleRegisteredYes}
-                    className="w-full bg-theme-blue text-white px-6 py-3.5 rounded-lg font-semibold shadow-sm hover:brightness-95 transition flex items-center justify-center gap-3"
+                    className="w-full bg-theme-blue text-white px-6 py-3.5 font-semibold shadow-sm hover:brightness-95 transition flex items-center justify-center gap-3"
                   >
                     <span className="h-8 w-8 rounded-full bg-white/15 border border-white/15 grid place-items-center">
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
