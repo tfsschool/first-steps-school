@@ -442,7 +442,12 @@ router.get('/verify-login', async (req, res) => {
   try {
     const { token, email } = req.query;
 
+    console.log('=== LOGIN VERIFICATION DEBUG ===');
+    console.log('Raw token from query:', token);
+    console.log('Raw email from query:', email);
+
     if (!token || !email) {
+      console.log('Missing token or email');
       return res.status(400).json({ msg: 'Invalid login link' });
     }
 
@@ -450,14 +455,35 @@ router.get('/verify-login', async (req, res) => {
     let cleanToken;
     try {
       cleanToken = decodeURIComponent(token).trim();
+      console.log('Decoded token:', cleanToken);
     } catch (e) {
       cleanToken = token.trim();
+      console.log('Token decode failed, using raw:', cleanToken);
+    }
+
+    // Decode email (might be double-encoded)
+    let cleanEmail;
+    try {
+      cleanEmail = decodeURIComponent(email).toLowerCase().trim();
+      console.log('Decoded email:', cleanEmail);
+    } catch (e) {
+      cleanEmail = email.toLowerCase().trim();
+      console.log('Email decode failed, using raw:', cleanEmail);
     }
 
     // First find candidate by email
     const candidate = await Candidate.findOne({ 
-      email: email.toLowerCase().trim()
+      email: cleanEmail
     });
+
+    console.log('Candidate found:', !!candidate);
+    if (candidate) {
+      console.log('Candidate email:', candidate.email);
+      console.log('Stored loginToken:', candidate.loginToken);
+      console.log('Token matches:', candidate.loginToken === cleanToken);
+      console.log('Token expiry:', candidate.loginTokenExpiry);
+      console.log('Email verified:', candidate.emailVerified);
+    }
 
     if (!candidate) {
       return res.status(400).json({ 

@@ -66,9 +66,11 @@ const validateProfile = [
         throw new Error('Profile data must be a valid object');
       }
       
-      // Require fullName
-      if (!parsed.fullName || typeof parsed.fullName !== 'string' || parsed.fullName.trim().length === 0) {
-        throw new Error('Full name is required');
+      // Only validate fullName if it's provided (allow empty for auto-save)
+      if (parsed.fullName !== undefined && parsed.fullName !== null && parsed.fullName !== '') {
+        if (typeof parsed.fullName !== 'string' || parsed.fullName.trim().length === 0) {
+          throw new Error('Full name must be a valid string');
+        }
       }
       
       // Store parsed data in req.body for use in controllers

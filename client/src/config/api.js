@@ -41,7 +41,7 @@ export const API_ENDPOINTS = {
   CANDIDATE: {
     REGISTER: `${BASE_URL}/api/candidate/register`,
     LOGIN: `${BASE_URL}/api/candidate/login`, // Request login link
-    VERIFY_LOGIN: (token, email) => `${BASE_URL}/api/candidate/verify-login?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`,
+    VERIFY_LOGIN: (token, email) => `${BASE_URL}/api/candidate/verify-login?token=${token}&email=${email}`,
     VERIFY_EMAIL: (token, email) => {
       const params = new URLSearchParams({ token: encodeURIComponent(token) });
       if (email) params.append('email', encodeURIComponent(email));
