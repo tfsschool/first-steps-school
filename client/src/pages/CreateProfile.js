@@ -196,7 +196,8 @@ const CreateProfile = () => {
     };
 
     loadProfile();
-  }, [isAuthenticated, userEmail, authLoading, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading]);
 
   // Auto-save function (saves progress without full validation)
   const autoSave = useCallback(async (showNotification = false) => {

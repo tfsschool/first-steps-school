@@ -140,7 +140,6 @@ const Apply = () => {
           const profileRes = await axios.get(API_ENDPOINTS.PROFILE.GET, {
             withCredentials: true
           });
-          console.log('Profile fetched successfully:', profileRes.data);
           const fetchedProfile = profileRes.data;
           setIsProfileLocked(fetchedProfile.isLocked || false);
           const missing = getMissingRequiredFields(fetchedProfile);
@@ -166,7 +165,8 @@ const Apply = () => {
       }
     };
     fetchData();
-  }, [jobId, navigate, isAuthenticated, authLoading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobId, authLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

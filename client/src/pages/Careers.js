@@ -8,7 +8,7 @@ import SEO from '../components/SEO';
 const Careers = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isAuthenticated, userEmail, loading: authLoading, checkAuth, logout } = useAuth();
+  const { isAuthenticated, userEmail, loading: authLoading, authChecked, logout } = useAuth();
   
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +36,7 @@ const Careers = () => {
   const [isUnverified, setIsUnverified] = useState(false);
   const [showNotRegisteredInLogin, setShowNotRegisteredInLogin] = useState(false);
 
+  // Fetch jobs ONCE on mount
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -43,31 +44,31 @@ const Careers = () => {
         setJobs(res.data);
       } catch (err) {
         setError('Error loading job positions. Please try again later.');
-        console.error(err);
       } finally {
         setLoading(false);
       }
     };
     fetchJobs();
 
-    // Check authentication status on mount
-    if (!authLoading) {
-      checkAuth();
-    }
-
     // If coming from verification page, show success message
     if (searchParams.get('verified') === 'true') {
       setSearchParams({});
     }
-  }, [authLoading, checkAuth, searchParams, setSearchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Fetch profile when authenticated
+  // Fetch profile ONLY when authenticated and auth check is complete
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!authChecked || authLoading) {
+        return; // Wait for auth check to complete
+      }
+
       if (!isAuthenticated) {
         setHasProfile(false);
         setProfileName(null);
         setProfileLoading(false);
+        setIsProfileLocked(false);
         return;
       }
 
@@ -87,12 +88,20 @@ const Careers = () => {
           setIsProfileLocked(false);
         }
       } catch (err) {
-        if (err.response?.status === 404 || err.response?.data === null) {
+        // Handle 404 - profile not found (normal)
+        if (err.response?.status === 404) {
           setHasProfile(false);
           setProfileName(null);
           setIsProfileLocked(false);
-        } else {
-          console.error('Unexpected error fetching profile:', err);
+        }
+        // Handle 503 - service unavailable (don't retry)
+        else if (err.response?.status === 503) {
+          setHasProfile(false);
+          setProfileName(null);
+          setIsProfileLocked(false);
+        }
+        // Other errors
+        else {
           setHasProfile(false);
           setProfileName(null);
           setIsProfileLocked(false);
@@ -102,10 +111,9 @@ const Careers = () => {
       }
     };
 
-    if (!authLoading) {
-      fetchProfile();
-    }
-  }, [isAuthenticated, authLoading, userEmail]);
+    fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, authChecked]);
 
   if (loading || authLoading || profileLoading) {
     return (
