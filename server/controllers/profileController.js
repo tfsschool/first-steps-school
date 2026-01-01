@@ -1,5 +1,6 @@
 const UserProfile = require('../models/UserProfile');
 const Candidate = require('../models/Candidate');
+const Application = require('../models/Application');
 const { uploadFile, normalizeFileData } = require('../config/cloudinary');
 
 /**
@@ -25,12 +26,17 @@ const getProfile = async (req, res) => {
     const candidateId = req.candidate.id;
     
     console.log('Fetching profile for candidateId:', candidateId);
+
+    // CHECK IF LOCKED: Has the user applied to any job?
+    const hasApplied = await Application.exists({ candidateId: candidateId });
+    const isLocked = !!hasApplied;
     
     const profile = await UserProfile.findOne({ candidateId: candidateId });
     
     if (!profile) {
       console.log('Profile not found for candidateId:', candidateId);
-      return res.status(404).json({ msg: 'Profile not found' });
+      // Return isLocked even if profile doesn't exist
+      return res.status(404).json({ msg: 'Profile not found', isLocked });
     }
     
     console.log('Profile found:', {
@@ -38,7 +44,8 @@ const getProfile = async (req, res) => {
       fullName: profile.fullName,
       email: profile.email,
       hasProfilePicture: !!profile.profilePicture,
-      hasResumePath: !!profile.resumePath
+      hasResumePath: !!profile.resumePath,
+      isLocked
     });
     
     const profileData = profile.toObject();
@@ -51,7 +58,8 @@ const getProfile = async (req, res) => {
       profileData.resumePath = normalized || profileData.resumePath;
     }
     
-    res.json(profileData);
+    // SEND isLocked STATUS
+    res.json({ ...profileData, isLocked });
   } catch (err) {
     console.error('Error fetching profile:', err);
     res.status(500).json({ msg: 'Server Error', error: err.message });
@@ -63,6 +71,16 @@ const getProfile = async (req, res) => {
  */
 const createOrUpdateProfile = async (req, res) => {
   try {
+    const candidateId = req.candidate.id;
+
+    // SECURITY CHECK: Block update if profile is locked
+    const hasApplied = await Application.exists({ candidateId: candidateId });
+    if (hasApplied) {
+      return res.status(403).json({ 
+        msg: 'Profile is locked. You cannot update your profile after submitting an application.' 
+      });
+    }
+
     const profileData = JSON.parse(req.body.profileData || '{}');
     Object.keys(profileData || {}).forEach((key) => {
       if (profileData[key] === '') {

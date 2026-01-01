@@ -67,6 +67,7 @@ const CreateProfile = () => {
   const [popupMessage, setPopupMessage] = useState('');
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   
   // Use ref to access latest formData in auto-save without causing re-renders
   const formDataRef = useRef(formData);
@@ -102,6 +103,12 @@ const CreateProfile = () => {
           const profileRes = await axios.get(API_ENDPOINTS.PROFILE.GET, {
             withCredentials: true
           });
+          
+          // 1. HANDLE LOCKED STATE
+          if (profileRes.data.isLocked) {
+            setIsLocked(true);
+          }
+
           const existingProfile = profileRes.data;
           
           // Pre-populate form with existing profile data
@@ -151,15 +158,27 @@ const CreateProfile = () => {
               }));
             }
           }
+          
+          // 2. FIX RESUME NAME DISPLAY
           if (existingProfile.resumePath) {
-            const resumeFilename = existingProfile.resumePath && typeof existingProfile.resumePath === 'object' && existingProfile.resumePath !== null
-              ? existingProfile.resumePath.original_filename || 'resume.pdf'
-              : typeof existingProfile.resumePath === 'string'
-                ? existingProfile.resumePath.split('/').pop() || 'resume.pdf'
-                : 'resume.pdf';
+            let resumeName = 'Saved Resume.pdf';
+            
+            // Try to extract a real filename if available
+            if (typeof existingProfile.resumePath === 'object' && existingProfile.resumePath?.original_filename) {
+               resumeName = `${existingProfile.resumePath.original_filename}.${existingProfile.resumePath.format || 'pdf'}`;
+            } else if (typeof existingProfile.resumePath === 'string') {
+               try {
+                  resumeName = decodeURIComponent(existingProfile.resumePath.split('/').pop());
+                  // Optional: remove timestamp prefix if your uploader adds one
+                  // resumeName = resumeName.replace(/^\d+_/, ''); 
+               } catch (e) {
+                  // fallback to default
+               }
+            }
+
             setPreview(prev => ({
               ...prev,
-              resume: resumeFilename
+              resume: resumeName
             }));
           }
 
@@ -181,6 +200,8 @@ const CreateProfile = () => {
 
   // Auto-save function (saves progress without full validation)
   const autoSave = useCallback(async (showNotification = false) => {
+    if (isLocked) return; // Don't save if locked
+    
     // Don't save if not authenticated
     if (!isAuthenticated || !userEmail) {
       return;
@@ -255,7 +276,7 @@ const CreateProfile = () => {
     } finally {
       setSaving(false);
     }
-  }, [isAuthenticated, userEmail]);
+  }, [isAuthenticated, userEmail, isLocked]);
 
   // Auto-save on form data changes (debounced)
   useEffect(() => {
@@ -1103,17 +1124,38 @@ const CreateProfile = () => {
       
       <div>
         <label className="block text-sm font-semibold mb-2">Upload Resume (PDF/Doc) *</label>
+        
+        {/* DISPLAY SAVED RESUME NAME */}
+        {preview.resume && !formData.resume && (
+           <div className="mb-4 p-4 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-3">
+              <div className="bg-blue-100 p-2 rounded-full text-blue-600">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">Current Resume</p>
+                <p className="text-sm font-medium text-blue-900">{preview.resume}</p>
+              </div>
+           </div>
+        )}
+
         <input
           type="file"
           name="resume"
           accept=".pdf,.doc,.docx"
           onChange={handleChange}
-          className="w-full border p-2 rounded"
-          required
+          disabled={isLocked}
+          className="w-full border p-2 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
+          // Only required if we don't have a saved one AND haven't picked a new one
+          required={!preview.resume && !formData.resume}
         />
-        {preview.resume && (
-          <p className="mt-2 text-sm text-gray-600">Selected: {preview.resume}</p>
+        
+        {/* Show newly selected file name */}
+        {formData.resume && (
+          <p className="mt-2 text-sm text-green-600 font-medium">
+             New file selected: {formData.resume.name}
+          </p>
         )}
+        
         {errors.resume && <p className="text-red-500 text-sm mt-1">{errors.resume}</p>}
       </div>
     </div>
@@ -1231,9 +1273,30 @@ const CreateProfile = () => {
             </div>
           )}
 
+          {/* ADD LOCK WARNING BANNER */}
+          {isLocked && (
+            <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    <span className="font-bold">Profile Locked:</span> You have already submitted an application. To ensure application integrity, your profile details cannot be changed.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Form Content */}
           <form onSubmit={(e) => e.preventDefault()}>
-            {renderSinglePageForm()}
+            {/* WRAP THE FORM RENDER IN A DISABLED FIELDSET */}
+            <fieldset disabled={isLocked} className={isLocked ? "opacity-75" : ""}>
+               {renderSinglePageForm()}
+            </fieldset>
 
             {/* Save Progress Indicator */}
             <div className="mt-4 flex items-center justify-between text-sm">
@@ -1261,16 +1324,19 @@ const CreateProfile = () => {
               </button>
             </div>
 
-            <div className="flex justify-end mt-8">
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={submitting}
-                className="bg-theme-green text-white px-6 py-2 rounded-lg font-semibold hover:brightness-95 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                {submitting ? 'Saving...' : 'Save Profile'}
-              </button>
-            </div>
+            {/* HIDE SAVE BUTTON IF LOCKED */}
+            {!isLocked && (
+              <div className="flex justify-end mt-8">
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="bg-theme-green text-white px-6 py-2 rounded-lg font-semibold hover:brightness-95 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  {submitting ? 'Saving...' : 'Save Profile'}
+                </button>
+              </div>
+            )}
           </form>
         </div>
       </div>
