@@ -6,7 +6,7 @@ const connectDB = async () => {
             console.error('❌ ERROR: MONGO_URI is not defined in .env file');
             console.log('Please create a .env file in the server folder with:');
             console.log('MONGO_URI=mongodb://localhost:27017/first-steps-school');
-            process.exit(1);
+            return;
         }
 
         const conn = await mongoose.connect(process.env.MONGO_URI, {
@@ -22,7 +22,6 @@ const connectDB = async () => {
         console.log('2. Check your .env file has the correct MONGO_URI');
         console.log('3. For local MongoDB, start it with: mongod');
         console.log('4. Or use MongoDB Atlas (cloud) - see README.md\n');
-        process.exit(1);
     }
 };
 
