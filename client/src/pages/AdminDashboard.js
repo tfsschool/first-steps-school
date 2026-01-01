@@ -32,11 +32,16 @@ const AdminDashboard = () => {
   const fetchJobs = useCallback(async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.ADMIN.JOBS, config);
-      const jobs = res.data;
+      const jobs = Array.isArray(res.data) ? res.data : [];
+      if (!Array.isArray(res.data)) {
+        console.warn('Warning: fetchJobs received non-array data:', res.data);
+      }
+      const totalJobs = jobs.length;
+      const openJobs = jobs.filter(j => j.status === 'Open').length;
       setStats(prev => ({
         ...prev,
-        totalJobs: jobs.length,
-        openJobs: jobs.filter(j => j.status === 'Open').length
+        totalJobs,
+        openJobs
       }));
     } catch (err) {
       if (!handleAuthError(err)) {
@@ -48,11 +53,16 @@ const AdminDashboard = () => {
   const fetchApplications = useCallback(async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.ADMIN.APPLICATIONS, config);
-      const applications = res.data;
+      const applications = Array.isArray(res.data) ? res.data : [];
+      if (!Array.isArray(res.data)) {
+        console.warn('Warning: fetchApplications received non-array data:', res.data);
+      }
+      const totalApplications = applications.length;
+      const pendingApplications = applications.filter(a => a.status === 'Pending').length;
       setStats(prev => ({
         ...prev,
-        totalApplications: applications.length,
-        pendingApplications: applications.filter(a => a.status === 'Pending').length
+        totalApplications,
+        pendingApplications
       }));
     } catch (err) {
       if (!handleAuthError(err)) {
@@ -64,11 +74,16 @@ const AdminDashboard = () => {
   const fetchCandidates = useCallback(async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.ADMIN.REGISTERED_EMAILS, config);
-      const candidates = res.data || [];
+      const candidates = Array.isArray(res.data) ? res.data : [];
+      if (!Array.isArray(res.data)) {
+        console.warn('Warning: fetchCandidates received non-array data:', res.data);
+      }
+      const totalRegisteredEmails = candidates.length;
+      const verifiedEmails = candidates.filter(c => c.emailVerified).length;
       setStats(prev => ({
         ...prev,
-        totalRegisteredEmails: candidates.length,
-        verifiedEmails: candidates.filter(c => c.emailVerified).length
+        totalRegisteredEmails,
+        verifiedEmails
       }));
     } catch (err) {
       if (!handleAuthError(err)) {
