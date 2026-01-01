@@ -8,7 +8,7 @@ const { uploadFile, normalizeFileData } = require('../config/cloudinary');
  */
 const checkProfile = async (req, res) => {
   try {
-    // const candidateId = req.candidate.id;
+    const candidateId = req.candidate.id;
     const profile = await UserProfile.findOne({ candidateId: candidateId });
     
     res.json({ exists: !!profile });
@@ -88,7 +88,6 @@ const createOrUpdateProfile = async (req, res) => {
       }
     });
     
-    const candidateId = req.candidate.id;
     const email = req.candidate.email;
     
     // CNIC formatting
