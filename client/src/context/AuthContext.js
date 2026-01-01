@@ -24,8 +24,11 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
+      // Get token from localStorage and include in headers
+      const token = localStorage.getItem('token');
+      const config = token ? { headers: { 'x-auth-token': token } } : {};
       // Use relative path since baseURL is set in axios config
-      const res = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH);
+      const res = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH, config);
       
       if (res.data.authenticated) {
         setIsAuthenticated(true);

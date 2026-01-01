@@ -22,9 +22,11 @@ const LoginVerify = () => {
       }
 
       // First, check if user is already authenticated (before trying to verify token)
-      // Cookies are automatically sent via axios defaults
+      // Get token from localStorage and include in headers
+      const tokenFromStorage = localStorage.getItem('token');
+      const authConfig = tokenFromStorage ? { headers: { 'x-auth-token': tokenFromStorage } } : {};
       try {
-        const authCheck = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH);
+        const authCheck = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH, authConfig);
         
         if (authCheck.data.authenticated && authCheck.data.email && 
             authCheck.data.email.toLowerCase() === email.toLowerCase()) {
@@ -49,6 +51,11 @@ const LoginVerify = () => {
         setStatus('success');
         setMessage(res.data.msg || 'Login successful!');
         
+        // Save token to localStorage for header-based authentication
+        if (res.data.token) {
+          localStorage.setItem('token', res.data.token);
+        }
+        
         // Update auth context
         if (res.data.email) {
           setAuthenticated(true, res.data.email);
@@ -65,7 +72,7 @@ const LoginVerify = () => {
         // If token verification fails, check authentication status again
         // (The backend might have set the cookie even if token was already used)
         try {
-          const finalAuthCheck = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH);
+          const finalAuthCheck = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH, authConfig);
           
           if (finalAuthCheck.data.authenticated && finalAuthCheck.data.email && 
               finalAuthCheck.data.email.toLowerCase() === email.toLowerCase()) {

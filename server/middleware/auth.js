@@ -1,11 +1,14 @@
 const jwt = require('jsonwebtoken');
 const Candidate = require('../models/Candidate');
 
-// Middleware to verify JWT token from HTTP-only cookie
+// Middleware to verify JWT token from header (primary) or HTTP-only cookie (fallback)
 const authenticate = async (req, res, next) => {
   try {
-    // Get token from HTTP-only cookie
-    const token = req.cookies?.authToken;
+    // Get token from header first (for cross-site compatibility), then fallback to cookie
+    let token = req.header('x-auth-token');
+    if (!token) {
+      token = req.cookies?.authToken;
+    }
 
     if (!token) {
       return res.status(401).json({ 
@@ -63,7 +66,11 @@ const authenticate = async (req, res, next) => {
 // Middleware to check if user is authenticated (optional - doesn't fail if not authenticated)
 const optionalAuth = async (req, res, next) => {
   try {
-    const token = req.cookies?.authToken;
+    // Get token from header first (for cross-site compatibility), then fallback to cookie
+    let token = req.header('x-auth-token');
+    if (!token) {
+      token = req.cookies?.authToken;
+    }
 
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
