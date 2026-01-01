@@ -246,7 +246,6 @@ const Candidates = () => {
                       onClick={() => handleViewDetails(app)}
                     >
                       {app.fullName}
-                      <span className="text-gray-500 font-normal ml-2">({app.email})</span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700">{app.email}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{app.jobId?.title || 'N/A'}</td>
@@ -344,7 +343,6 @@ const Candidates = () => {
               <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-800">
                   {selectedApplication.fullName}
-                  <span className="text-gray-500 font-normal ml-2 text-lg">({selectedApplication.email})</span>
                 </h2>
                 <button
                   onClick={() => {
@@ -385,7 +383,6 @@ const CandidateDetails = ({ application }) => {
           <div className="col-span-2">
             <span className="text-gray-600">Full Name:</span>
             <span className="ml-2 font-medium">{application.fullName}</span>
-            <span className="text-gray-500 font-normal ml-2">({application.email})</span>
           </div>
           <div>
             <span className="text-gray-600">CNIC/National ID:</span>

@@ -17,6 +17,7 @@ const Apply = () => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [isProfileLocked, setIsProfileLocked] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -141,6 +142,7 @@ const Apply = () => {
           });
           console.log('Profile fetched successfully:', profileRes.data);
           const fetchedProfile = profileRes.data;
+          setIsProfileLocked(fetchedProfile.isLocked || false);
           const missing = getMissingRequiredFields(fetchedProfile);
           if (missing.length > 0) {
             setError(formatMissingFieldsMessage(missing));
@@ -390,7 +392,7 @@ const Apply = () => {
                     onClick={() => navigate('/create-profile')}
                     className="bg-theme-blue text-white px-6 py-3 rounded-lg font-semibold hover:brightness-95 transition"
                   >
-                    Edit Profile
+                    {isProfileLocked ? 'View Profile' : 'Edit Profile'}
                   </button>
                 </div>
 

@@ -18,6 +18,7 @@ const Careers = () => {
   const [hasProfile, setHasProfile] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileName, setProfileName] = useState(null);
+  const [isProfileLocked, setIsProfileLocked] = useState(false);
   
   // Modal states
   const [showInitialModal, setShowInitialModal] = useState(false);
@@ -79,18 +80,22 @@ const Careers = () => {
         if (profileRes.data) {
           setHasProfile(true);
           setProfileName(profileRes.data.fullName || userEmail);
+          setIsProfileLocked(profileRes.data.isLocked || false);
         } else {
           setHasProfile(false);
           setProfileName(null);
+          setIsProfileLocked(false);
         }
       } catch (err) {
         if (err.response?.status === 404 || err.response?.data === null) {
           setHasProfile(false);
           setProfileName(null);
+          setIsProfileLocked(false);
         } else {
           console.error('Unexpected error fetching profile:', err);
           setHasProfile(false);
           setProfileName(null);
+          setIsProfileLocked(false);
         }
       } finally {
         setProfileLoading(false);
@@ -490,7 +495,7 @@ const Careers = () => {
                             onClick={() => navigate('/create-profile')}
                             className="btn-primary"
                           >
-                            Update Profile
+                            {isProfileLocked ? 'View Profile' : 'Update Profile'}
                           </button>
                         </div>
                       </div>
