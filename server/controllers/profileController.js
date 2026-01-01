@@ -9,7 +9,7 @@ const { uploadFile, normalizeFileData } = require('../config/cloudinary');
 const checkProfile = async (req, res) => {
   try {
     const candidateId = req.candidate.id;
-    const profile = await UserProfile.findOne({ candidateId: candidateId });
+    const profile = await UserProfile.findgOne({ candidateId: candidateId });
     
     res.json({ exists: !!profile });
   } catch (err) {

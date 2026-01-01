@@ -1,17 +1,18 @@
 const nodemailer = require('nodemailer');
 
-// Create transporter - configure with your email service
+// FIX: Dynamically set secure based on port (465 uses SSL, others use STARTTLS)
+const isSecure = process.env.EMAIL_PORT == 465;
+
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: process.env.EMAIL_PORT || 465,
-  secure: true, // true for 465, false for other ports
+  port: process.env.EMAIL_PORT || 587, 
+  secure: isSecure, // <--- This automatically fixes the SSL error
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD
   },
   tls: {
-    // Determine if we need to set rejectUnauthorized: false in development
-    // ciphers: 'SSLv3' // Sometimes helps with older node versions
+    rejectUnauthorized: false // Helps with self-signed cert issues
   }
 });
 
@@ -44,4 +45,3 @@ const sendEmail = async (to, subject, html, text) => {
 };
 
 module.exports = { sendEmail, transporter };
-
