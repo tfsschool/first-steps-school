@@ -9,6 +9,14 @@ const { authenticate } = require('../middleware/auth');
 
 // Helper function to get frontend URL with proper trailing slash handling
 const getFrontendUrl = () => {
+  // 1. Force custom domain in production if set, or fallback to tfs.school
+  if (process.env.NODE_ENV === 'production') {
+     // If FRONTEND_URL is the vercel default or missing, force tfs.school
+     if (!process.env.FRONTEND_URL || process.env.FRONTEND_URL.includes('vercel.app')) {
+        return 'https://tfs.school';
+     }
+  }
+  
   const url = process.env.FRONTEND_URL || 'http://localhost:3000';
   // Remove trailing slash to avoid double slashes
   return url.replace(/\/+$/, '');
@@ -53,11 +61,8 @@ router.post('/register', async (req, res) => {
     }
 
     // Send verification email
-    // Use the FRONTEND_URL from env, or fallback to localhost for development
-    const clientURL = process.env.FRONTEND_URL || 'http://localhost:3000';
-    
-    // Ensure no double slashes if the env var has a trailing slash
-    const baseURL = clientURL.replace(/\/$/, "");
+    // Use the getFrontendUrl helper for consistency
+    const baseURL = getFrontendUrl();
     
     // URL encode the token to handle special characters
     const verificationUrl = `${baseURL}/verify-email?token=${encodeURIComponent(verificationToken)}&email=${encodeURIComponent(email)}`;
