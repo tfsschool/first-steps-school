@@ -476,6 +476,7 @@ router.get('/verify-login', async (req, res) => {
                 msg: 'You are already logged in!',
                 email: candidate.email,
                 authenticated: true,
+                token: existingToken,
                 alreadyLoggedIn: true
               });
             }
@@ -504,6 +505,7 @@ router.get('/verify-login', async (req, res) => {
           msg: 'Login successful!',
           email: candidate.email,
           authenticated: true,
+          token: authToken,
           tokenReused: true
         });
       }
@@ -559,7 +561,8 @@ router.get('/verify-login', async (req, res) => {
     res.json({ 
       msg: 'Login successful!',
       email: candidate.email,
-      authenticated: true
+      authenticated: true,
+      token: authToken
     });
   } catch (err) {
     console.error('Verify login error:', err);
