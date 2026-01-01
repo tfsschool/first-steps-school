@@ -838,27 +838,29 @@ const Careers = () => {
                     key={job._id}
                     className="group relative w-full bg-white border border-gray-100 rounded-2xl shadow-soft hover:shadow-lift transition-shadow"
                   >
-                    <div className={`p-7 ${isAuthenticated && hasProfile ? 'pb-20' : ''}`}>
-                      <div className="text-xs tracking-[0.25em] uppercase text-theme-dark/50 font-semibold">
-                        Open Position
+                    <div className="p-7">
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <div className="flex-1">
+                          <div className="text-xs tracking-[0.25em] uppercase text-theme-dark/50 font-semibold">
+                            Open Position
+                          </div>
+                          <h2 className="mt-3 text-xl font-extrabold text-theme-dark leading-snug">
+                            {job.title}
+                          </h2>
+                        </div>
+                        {isAuthenticated && hasProfile && (
+                          <button
+                            onClick={() => handleApply(job._id)}
+                            className="btn-primary rounded-lg flex-shrink-0"
+                          >
+                            Apply Now
+                          </button>
+                        )}
                       </div>
-                      <h2 className="mt-3 text-xl font-extrabold text-theme-dark leading-snug">
-                        {job.title}
-                      </h2>
-                      <p className="mt-4 text-gray-600 leading-relaxed">
+                      <p className="text-gray-600 leading-relaxed">
                         {job.description}
                       </p>
                     </div>
-                    {isAuthenticated && hasProfile && (
-                      <div className="absolute bottom-5 right-5">
-                        <button
-                          onClick={() => handleApply(job._id)}
-                          className="btn-primary rounded-lg"
-                        >
-                          Apply Now
-                        </button>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>

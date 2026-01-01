@@ -246,6 +246,7 @@ const Candidates = () => {
                       onClick={() => handleViewDetails(app)}
                     >
                       {app.fullName}
+                      <span className="text-gray-500 font-normal ml-2">({app.email})</span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700">{app.email}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{app.jobId?.title || 'N/A'}</td>
@@ -341,7 +342,10 @@ const Candidates = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-soft border border-gray-100 max-w-4xl w-full max-h-[90vh]" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-800">Candidate Details</h2>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {selectedApplication.fullName}
+                  <span className="text-gray-500 font-normal ml-2 text-lg">({selectedApplication.email})</span>
+                </h2>
                 <button
                   onClick={() => {
                     setShowModal(false);
@@ -378,6 +382,11 @@ const CandidateDetails = ({ application }) => {
       <div className="bg-white p-4 rounded-lg shadow-sm">
         <h4 className="font-semibold text-gray-700 mb-3">Personal Information</h4>
         <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="col-span-2">
+            <span className="text-gray-600">Full Name:</span>
+            <span className="ml-2 font-medium">{application.fullName}</span>
+            <span className="text-gray-500 font-normal ml-2">({application.email})</span>
+          </div>
           <div>
             <span className="text-gray-600">CNIC/National ID:</span>
             <span className="ml-2 font-medium">{formatCnic(profile.cnic)}</span>
@@ -557,17 +566,32 @@ const CandidateDetails = ({ application }) => {
             if (!cvData) return null;
 
             // Handle both string URLs and normalized objects
-            let cvUrl, downloadUrl;
+            let cvUrl, downloadUrl, resumeName = 'Resume.pdf';
             
             if (typeof cvData === 'object' && cvData !== null) {
               // It's a normalized object with preview_url and download_url
               cvUrl = cvData.preview_url || cvData.secure_url;
               downloadUrl = cvData.download_url || cvData.secure_url || cvUrl;
+              // Extract filename from resume object
+              if (cvData.original_filename) {
+                resumeName = `${cvData.original_filename}.${cvData.format || 'pdf'}`;
+              } else if (cvData.public_id) {
+                try {
+                  resumeName = decodeURIComponent(cvData.public_id.split('/').pop());
+                } catch (e) {
+                  resumeName = 'Resume.pdf';
+                }
+              }
             } else if (typeof cvData === 'string') {
               // It's a string URL - use it for both view and download
               // The backend should normalize it, but if not, use the string directly
               cvUrl = cvData;
               downloadUrl = cvData;
+              try {
+                resumeName = decodeURIComponent(cvData.split('/').pop());
+              } catch (e) {
+                resumeName = 'Resume.pdf';
+              }
             } else {
               return null;
             }
@@ -577,23 +601,28 @@ const CandidateDetails = ({ application }) => {
             return (
               <div>
                 <span className="text-gray-600 text-sm">CV/Resume:</span>
-                <div className="flex gap-2 mt-1">
-                  <a
-                    href={cvUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-theme-blue hover:text-theme-green text-sm font-semibold underline transition-colors"
-                  >
-                    👁️ View CV
-                  </a>
-                  <span className="text-gray-400">|</span>
-                  <a
-                    href={downloadUrl}
-                    download
-                    className="text-theme-blue hover:text-theme-green text-sm font-semibold underline transition-colors"
-                  >
-                    📥 Download CV
-                  </a>
+                <div className="mt-1">
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    📄 {resumeName}
+                  </p>
+                  <div className="flex gap-2">
+                    <a
+                      href={cvUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-theme-blue hover:text-theme-green text-sm font-semibold underline transition-colors"
+                    >
+                      👁️ View CV
+                    </a>
+                    <span className="text-gray-400">|</span>
+                    <a
+                      href={downloadUrl}
+                      download
+                      className="text-theme-blue hover:text-theme-green text-sm font-semibold underline transition-colors"
+                    >
+                      📥 Download CV
+                    </a>
+                  </div>
                 </div>
               </div>
             );

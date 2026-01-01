@@ -397,7 +397,10 @@ const Apply = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
                     <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Name</div>
-                    <div className="mt-2 font-semibold text-theme-dark">{profile.fullName}</div>
+                    <div className="mt-2 font-semibold text-theme-dark">
+                      {profile.fullName}
+                      <span className="text-gray-500 font-normal ml-2">({profile.email})</span>
+                    </div>
                   </div>
                   <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
                     <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Email</div>
