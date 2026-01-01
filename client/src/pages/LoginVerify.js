@@ -46,7 +46,8 @@ const LoginVerify = () => {
       // User is not authenticated, verify the login token
       try {
         // Cookies are automatically sent via axios defaults
-        const res = await axios.get(API_ENDPOINTS.CANDIDATE.VERIFY_LOGIN(token, email));
+        // Include auth headers if token exists in storage
+        const res = await axios.get(API_ENDPOINTS.CANDIDATE.VERIFY_LOGIN(token, email), authConfig);
         
         setStatus('success');
         setMessage(res.data.msg || 'Login successful!');

@@ -32,6 +32,11 @@ const VerifyEmail = () => {
         setStatus('success');
         setMessage(res.data.msg || (res.data.alreadyVerified ? 'Email is already verified. You have been logged in.' : 'Email verified successfully!'));
         
+        // Save token to localStorage if provided
+        if (res.data.token) {
+          localStorage.setItem('token', res.data.token);
+        }
+        
         // Update auth context (session is created automatically by backend via cookie)
         if (res.data.email) {
           setAuthenticated(true, res.data.email);

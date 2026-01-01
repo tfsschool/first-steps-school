@@ -332,7 +332,8 @@ router.get('/verify-email', async (req, res) => {
       msg: 'Email verified successfully! You can now create your profile and apply for jobs.',
       email: candidate.email,
       emailVerified: true,
-      authenticated: true
+      authenticated: true,
+      token: authToken
     });
   } catch (err) {
     console.error('Verification error:', err);
@@ -471,7 +472,7 @@ router.get('/verify-login', async (req, res) => {
       // This handles the case where user clicks the link twice
       if (candidate.emailVerified) {
         // User is verified, token was already used - check if they're already logged in
-        const existingToken = req.cookies?.authToken;
+        const existingToken = req.header('x-auth-token') || req.cookies?.authToken;
         if (existingToken) {
           try {
             const decoded = jwt.verify(existingToken, process.env.JWT_SECRET);
