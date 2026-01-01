@@ -728,9 +728,9 @@ const Careers = () => {
                 {jobs.map((job) => (
                   <div
                     key={job._id}
-                    className="group w-full bg-white border border-gray-100 rounded-2xl shadow-soft hover:shadow-lift transition-shadow"
+                    className="group relative w-full bg-white border border-gray-100 rounded-2xl shadow-soft hover:shadow-lift transition-shadow"
                   >
-                    <div className="p-7">
+                    <div className="p-7 pb-20">
                       <div className="text-xs tracking-[0.25em] uppercase text-theme-dark/50 font-semibold">
                         Open Position
                       </div>
@@ -740,15 +740,14 @@ const Careers = () => {
                       <p className="mt-4 text-gray-600 leading-relaxed">
                         {job.description}
                       </p>
-
-                      <div className="mt-6">
-                        <button
-                          onClick={() => handleApply(job._id)}
-                          className="w-full bg-theme-green text-white px-6 py-3 rounded-lg font-semibold hover:brightness-95 transition"
-                        >
-                          Apply Now
-                        </button>
-                      </div>
+                    </div>
+                    <div className="absolute bottom-5 right-5">
+                      <button
+                        onClick={() => handleApply(job._id)}
+                        className="btn-primary rounded-lg"
+                      >
+                        Apply Now
+                      </button>
                     </div>
                   </div>
                 ))}

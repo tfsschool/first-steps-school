@@ -17,8 +17,6 @@ const JobManagement = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    salary: '',
-    requirements: '',
     status: 'Open'
   });
 
@@ -81,8 +79,6 @@ const JobManagement = () => {
       setFormData({
         title: '',
         description: '',
-        salary: '',
-        requirements: '',
         status: 'Open'
       });
       fetchJobs();
@@ -98,8 +94,6 @@ const JobManagement = () => {
     setFormData({
       title: job.title,
       description: job.description,
-      salary: job.salary || '',
-      requirements: job.requirements || '',
       status: job.status || 'Open'
     });
     setShowModal(true);
@@ -152,8 +146,6 @@ const JobManagement = () => {
       setFormData({
         title: '',
         description: '',
-        salary: '',
-        requirements: '',
         status: 'Open'
       });
               setShowModal(true);
@@ -292,28 +284,6 @@ const JobManagement = () => {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows="3"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salary Range</label>
-                  <input
-                    type="text"
-                    value={formData.salary}
-                    onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                    placeholder="e.g., $50,000 - $70,000"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Requirements</label>
-                  <textarea
-                    value={formData.requirements}
-                    onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                    rows="3"
-                    placeholder="List job requirements..."
                     className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-theme-green/30 focus:border-theme-green"
                   />
                 </div>

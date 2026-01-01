@@ -47,8 +47,6 @@ router.post('/job', adminAuth, async (req, res) => {
             description: req.body.description.trim(),
             department: req.body.department?.trim() || '',
             location: req.body.location?.trim() || '',
-            salary: req.body.salary?.trim() || '',
-            requirements: req.body.requirements?.trim() || '',
             type: req.body.type || 'Full Time',
             status: req.body.status || 'Open'
         });
@@ -72,8 +70,6 @@ router.put('/job/:id', adminAuth, async (req, res) => {
         if (req.body.description) job.description = req.body.description.trim();
         if (req.body.department) job.department = req.body.department.trim();
         if (req.body.location) job.location = req.body.location.trim();
-        if (req.body.salary !== undefined) job.salary = req.body.salary.trim();
-        if (req.body.requirements !== undefined) job.requirements = req.body.requirements.trim();
         if (req.body.type) job.type = req.body.type;
         if (req.body.status) job.status = req.body.status;
         job.updatedAt = new Date();
