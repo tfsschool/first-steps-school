@@ -16,9 +16,19 @@ const AdminLogin = () => {
 
     try {
       const res = await axios.post(API_ENDPOINTS.ADMIN.LOGIN, credentials);
+      // Store admin token separately to avoid conflicts with candidate auth
       localStorage.setItem('token', res.data.token);
+      localStorage.setItem('adminToken', res.data.token);
+      localStorage.setItem('isAdmin', 'true');
+      // Clear any candidate-specific data
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('hasProfile');
+      localStorage.removeItem('appliedJobs');
+      localStorage.removeItem('profileName');
+      localStorage.removeItem('isProfileLocked');
       navigate('/admin/dashboard');
     } catch (err) {
+      console.error('Admin login error:', err);
       setError(err.response?.data?.msg || 'Invalid credentials. Please try again.');
     } finally {
       setLoading(false);

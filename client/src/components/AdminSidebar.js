@@ -7,7 +7,10 @@ const AdminSidebar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
+    // Clear all admin-specific localStorage
     localStorage.removeItem('token');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('isAdmin');
     navigate('/admin/login');
   };
 

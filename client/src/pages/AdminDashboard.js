@@ -17,12 +17,16 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem('token');
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
   const config = useMemo(() => ({ headers: { 'x-auth-token': token } }), [token]);
 
   const handleAuthError = useCallback((err) => {
     // Check if it's an authentication error
     if (err.response?.status === 401 || err.response?.data?.msg?.includes('token') || err.response?.data?.msg?.includes('authorization')) {
+      // Clear admin-specific localStorage
       localStorage.removeItem('token');
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('isAdmin');
       navigate('/admin/login');
       return true;
     }
