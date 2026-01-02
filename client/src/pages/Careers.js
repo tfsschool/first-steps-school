@@ -43,13 +43,6 @@ const Careers = () => {
   const [bannerStatus, setBannerStatus] = useState('idle'); // 'idle', 'verification_sent', 'login_link_sent'
   const [bannerEmail, setBannerEmail] = useState(''); // Store email for banner display
 
-  // Refresh user data when component mounts or when returning to page
-  useEffect(() => {
-    if (isAuthenticated && authChecked) {
-      refreshUserData();
-    }
-  }, [isAuthenticated, authChecked]);
-
   // Fetch jobs ONCE on mount
   useEffect(() => {
     const fetchJobs = async () => {
