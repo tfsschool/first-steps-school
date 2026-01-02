@@ -172,7 +172,7 @@ const Careers = () => {
       });
 
       // Login link sent successfully
-      setLoginMessage('Login link sent to your email! Please check your inbox and click the link to login. The link will expire in 15 minutes.');
+      setLoginMessage('Login link has been sent to your mail. Please check your inbox.');
       setIsUnverified(false);
     } catch (err) {
       if (err.response?.data?.notRegistered) {
@@ -213,7 +213,7 @@ const Careers = () => {
         return;
       }
 
-      setRegisterMessage('Verification email sent! Please check your inbox and click the verification link to complete your registration.');
+      setRegisterMessage('Verification email has been sent to your mail. Please check your inbox.');
       setIsUnverified(false);
       
       setTimeout(() => {

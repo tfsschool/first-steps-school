@@ -68,6 +68,7 @@ const CreateProfile = () => {
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [showApplyButton, setShowApplyButton] = useState(false);
   
   // Use ref to access latest formData in auto-save without causing re-renders
   const formDataRef = useRef(formData);
@@ -585,22 +586,21 @@ const CreateProfile = () => {
         withCredentials: true
       });
 
+      // Update state immediately for real-time UI updates
+      setProfileLoaded(true);
+      setShowApplyButton(true);
+
       if (missing.length > 0) {
         setPopupMessage(`Profile saved, but it is incomplete.\n\n${formatMissingFieldsMessage(missing)}`);
       } else {
-        setPopupMessage('Profile saved successfully!');
+        setPopupMessage('Profile saved successfully! You can now apply for jobs or continue editing your profile.');
       }
       setShowSuccessPopup(true);
       
-      // Redirect to apply page if jobId was provided, otherwise to careers
+      // Don't auto-redirect, let user choose next action
       setTimeout(() => {
         setShowSuccessPopup(false);
-        if (jobIdParam) {
-          navigate(`/apply/${jobIdParam}`);
-        } else {
-          navigate('/careers');
-        }
-      }, 2000);
+      }, 3000);
     } catch (err) {
       setPopupMessage('Error saving profile: ' + (err.response?.data?.msg || err.message));
       setShowErrorPopup(true);
@@ -748,10 +748,12 @@ const CreateProfile = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Education Details</h2>
       </div>
+      <p className="text-sm text-gray-600 mb-2">* At least one education entry is required</p>
 
       {formData.education.length === 0 ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-          <p className="text-gray-500 mb-4">No education added yet.</p>
+        <div className="border-2 border-dashed border-red-300 bg-red-50 rounded-lg p-8 text-center">
+          <p className="text-red-600 font-semibold mb-2">⚠️ Education Required</p>
+          <p className="text-gray-600 mb-4">Please add at least one education entry to complete your profile.</p>
           <button
             type="button"
             onClick={addEducation}
@@ -976,12 +978,10 @@ const CreateProfile = () => {
 
   // Step 4: Skills & Certifications
   const renderStep4 = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold mb-4">Skills & Certifications</h2>
-      <p className="text-sm text-gray-600 mb-4">(Optional - You can skip adding skills or certifications if you don't have any)</p>
-
+    <div className="space-y-8">
       <div>
-        <label className="block text-sm font-semibold mb-2">Skills</label>
+        <h2 className="text-2xl font-bold mb-2">Skills</h2>
+        <p className="text-sm text-gray-600 mb-4">(Optional - Add skills to showcase your expertise)</p>
         <div className="flex gap-2 mb-2">
           <input
             type="text"
@@ -1018,14 +1018,15 @@ const CreateProfile = () => {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-500">No skills added yet. Add skills to showcase your expertise.</p>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <p className="text-gray-500 text-sm">No skills added yet. Add skills to showcase your expertise.</p>
+          </div>
         )}
       </div>
 
       <div>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold">Certifications</h3>
-        </div>
+        <h2 className="text-2xl font-bold mb-2">Certifications</h2>
+        <p className="text-sm text-gray-600 mb-4">(Optional - Add professional certifications if you have any)</p>
 
         {formData.certifications.length === 0 ? (
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
@@ -1343,17 +1344,70 @@ const CreateProfile = () => {
               </button>
             </div>
 
-            {/* HIDE SAVE BUTTON IF LOCKED */}
+            {/* Action Buttons */}
             {!isLocked && (
-              <div className="flex justify-end mt-8">
+              <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
                 <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="bg-theme-green text-white px-6 py-2 rounded-lg font-semibold hover:brightness-95 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="bg-theme-green text-white px-8 py-3 rounded-lg font-semibold hover:brightness-95 transition disabled:bg-gray-300 disabled:cursor-not-allowed text-lg"
                 >
-                  {submitting ? 'Saving...' : 'Save Profile'}
+                  {submitting ? 'Saving...' : (profileLoaded ? 'Update Profile' : 'Save Profile')}
                 </button>
+              </div>
+            )}
+
+            {/* Show Apply and Edit buttons after profile is saved */}
+            {(profileLoaded || showApplyButton) && (
+              <div className="mt-6 p-6 bg-green-50 border-2 border-green-200 rounded-lg">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="flex-shrink-0">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-green-800 mb-1">Profile Ready!</h3>
+                    <p className="text-sm text-green-700 mb-4">
+                      Your profile has been saved. You can now apply for jobs or continue editing your profile.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <button
+                        onClick={() => navigate('/careers')}
+                        className="bg-theme-green text-white px-6 py-3 rounded-lg font-semibold hover:brightness-95 transition flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Apply for Jobs
+                      </button>
+                      {!isLocked && (
+                        <button
+                          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                          className="bg-white text-theme-blue border-2 border-theme-blue px-6 py-3 rounded-lg font-semibold hover:bg-theme-blue hover:text-white transition flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          Edit Profile
+                        </button>
+                      )}
+                      {isLocked && (
+                        <button
+                          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                          className="bg-white text-theme-blue border-2 border-theme-blue px-6 py-3 rounded-lg font-semibold hover:bg-theme-blue hover:text-white transition flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          View Profile
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </form>
