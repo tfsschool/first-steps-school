@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import axios from '../config/axios';
 import { API_ENDPOINTS } from '../config/api';
 import { useAuth } from '../context/AuthContext';
@@ -7,6 +7,7 @@ import SEO from '../components/SEO';
 
 const Careers = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { 
     isAuthenticated, 
@@ -15,6 +16,7 @@ const Careers = () => {
     authChecked,
     hasProfile: authHasProfile,
     applicationStatus,
+    refreshApplications,
     logout
   } = useAuth();
   
@@ -186,6 +188,13 @@ const Careers = () => {
   useEffect(() => {
     fetchProfileAndApplications();
   }, [fetchProfileAndApplications]);
+
+  // Refresh AuthContext data when navigating to this page
+  useEffect(() => {
+    if (isAuthenticated && refreshApplications) {
+      refreshApplications();
+    }
+  }, [location.pathname, isAuthenticated, refreshApplications]);
 
   // Re-fetch when page becomes visible (user returns from another tab/page)
   useEffect(() => {

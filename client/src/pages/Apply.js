@@ -301,9 +301,9 @@ const Apply = () => {
       }
       
       setShowThankYou(true);
-      // Redirect to careers page after 3 seconds (removed /thank-you redirect)
+      // Redirect to thank you page after 3 seconds
       setTimeout(() => {
-        navigate('/careers');
+        navigate('/thank-you');
       }, 3000);
     } catch (err) {
       const errorMsg = err.response?.data?.msg || 'Error submitting application. Please try again.';
@@ -520,7 +520,7 @@ const Apply = () => {
             <p className="text-gray-600 mb-4">
               Your application has been submitted successfully. You will receive a confirmation email shortly.
             </p>
-            <p className="text-sm text-gray-500">Redirecting to dashboard...</p>
+            <p className="text-sm text-gray-500">Redirecting to thank you page...</p>
           </div>
         </div>
       )}

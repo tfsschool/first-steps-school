@@ -79,7 +79,15 @@ const Candidates = () => {
     fetchApplications();
   }, [fetchApplications]);
 
-  const handleStatusChange = async (applicationId, newStatus) => {
+  const handleStatusChange = async (applicationId, newStatus, currentStatus) => {
+    // Show confirmation dialog
+    const confirmMessage = `Are you sure you want to change the status from "${currentStatus}" to "${newStatus}"?`;
+    if (!window.confirm(confirmMessage)) {
+      // User cancelled - refresh to reset the dropdown to original value
+      fetchApplications();
+      return;
+    }
+    
     try {
       await axios.put(API_ENDPOINTS.ADMIN.APPLICATION_STATUS(applicationId), 
         { status: newStatus }, config);
@@ -258,7 +266,7 @@ const Candidates = () => {
                     <td className="px-6 py-4">
                       <select
                         value={app.status || 'Pending'}
-                        onChange={(e) => handleStatusChange(app._id, e.target.value)}
+                        onChange={(e) => handleStatusChange(app._id, e.target.value, app.status || 'Pending')}
                         className={`px-3 py-1 rounded-full text-xs font-semibold border-0 ${getStatusColor(app.status || 'Pending')}`}
                       >
                         <option value="Pending">Pending</option>
