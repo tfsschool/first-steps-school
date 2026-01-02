@@ -445,22 +445,12 @@ const Apply = () => {
                 )}
 
                 <div className="mb-6">
-                  <h3 className="text-lg font-bold text-theme-dark mb-2">Salary Expectations</h3>
-                  <p className="text-gray-600 mb-4">What salary do you expect as per your qualification?</p>
+                  <h3 className="text-lg font-bold text-theme-dark mb-2">Salary Information (Required)</h3>
+                  <p className="text-gray-600 mb-4">Please provide your salary expectations based on your qualifications and experience.</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Minimum Salary *</label>
-                      <input
-                        type="text"
-                        value={minimumSalary}
-                        onChange={(e) => setMinimumSalary(e.target.value)}
-                        placeholder="e.g., 30,000"
-                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-theme-blue"
-                        required
-                      />
-                    </div>
-                    <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Expected Salary *</label>
+                      <p className="text-xs text-gray-500 mb-2">Monthly salary appropriate to your qualifications and experience</p>
                       <input
                         type="text"
                         value={expectedSalary}
@@ -470,6 +460,23 @@ const Apply = () => {
                         required
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Minimum Acceptable Salary *</label>
+                      <p className="text-xs text-gray-500 mb-2">Lowest salary you are willing to accept</p>
+                      <input
+                        type="text"
+                        value={minimumSalary}
+                        onChange={(e) => setMinimumSalary(e.target.value)}
+                        placeholder="e.g., 30,000"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-theme-blue"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <span className="font-semibold">Note:</span> Final salary determination will be based on comprehensive assessment and interview performance. The offered salary may differ from your expectations.
+                    </p>
                   </div>
                 </div>
 

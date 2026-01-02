@@ -410,40 +410,42 @@ const CandidateDetails = ({ application }) => {
     return `${digitsOnly.slice(0, 5)}-${digitsOnly.slice(5, 12)}-${digitsOnly.slice(12)}`;
   };
 
+  const calculateAge = (dateOfBirth) => {
+    if (!dateOfBirth) return 'N/A';
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   return (
     <div className="space-y-6">
       {/* Personal Information */}
       <div className="bg-white p-4 rounded-lg shadow-sm">
         <h4 className="font-semibold text-gray-700 mb-3">Personal Information</h4>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="col-span-2">
-            <span className="text-gray-600">Full Name:</span>
-            <span className="ml-2 font-medium">{application.fullName}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">CNIC/National ID:</span>
-            <span className="ml-2 font-medium">{formatCnic(profile.cnic)}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Date of Birth:</span>
-            <span className="ml-2 font-medium">{profile.dateOfBirth || 'N/A'}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Gender:</span>
-            <span className="ml-2 font-medium">{profile.gender || 'N/A'}</span>
-          </div>
-          <div className="col-span-2">
-            <span className="text-gray-600">Address:</span>
-            <span className="ml-2 font-medium">{profile.address || 'N/A'}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Cell Number:</span>
-            <span className="ml-2 font-medium">{application.phone || 'N/A'}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Email:</span>
-            <span className="ml-2 font-medium">{application.email}</span>
-          </div>
+        
+        {/* Line 1: Full Name | CNIC | Age | Gender */}
+        <div className="text-sm mb-3 pb-3 border-b border-gray-200">
+          <span className="font-medium text-gray-800">{application.fullName}</span>
+          <span className="text-gray-400 mx-2">|</span>
+          <span className="text-gray-700">{formatCnic(profile.cnic)}</span>
+          <span className="text-gray-400 mx-2">|</span>
+          <span className="text-gray-700">{calculateAge(profile.dateOfBirth)} years</span>
+          <span className="text-gray-400 mx-2">|</span>
+          <span className="text-gray-700">{profile.gender || 'N/A'}</span>
+        </div>
+        
+        {/* Line 2: Phone Number | Email | Address */}
+        <div className="text-sm">
+          <span className="text-gray-700">{application.phone || 'N/A'}</span>
+          <span className="text-gray-400 mx-2">|</span>
+          <span className="text-gray-700">{application.email}</span>
+          <span className="text-gray-400 mx-2">|</span>
+          <span className="text-gray-700">{profile.address || 'N/A'}</span>
         </div>
         {profile.profilePicture && (
           <div className="mt-4">
@@ -663,28 +665,20 @@ const CandidateDetails = ({ application }) => {
         </div>
       </div>
 
-      {/* Application Details */}
-      <div className="bg-white p-4 rounded-lg shadow-sm">
-        <h4 className="font-semibold text-gray-700 mb-3">Application Details</h4>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-gray-600">Minimum Salary:</span>
-            <span className="ml-2 font-medium">{application.minimumSalary || 'Not specified'}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Expected Salary:</span>
-            <span className="ml-2 font-medium">{application.expectedSalary || 'Not specified'}</span>
-          </div>
-          <div className="col-span-2">
-            <span className="text-gray-600">Date Applied:</span>
-            <span className="ml-2 font-medium">
-              {application.appliedAt ? new Date(application.appliedAt).toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              }) : 'N/A'}
-            </span>
-          </div>
+      {/* Application Details - Footer */}
+      <div className="bg-gray-50 p-4 rounded-lg border-t-2 border-theme-blue">
+        <div className="text-sm text-gray-700">
+          <span className="font-semibold">Minimum Salary:</span> <span className="font-medium">{application.minimumSalary || 'Not specified'}</span>
+          <span className="text-gray-400 mx-3">|</span>
+          <span className="font-semibold">Expected Salary:</span> <span className="font-medium">{application.expectedSalary || 'Not specified'}</span>
+          <span className="text-gray-400 mx-3">|</span>
+          <span className="font-semibold">Date Applied:</span> <span className="font-medium">
+            {application.appliedAt ? new Date(application.appliedAt).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }) : 'N/A'}
+          </span>
         </div>
       </div>
     </div>
