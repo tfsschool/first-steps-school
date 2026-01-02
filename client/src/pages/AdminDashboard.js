@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useNavigate, Navigate } from 'react-router-dom';
+import axios from '../config/axios';
 import AdminSidebar from '../components/AdminSidebar';
 import { API_ENDPOINTS } from '../config/api';
 
@@ -18,6 +18,11 @@ const AdminDashboard = () => {
 
   const token = localStorage.getItem('token');
   const config = useMemo(() => ({ headers: { 'x-auth-token': token } }), [token]);
+
+  // Guard clause: redirect to login if no token
+  if (!token) {
+    return <Navigate to="/admin/login" replace />;
+  }
 
   const handleAuthError = useCallback((err) => {
     // Check if it's an authentication error

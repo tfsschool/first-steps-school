@@ -49,7 +49,8 @@ export const API_ENDPOINTS = {
     },
     CHECK_AUTH: `${BASE_URL}/api/candidate/check-auth`, // Check if authenticated
     LOGOUT: `${BASE_URL}/api/candidate/logout`,
-    CHECK: (email) => `${BASE_URL}/api/candidate/check/${encodeURIComponent(email)}` // Public check (for registration flow)
+    CHECK: (email) => `${BASE_URL}/api/candidate/check/${encodeURIComponent(email)}`, // Public check (for registration flow)
+    APPLICATIONS: `${BASE_URL}/api/candidate/applications` // Get candidate's applications
   },
   
   // Profile endpoints (authentication required)

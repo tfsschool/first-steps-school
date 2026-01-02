@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const Candidate = require('../models/Candidate');
 const UserProfile = require('../models/UserProfile');
+const Application = require('../models/Application');
 const { sendEmail } = require('../config/email');
 const { authenticate } = require('../middleware/auth');
 const { authLimiter } = require('../middleware/rateLimiter');
@@ -604,7 +605,21 @@ router.get('/check-auth', authenticate, async (req, res) => {
   }
 });
 
-// 7. Logout
+// 7. Get Candidate Applications
+router.get('/applications', authenticate, async (req, res) => {
+  try {
+    const applications = await Application.find({ candidateId: req.candidate.id })
+      .select('jobId status')
+      .lean();
+    
+    res.json(applications);
+  } catch (err) {
+    console.error('Get applications error:', err);
+    res.status(500).json({ msg: 'Server Error', error: err.message });
+  }
+});
+
+// 8. Logout
 router.post('/logout', (req, res) => {
   // Clear HTTP-only cookie
   const options = {

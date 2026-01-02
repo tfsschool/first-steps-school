@@ -19,6 +19,7 @@ const Careers = () => {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileName, setProfileName] = useState(null);
   const [isProfileLocked, setIsProfileLocked] = useState(false);
+  const [appliedJobIds, setAppliedJobIds] = useState(new Set());
   
   // Modal states
   const [showInitialModal, setShowInitialModal] = useState(false);
@@ -91,7 +92,12 @@ const Careers = () => {
         }
         
         const config = { headers: { 'x-auth-token': token }, withCredentials: true };
-        const profileRes = await axios.get(API_ENDPOINTS.PROFILE.GET, config);
+        
+        // Fetch profile and applications in parallel
+        const [profileRes, applicationsRes] = await Promise.all([
+          axios.get(API_ENDPOINTS.PROFILE.GET, config),
+          axios.get(API_ENDPOINTS.CANDIDATE.APPLICATIONS, config).catch(() => ({ data: [] }))
+        ]);
         
         if (profileRes.data) {
           setHasProfile(true);
@@ -101,6 +107,12 @@ const Careers = () => {
           setHasProfile(false);
           setProfileName(null);
           setIsProfileLocked(false);
+        }
+        
+        // Store applied job IDs as a Set for O(1) lookup
+        if (applicationsRes.data && Array.isArray(applicationsRes.data)) {
+          const jobIds = new Set(applicationsRes.data.map(app => app.jobId));
+          setAppliedJobIds(jobIds);
         }
       } catch (err) {
         // Handle 404 - profile not found (normal for new users)
@@ -906,12 +918,21 @@ const Careers = () => {
                           </h2>
                         </div>
                         {isAuthenticated && hasProfile && (
-                          <button
-                            onClick={() => handleApply(job._id)}
-                            className="btn-primary rounded-lg flex-shrink-0"
-                          >
-                            Apply Now
-                          </button>
+                          appliedJobIds.has(job._id) ? (
+                            <button
+                              disabled
+                              className="bg-yellow-100 text-yellow-700 cursor-default border border-yellow-200 px-6 py-3 rounded-lg font-semibold flex-shrink-0"
+                            >
+                              Already Applied
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleApply(job._id)}
+                              className="btn-primary rounded-lg flex-shrink-0"
+                            >
+                              Apply Now
+                            </button>
+                          )
                         )}
                       </div>
                       <p className="text-gray-600 leading-relaxed">
