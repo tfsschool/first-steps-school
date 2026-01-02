@@ -9,7 +9,7 @@ import { showWarning } from '../utils/toast';
 const Apply = () => {
   const { jobId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, updateAppliedJobs, appliedJobs } = useAuth();
   
   const [profile, setProfile] = useState(null);
   const [job, setJob] = useState(null);
@@ -292,7 +292,11 @@ const Apply = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true
       });
-      // Show thank you popup
+      
+      // Update AuthContext with applied job for persistence and cross-tab sync
+      const updatedAppliedJobs = [...appliedJobs, jobId];
+      updateAppliedJobs(updatedAppliedJobs);
+      
       setShowThankYou(true);
       // Redirect to thank you page after 3 seconds
       setTimeout(() => {

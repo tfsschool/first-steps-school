@@ -8,18 +8,28 @@ import SEO from '../components/SEO';
 const Careers = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isAuthenticated, userEmail, loading: authLoading, authChecked, logout } = useAuth();
+  const { 
+    isAuthenticated, 
+    userEmail, 
+    loading: authLoading, 
+    authChecked, 
+    logout,
+    hasProfile: hasProfileFromContext,
+    appliedJobs: appliedJobsFromContext,
+    updateProfileState,
+    updateAppliedJobs
+  } = useAuth();
   
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Profile states
-  const [hasProfile, setHasProfile] = useState(false);
+  // Profile states - use context state with local cache
+  const [hasProfile, setHasProfile] = useState(hasProfileFromContext);
   const [profileLoading, setProfileLoading] = useState(false);
-  const [profileName, setProfileName] = useState(null);
-  const [isProfileLocked, setIsProfileLocked] = useState(false);
-  const [appliedJobIds, setAppliedJobIds] = useState(new Set());
+  const [profileName, setProfileName] = useState(() => localStorage.getItem('profileName') || null);
+  const [isProfileLocked, setIsProfileLocked] = useState(() => localStorage.getItem('isProfileLocked') === 'true');
+  const [appliedJobIds, setAppliedJobIds] = useState(() => new Set(appliedJobsFromContext));
   
   // Modal states
   const [showInitialModal, setShowInitialModal] = useState(false);
@@ -38,6 +48,15 @@ const Careers = () => {
   const [showNotRegisteredInLogin, setShowNotRegisteredInLogin] = useState(false);
   const [bannerStatus, setBannerStatus] = useState('idle'); // 'idle', 'verification_sent', 'login_link_sent'
   const [bannerEmail, setBannerEmail] = useState(''); // Store email for banner display
+
+  // Sync context state to local state
+  useEffect(() => {
+    setHasProfile(hasProfileFromContext);
+  }, [hasProfileFromContext]);
+
+  useEffect(() => {
+    setAppliedJobIds(new Set(appliedJobsFromContext));
+  }, [appliedJobsFromContext]);
 
   // Fetch jobs ONCE on mount
   useEffect(() => {
@@ -75,6 +94,8 @@ const Careers = () => {
         setProfileLoading(false);
         setIsProfileLocked(false);
         setAppliedJobIds(new Set());
+        updateProfileState(false);
+        updateAppliedJobs([]);
         return;
       }
 
@@ -101,19 +122,29 @@ const Careers = () => {
         ]);
         
         if (profileRes.data) {
-          setHasProfile(true);
-          setProfileName(profileRes.data.fullName || userEmail);
-          setIsProfileLocked(profileRes.data.isLocked || false);
+          const profileExists = true;
+          const profileData = {
+            fullName: profileRes.data.fullName || userEmail,
+            isLocked: profileRes.data.isLocked || false
+          };
+          setHasProfile(profileExists);
+          setProfileName(profileData.fullName);
+          setIsProfileLocked(profileData.isLocked);
+          // Update context state for persistence
+          updateProfileState(profileExists, profileData);
         } else {
           setHasProfile(false);
           setProfileName(null);
           setIsProfileLocked(false);
+          updateProfileState(false);
         }
         
         // Store applied job IDs as a Set for O(1) lookup
         if (applicationsRes.data && Array.isArray(applicationsRes.data)) {
-          const jobIds = new Set(applicationsRes.data.map(app => app.jobId));
-          setAppliedJobIds(jobIds);
+          const jobIds = applicationsRes.data.map(app => app.jobId);
+          setAppliedJobIds(new Set(jobIds));
+          // Update context state for persistence
+          updateAppliedJobs(jobIds);
         }
       } catch (err) {
         // Handle 404 - profile not found (normal for new users)
@@ -128,6 +159,8 @@ const Careers = () => {
           setProfileName(null);
           setIsProfileLocked(false);
           setAppliedJobIds(new Set());
+          updateProfileState(false);
+          updateAppliedJobs([]);
           // Token is invalid, trigger logout
           logout();
         }
@@ -147,7 +180,7 @@ const Careers = () => {
     };
 
     fetchProfile();
-  }, [isAuthenticated, authChecked, authLoading, userEmail, logout]);
+  }, [isAuthenticated, authChecked, authLoading, userEmail, logout, updateProfileState, updateAppliedJobs]);
 
   if (loading || authLoading || profileLoading) {
     return (
