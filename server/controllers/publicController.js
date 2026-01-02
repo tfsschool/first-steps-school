@@ -11,9 +11,12 @@ const { sendEmail } = require('../config/email');
 const getOpenJobs = async (req, res) => {
   try {
     const jobs = await Job.find({ status: 'Open' });
-    res.json(jobs);
+    // Always return an array, even if empty
+    res.json(Array.isArray(jobs) ? jobs : []);
   } catch (err) {
-    res.status(500).send('Server Error');
+    console.error('Error fetching jobs:', err);
+    // Return empty array on error instead of string
+    res.status(500).json([]);
   }
 };
 

@@ -41,9 +41,11 @@ const Careers = () => {
     const fetchJobs = async () => {
       try {
         const res = await axios.get(API_ENDPOINTS.PUBLIC.JOBS);
-        setJobs(res.data);
+        // Ensure res.data is an array before setting
+        setJobs(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         setError('Error loading job positions. Please try again later.');
+        setJobs([]); // Set empty array on error
       } finally {
         setLoading(false);
       }
