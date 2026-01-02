@@ -507,7 +507,7 @@ const Apply = () => {
         </section>
       </div>
 
-      {/* Thank You Popup */}
+      {/* Success Popup */}
       {showThankYou && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-lift p-8 max-w-md w-full mx-4 text-center border border-gray-100 max-h-[90vh] overflow-y-auto">
@@ -520,7 +520,7 @@ const Apply = () => {
             <p className="text-gray-600 mb-4">
               Your application has been submitted successfully. You will receive a confirmation email shortly.
             </p>
-            <p className="text-sm text-gray-500">Redirecting to thank you page...</p>
+            <p className="text-sm text-gray-500">Redirecting to dashboard...</p>
           </div>
         </div>
       )}

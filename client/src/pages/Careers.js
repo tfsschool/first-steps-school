@@ -590,38 +590,12 @@ const Careers = () => {
                 {isAuthenticated && hasProfile && (
                   <div className="max-w-5xl mx-auto mb-8">
                     <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-5 sm:p-6">
-                      {/* Application Status Badges - Show ALL applications */}
-                      {allApplications.length > 0 && (
-                        <div className="mb-4 space-y-3">
-                          {allApplications.map((app, index) => {
-                            const colors = getStatusColor(app.status);
-                            const isLocked = ['Pending', 'Reviewed'].includes(app.status);
-                            return (
-                              <div key={app._id || index} className={`p-4 rounded-lg border-2 ${colors.bg} ${colors.border}`}>
-                                <div className="flex items-center gap-3">
-                                  <svg className={`w-6 h-6 ${colors.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    {isLocked ? (
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    ) : app.status === 'Rejected' ? (
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    ) : (
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    )}
-                                  </svg>
-                                  <div className="flex-1">
-                                    <p className={`font-bold ${colors.text}`}>
-                                      {app.jobId?.title || 'Job Application'}
-                                    </p>
-                                    <p className={`text-sm ${colors.textLight}`}>
-                                      Status: <span className="font-semibold">{app.status}</span>
-                                      {isLocked && ' • Profile Locked'}
-                                      {app.appliedAt && ` • Applied ${new Date(app.appliedAt).toLocaleDateString()}`}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
+                      {/* Minimal Profile Locked Message */}
+                      {isProfileLocked && (
+                        <div className="mb-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+                          <p className="text-sm text-yellow-800 text-center">
+                            <span className="font-semibold">Profile Locked:</span> Your profile is locked due to active applications under review.
+                          </p>
                         </div>
                       )}
                       
@@ -1018,21 +992,37 @@ const Careers = () => {
                           </h2>
                         </div>
                         {isAuthenticated && hasProfile && (
-                          appliedJobIds.has(job._id) ? (
-                            <button
-                              disabled
-                              className="bg-yellow-100 text-yellow-700 cursor-default border border-yellow-200 px-6 py-3 rounded-lg font-semibold flex-shrink-0"
-                            >
-                              Already Applied
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleApply(job._id)}
-                              className="btn-primary rounded-lg flex-shrink-0"
-                            >
-                              Apply Now
-                            </button>
-                          )
+                          <div className="flex flex-col items-end gap-2">
+                            {appliedJobIds.has(job._id) ? (
+                              <>
+                                <button
+                                  disabled
+                                  className="bg-yellow-100 text-yellow-700 cursor-default border border-yellow-200 px-6 py-3 rounded-lg font-semibold flex-shrink-0"
+                                >
+                                  Already Applied
+                                </button>
+                                {(() => {
+                                  const thisJobApplication = allApplications.find(app => app.jobId?._id === job._id);
+                                  if (thisJobApplication) {
+                                    const colors = getStatusColor(thisJobApplication.status);
+                                    return (
+                                      <div className={`px-3 py-1.5 rounded-md text-xs font-semibold ${colors.bg} ${colors.text} border ${colors.border}`}>
+                                        Status: {thisJobApplication.status}
+                                      </div>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => handleApply(job._id)}
+                                className="btn-primary rounded-lg flex-shrink-0"
+                              >
+                                Apply Now
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                       <p className="text-gray-600 leading-relaxed">
