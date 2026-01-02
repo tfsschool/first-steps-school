@@ -37,7 +37,13 @@ export const AuthProvider = ({ children }) => {
       if (e.key === 'token') {
         // Token changed in another tab
         if (e.newValue) {
-          // Token added - revalidate with backend
+          // Token added - set authenticated IMMEDIATELY (optimistic update)
+          setIsAuthenticated(true);
+          const storedEmail = localStorage.getItem('userEmail');
+          if (storedEmail) {
+            setUserEmail(storedEmail);
+          }
+          // Then revalidate with backend in background
           setAuthChecked(false);
           checkAuth();
         } else {
@@ -92,7 +98,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('[AuthContext] checkAuth error:', err.response?.status, err.message);
-      // Handle 401/403 - clear zombie states (invalid/expired token)
+      // ONLY clear auth on explicit 401/403 (invalid/expired token)
       if (err.response?.status === 401 || err.response?.status === 403) {
         console.log('[AuthContext] Invalid token (401/403), clearing auth');
         setIsAuthenticated(false);
@@ -100,19 +106,11 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('userEmail');
       }
-      // Handle 503 - service unavailable (keep token, might be temporary)
-      else if (err.response?.status === 503) {
-        console.log('[AuthContext] Service unavailable (503), keeping token');
-        setIsAuthenticated(false);
-        setUserEmail(null);
-        // Don't remove token - service might come back
-      }
-      // Network errors or other issues - keep token, might be temporary
+      // For ALL other errors (500, 503, network errors) - keep user logged in (optimistic)
       else {
-        console.log('[AuthContext] Network/server error, keeping token');
-        setIsAuthenticated(false);
-        setUserEmail(null);
-        // Don't remove token on network errors - keep it for retry
+        console.log('[AuthContext] Server/network error (status:', err.response?.status, '), keeping token and staying logged in');
+        // Keep isAuthenticated as true (optimistic) - don't logout on temporary issues
+        // The token is still in localStorage and will be retried on next checkAuth
       }
     } finally {
       setLoading(false);
