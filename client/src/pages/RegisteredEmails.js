@@ -402,9 +402,6 @@ const CandidateDetails = ({ candidate }) => {
             <div className="col-span-2">
               <span className="text-gray-600">Full Name:</span>
               <span className="ml-2 font-medium">{profile.fullName || 'N/A'}</span>
-              {candidate.email && (
-                <span className="text-gray-500 font-normal ml-2">({candidate.email})</span>
-              )}
             </div>
             <div>
               <span className="text-gray-600">Cell Number:</span>

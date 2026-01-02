@@ -437,7 +437,7 @@ const Careers = () => {
                       <div className="flex flex-col gap-4">
                         <div>
                           <p className="text-sm sm:text-base text-gray-700 mb-2">
-                            You are logged in as <span className="font-semibold text-theme-dark">{userEmail}</span>.
+                            Logged in as: <span className="font-semibold text-theme-dark block sm:inline">{userEmail}</span>
                           </p>
                           <p className="text-sm sm:text-base text-gray-700 mb-2">
                             Before applying for any position, please complete your applicant profile.
@@ -478,14 +478,13 @@ const Careers = () => {
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex-1">
                           <p className="text-sm sm:text-base text-gray-700 mb-2">
-                            You are logged in as{' '}
-                            <span className="font-semibold text-theme-dark">
+                            Logged in as:{' '}
+                            <span className="font-semibold text-theme-dark block sm:inline">
                               {profileName || userEmail}
-                            </span>{' '}
-                            <span className="text-gray-500 font-normal">
-                              ({userEmail})
                             </span>
-                            .
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {userEmail}
                           </p>
                           <p className="text-sm sm:text-base text-gray-700 mt-1">
                             You may update your profile or apply for available positions.
