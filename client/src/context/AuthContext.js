@@ -26,16 +26,43 @@ export const AuthProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Listen for storage events (cross-tab synchronization)
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'token') {
+        // Token changed in another tab
+        if (e.newValue) {
+          // Token added - re-check auth
+          setAuthChecked(false);
+          checkAuth();
+        } else {
+          // Token removed - logout
+          setIsAuthenticated(false);
+          setUserEmail(null);
+          setLoading(false);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const checkAuth = async () => {
-    if (authChecked) {
-      return; // Prevent repeated calls
+    // Always read token from localStorage at start
+    const token = localStorage.getItem('token');
+    
+    // If no token, immediately set unauthenticated
+    if (!token) {
+      setIsAuthenticated(false);
+      setUserEmail(null);
+      setLoading(false);
+      setAuthChecked(true);
+      return;
     }
 
     try {
-      // Get token from localStorage and include in headers
-      const token = localStorage.getItem('token');
-      const config = token ? { headers: { 'x-auth-token': token } } : {};
-      // Use relative path since baseURL is set in axios config
+      const config = { headers: { 'x-auth-token': token } };
       const res = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH, config);
       
       if (res.data.authenticated) {
@@ -44,27 +71,41 @@ export const AuthProvider = ({ children }) => {
       } else {
         setIsAuthenticated(false);
         setUserEmail(null);
+        localStorage.removeItem('token');
       }
     } catch (err) {
-      // Handle 401 - user not authenticated (normal)
-      if (err.response?.status === 401) {
+      // Handle 401/403 - clear zombie states
+      if (err.response?.status === 401 || err.response?.status === 403) {
         setIsAuthenticated(false);
         setUserEmail(null);
+        localStorage.removeItem('token');
       }
-      // Handle 503 - service unavailable (stop retries)
+      // Handle 503 - service unavailable
       else if (err.response?.status === 503) {
         setIsAuthenticated(false);
         setUserEmail(null);
+        localStorage.removeItem('token');
       }
       // Other errors
       else {
         setIsAuthenticated(false);
         setUserEmail(null);
+        localStorage.removeItem('token');
       }
     } finally {
       setLoading(false);
       setAuthChecked(true);
     }
+  };
+
+  const login = (token, email) => {
+    // Set token in localStorage
+    localStorage.setItem('token', token);
+    // Update state
+    setIsAuthenticated(true);
+    setUserEmail(email);
+    setLoading(false);
+    setAuthChecked(true);
   };
 
   const logout = async () => {
@@ -74,6 +115,9 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
+      // Remove token from localStorage
+      localStorage.removeItem('token');
+      // Update state
       setIsAuthenticated(false);
       setUserEmail(null);
     }
@@ -85,6 +129,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     authChecked,
     checkAuth,
+    login,
     logout,
     setAuthenticated: (auth, email) => {
       setIsAuthenticated(auth);

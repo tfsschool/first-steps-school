@@ -11,7 +11,7 @@ const LoginVerify = () => {
   const email = searchParams.get('email');
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [message, setMessage] = useState('');
-  const { checkAuth, setAuthenticated } = useAuth();
+  const { login, checkAuth, setAuthenticated } = useAuth();
 
   useEffect(() => {
     const verifyLogin = async () => {
@@ -52,16 +52,13 @@ const LoginVerify = () => {
         setStatus('success');
         setMessage(res.data.msg || 'Login successful!');
         
-        // Save token to localStorage for header-based authentication
-        if (res.data.token) {
-          localStorage.setItem('token', res.data.token);
-        }
-        
-        // Update auth context
-        if (res.data.email) {
-          setAuthenticated(true, res.data.email);
+        // Use login() helper to set token and update state
+        if (res.data.token && res.data.email) {
+          login(res.data.token, res.data.email);
+        } else if (res.data.token) {
+          login(res.data.token, email);
         } else {
-          // Refresh auth status
+          // Fallback: refresh auth status
           await checkAuth();
         }
 

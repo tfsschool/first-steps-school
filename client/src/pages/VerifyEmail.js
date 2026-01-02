@@ -13,7 +13,7 @@ const VerifyEmail = () => {
   const [message, setMessage] = useState('');
   const [resending, setResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
-  const { setAuthenticated } = useAuth();
+  const { login, setAuthenticated } = useAuth();
 
   useEffect(() => {
     const verifyEmail = async () => {
@@ -32,13 +32,12 @@ const VerifyEmail = () => {
         setStatus('success');
         setMessage(res.data.msg || (res.data.alreadyVerified ? 'Email is already verified. You have been logged in.' : 'Email verified successfully!'));
         
-        // Save token to localStorage if provided
-        if (res.data.token) {
-          localStorage.setItem('token', res.data.token);
-        }
-        
-        // Update auth context (session is created automatically by backend via cookie)
-        if (res.data.email) {
+        // Use login() helper to set token and update state
+        if (res.data.token && res.data.email) {
+          login(res.data.token, res.data.email);
+        } else if (res.data.token && email) {
+          login(res.data.token, email);
+        } else if (res.data.email) {
           setAuthenticated(true, res.data.email);
         }
 

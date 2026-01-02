@@ -77,8 +77,19 @@ const Careers = () => {
 
       setProfileLoading(true);
       try {
+        // Always get fresh token from localStorage
         const token = localStorage.getItem('token');
-        const config = token ? { headers: { 'x-auth-token': token } } : { withCredentials: true };
+        
+        // Double-check: if authenticated but no token, something is wrong
+        if (!token) {
+          setHasProfile(false);
+          setProfileName(null);
+          setIsProfileLocked(false);
+          setProfileLoading(false);
+          return;
+        }
+        
+        const config = { headers: { 'x-auth-token': token }, withCredentials: true };
         const profileRes = await axios.get(API_ENDPOINTS.PROFILE.GET, config);
         
         if (profileRes.data) {
@@ -91,8 +102,14 @@ const Careers = () => {
           setIsProfileLocked(false);
         }
       } catch (err) {
-        // Handle 404 - profile not found (normal)
+        // Handle 404 - profile not found (normal for new users)
         if (err.response?.status === 404) {
+          setHasProfile(false);
+          setProfileName(null);
+          setIsProfileLocked(false);
+        }
+        // Handle 401/403 - token invalid, clear state
+        else if (err.response?.status === 401 || err.response?.status === 403) {
           setHasProfile(false);
           setProfileName(null);
           setIsProfileLocked(false);
@@ -115,8 +132,7 @@ const Careers = () => {
     };
 
     fetchProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, authChecked]);
+  }, [isAuthenticated, authChecked, authLoading, userEmail]);
 
   if (loading || authLoading || profileLoading) {
     return (
