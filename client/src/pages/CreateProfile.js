@@ -1304,7 +1304,7 @@ const CreateProfile = () => {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-yellow-700">
-                    <span className="font-bold">Your profile is locked because you have active job applications. You cannot edit it.</span>
+                    <span className="font-bold">Profile Locked:</span> You have already submitted an application. To ensure application integrity, your profile details cannot be changed.
                   </p>
                 </div>
               </div>
@@ -1337,7 +1337,7 @@ const CreateProfile = () => {
               <button
                 type="button"
                 onClick={() => autoSave(true)}
-                disabled={saving || !isAuthenticated || isLocked}
+                disabled={saving || !isAuthenticated}
                 className="text-theme-blue hover:text-theme-green text-sm font-semibold underline disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 {saving ? 'Saving...' : 'Save Progress'}
