@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { BASE_URL } from './api';
+import { responseValidationInterceptor, errorValidationInterceptor } from '../utils/apiResponseValidator';
 
 // Configure axios defaults for all requests
 // This ensures HTTP-only cookies are sent with every request
@@ -7,9 +8,12 @@ axios.defaults.baseURL = BASE_URL;
 axios.defaults.withCredentials = true; // MANDATORY: Send cookies with all requests for HTTP-only cookie authentication
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
-// Interceptor to handle expected errors gracefully
+// Response interceptor to validate JSON responses (not HTML)
 axios.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Validate that response is JSON, not HTML
+    return responseValidationInterceptor(response);
+  },
   (error) => {
     // Suppress console errors for 401 on check-auth (expected when not logged in)
     if (error.config?.url?.includes('/check-auth') && error.response?.status === 401) {
@@ -21,8 +25,8 @@ axios.interceptors.response.use(
       return Promise.reject(error);
     }
     
-    // For all other errors, let them be handled normally
-    return Promise.reject(error);
+    // Validate error responses (check for HTML error pages)
+    return errorValidationInterceptor(error);
   }
 );
 
