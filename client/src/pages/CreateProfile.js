@@ -8,7 +8,7 @@ const CreateProfile = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const jobIdParam = searchParams.get('jobId');
-  const { isAuthenticated, userEmail, loading: authLoading, updateProfileState } = useAuth();
+  const { isAuthenticated, userEmail, loading: authLoading } = useAuth();
 
   const formatCnic = (value) => {
     const digitsOnly = String(value || '').replace(/[^\d]/g, '').slice(0, 13);
@@ -581,7 +581,7 @@ const CreateProfile = () => {
       
       submitData.append('profileData', JSON.stringify(profileData));
       
-      const response = await axios.post(API_ENDPOINTS.PROFILE.CREATE_UPDATE, submitData, {
+      await axios.post(API_ENDPOINTS.PROFILE.CREATE_UPDATE, submitData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true
       });
@@ -589,12 +589,6 @@ const CreateProfile = () => {
       // Update state immediately for real-time UI updates
       setProfileLoaded(true);
       setShowApplyButton(true);
-
-      // Update AuthContext with profile state for persistence and cross-tab sync
-      updateProfileState(true, {
-        fullName: formData.fullName,
-        isLocked: response.data?.isLocked || false
-      });
 
       if (missing.length > 0) {
         setPopupMessage(`Profile saved, but it is incomplete.\n\n${formatMissingFieldsMessage(missing)}`);

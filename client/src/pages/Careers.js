@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from '../config/axios';
 import { API_ENDPOINTS } from '../config/api';
@@ -13,23 +13,17 @@ const Careers = () => {
     userEmail, 
     loading: authLoading, 
     authChecked, 
-    logout,
-    hasProfile: hasProfileFromContext,
-    appliedJobs: appliedJobsFromContext,
-    updateProfileState,
-    updateAppliedJobs
+    logout
   } = useAuth();
   
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
-  // Profile states - use context state with local cache
-  const [hasProfile, setHasProfile] = useState(hasProfileFromContext);
+  const [hasProfile, setHasProfile] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
-  const [profileName, setProfileName] = useState(() => localStorage.getItem('profileName') || null);
-  const [isProfileLocked, setIsProfileLocked] = useState(() => localStorage.getItem('isProfileLocked') === 'true');
-  const [appliedJobIds, setAppliedJobIds] = useState(() => new Set(appliedJobsFromContext));
+  const [profileName, setProfileName] = useState(null);
+  const [isProfileLocked, setIsProfileLocked] = useState(false);
+  const [appliedJobIds, setAppliedJobIds] = useState(new Set());
   
   // Modal states
   const [showInitialModal, setShowInitialModal] = useState(false);
@@ -49,14 +43,12 @@ const Careers = () => {
   const [bannerStatus, setBannerStatus] = useState('idle'); // 'idle', 'verification_sent', 'login_link_sent'
   const [bannerEmail, setBannerEmail] = useState(''); // Store email for banner display
 
-  // Sync context state to local state
+  // Refresh user data when component mounts or when returning to page
   useEffect(() => {
-    setHasProfile(hasProfileFromContext);
-  }, [hasProfileFromContext]);
-
-  useEffect(() => {
-    setAppliedJobIds(new Set(appliedJobsFromContext));
-  }, [appliedJobsFromContext]);
+    if (isAuthenticated && authChecked) {
+      refreshUserData();
+    }
+  }, [isAuthenticated, authChecked]);
 
   // Fetch jobs ONCE on mount
   useEffect(() => {
@@ -81,106 +73,117 @@ const Careers = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch profile ONLY when authenticated and auth check is complete
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!authChecked || authLoading) {
-        return; // Wait for auth check to complete
-      }
+  // Fetch profile and application data - single source of truth from backend
+  const fetchProfileAndApplications = useCallback(async () => {
+    if (!authChecked || authLoading) {
+      return; // Wait for auth check to complete
+    }
 
-      if (!isAuthenticated) {
+    if (!isAuthenticated) {
+      setHasProfile(false);
+      setProfileName(null);
+      setProfileLoading(false);
+      setIsProfileLocked(false);
+      setAppliedJobIds(new Set());
+      return;
+    }
+
+    setProfileLoading(true);
+    try {
+      // Always get fresh token from localStorage
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
         setHasProfile(false);
         setProfileName(null);
-        setProfileLoading(false);
         setIsProfileLocked(false);
-        setAppliedJobIds(new Set());
-        updateProfileState(false);
-        updateAppliedJobs([]);
+        setProfileLoading(false);
         return;
       }
+      
+      const config = { headers: { 'x-auth-token': token }, withCredentials: true };
+      
+      // Fetch profile and applications in parallel from backend
+      const [profileRes, applicationsRes] = await Promise.all([
+        axios.get(API_ENDPOINTS.PROFILE.GET, config),
+        axios.get(API_ENDPOINTS.CANDIDATE.APPLICATIONS, config).catch(() => ({ data: [] }))
+      ]);
+      
+      if (profileRes.data) {
+        setHasProfile(true);
+        setProfileName(profileRes.data.fullName || userEmail);
+        setIsProfileLocked(profileRes.data.isLocked || false);
+      } else {
+        setHasProfile(false);
+        setProfileName(null);
+        setIsProfileLocked(false);
+      }
+      
+      // Store applied job IDs as a Set for O(1) lookup
+      if (applicationsRes.data && Array.isArray(applicationsRes.data)) {
+        const jobIds = applicationsRes.data.map(app => app.jobId);
+        setAppliedJobIds(new Set(jobIds));
+      }
+    } catch (err) {
+      // Handle 404 - profile not found (normal for new users)
+      if (err.response?.status === 404) {
+        setHasProfile(false);
+        setProfileName(null);
+        setIsProfileLocked(false);
+      }
+      // Handle 401/403 - token invalid, clear state and logout
+      else if (err.response?.status === 401 || err.response?.status === 403) {
+        setHasProfile(false);
+        setProfileName(null);
+        setIsProfileLocked(false);
+        setAppliedJobIds(new Set());
+        // Token is invalid, trigger logout
+        logout();
+      }
+      // Handle 503 - service unavailable (don't retry)
+      else if (err.response?.status === 503) {
+        setHasProfile(false);
+        setProfileName(null);
+        setIsProfileLocked(false);
+      }
+      // Other errors - don't clear state, just log
+      else {
+        console.error('Error fetching profile:', err);
+      }
+    } finally {
+      setProfileLoading(false);
+    }
+  }, [isAuthenticated, authChecked, authLoading, userEmail, logout]);
 
-      setProfileLoading(true);
-      try {
-        // Always get fresh token from localStorage
-        const token = localStorage.getItem('token');
-        
-        // Double-check: if authenticated but no token, something is wrong
-        if (!token) {
-          setHasProfile(false);
-          setProfileName(null);
-          setIsProfileLocked(false);
-          setProfileLoading(false);
-          return;
-        }
-        
-        const config = { headers: { 'x-auth-token': token }, withCredentials: true };
-        
-        // Fetch profile and applications in parallel
-        const [profileRes, applicationsRes] = await Promise.all([
-          axios.get(API_ENDPOINTS.PROFILE.GET, config),
-          axios.get(API_ENDPOINTS.CANDIDATE.APPLICATIONS, config).catch(() => ({ data: [] }))
-        ]);
-        
-        if (profileRes.data) {
-          const profileExists = true;
-          const profileData = {
-            fullName: profileRes.data.fullName || userEmail,
-            isLocked: profileRes.data.isLocked || false
-          };
-          setHasProfile(profileExists);
-          setProfileName(profileData.fullName);
-          setIsProfileLocked(profileData.isLocked);
-          // Update context state for persistence
-          updateProfileState(profileExists, profileData);
-        } else {
-          setHasProfile(false);
-          setProfileName(null);
-          setIsProfileLocked(false);
-          updateProfileState(false);
-        }
-        
-        // Store applied job IDs as a Set for O(1) lookup
-        if (applicationsRes.data && Array.isArray(applicationsRes.data)) {
-          const jobIds = applicationsRes.data.map(app => app.jobId);
-          setAppliedJobIds(new Set(jobIds));
-          // Update context state for persistence
-          updateAppliedJobs(jobIds);
-        }
-      } catch (err) {
-        // Handle 404 - profile not found (normal for new users)
-        if (err.response?.status === 404) {
-          setHasProfile(false);
-          setProfileName(null);
-          setIsProfileLocked(false);
-        }
-        // Handle 401/403 - token invalid, clear state and logout
-        else if (err.response?.status === 401 || err.response?.status === 403) {
-          setHasProfile(false);
-          setProfileName(null);
-          setIsProfileLocked(false);
-          setAppliedJobIds(new Set());
-          updateProfileState(false);
-          updateAppliedJobs([]);
-          // Token is invalid, trigger logout
-          logout();
-        }
-        // Handle 503 - service unavailable (don't retry)
-        else if (err.response?.status === 503) {
-          setHasProfile(false);
-          setProfileName(null);
-          setIsProfileLocked(false);
-        }
-        // Other errors - don't clear state, just log
-        else {
-          console.error('Error fetching profile:', err);
-        }
-      } finally {
-        setProfileLoading(false);
+  // Fetch on mount and when auth changes
+  useEffect(() => {
+    fetchProfileAndApplications();
+  }, [fetchProfileAndApplications]);
+
+  // Re-fetch when page becomes visible (user returns from another tab/page)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isAuthenticated) {
+        // Page is now visible - re-fetch to ensure fresh data
+        fetchProfileAndApplications();
       }
     };
 
-    fetchProfile();
-  }, [isAuthenticated, authChecked, authLoading, userEmail, logout, updateProfileState, updateAppliedJobs]);
+    const handleFocus = () => {
+      if (isAuthenticated) {
+        // Window regained focus - re-fetch to ensure fresh data
+        fetchProfileAndApplications();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [isAuthenticated, fetchProfileAndApplications]);
 
   if (loading || authLoading || profileLoading) {
     return (
