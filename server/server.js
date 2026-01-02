@@ -84,7 +84,7 @@ app.use(cors({
   },
   credentials: true, // REQUIRED: Allows cookies to be sent cross-site
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Explicitly allow all HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'], // Headers that can be sent
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'x-auth-token'], // Headers that can be sent
   exposedHeaders: ['Set-Cookie'], // Headers that frontend can access
   optionsSuccessStatus: 200, // For legacy browser support
   preflightContinue: false, // Pass preflight response to next handler
