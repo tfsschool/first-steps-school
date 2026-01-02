@@ -591,13 +591,13 @@ const Careers = () => {
                   <div className="max-w-5xl mx-auto mb-8">
                     <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-5 sm:p-6">
                       {/* Minimal Profile Locked Message */}
-                      {isProfileLocked && (
+                      {/* {isProfileLocked && (
                         <div className="mb-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
                           <p className="text-sm text-yellow-800 text-center">
                             <span className="font-semibold">Profile Locked:</span> Your profile is locked due to active applications under review.
                           </p>
                         </div>
-                      )}
+                      )} */}
                       
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex-1">
@@ -992,37 +992,31 @@ const Careers = () => {
                           </h2>
                         </div>
                         {isAuthenticated && hasProfile && (
-                          <div className="flex flex-col items-end gap-2">
-                            {appliedJobIds.has(job._id) ? (
-                              <>
-                                <button
-                                  disabled
-                                  className="bg-yellow-100 text-yellow-700 cursor-default border border-yellow-200 px-6 py-3 rounded-lg font-semibold flex-shrink-0"
-                                >
+                          appliedJobIds.has(job._id) ? (
+                            (() => {
+                              const thisJobApplication = allApplications.find(app => app.jobId?._id === job._id);
+                              if (thisJobApplication) {
+                                const colors = getStatusColor(thisJobApplication.status);
+                                return (
+                                  <div className={`px-4 py-2.5 rounded-lg text-sm font-semibold ${colors.bg} ${colors.text} border-2 ${colors.border} flex-shrink-0`}>
+                                    Status: {thisJobApplication.status}
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-gray-100 text-gray-700 border-2 border-gray-300 flex-shrink-0">
                                   Already Applied
-                                </button>
-                                {(() => {
-                                  const thisJobApplication = allApplications.find(app => app.jobId?._id === job._id);
-                                  if (thisJobApplication) {
-                                    const colors = getStatusColor(thisJobApplication.status);
-                                    return (
-                                      <div className={`px-3 py-1.5 rounded-md text-xs font-semibold ${colors.bg} ${colors.text} border ${colors.border}`}>
-                                        Status: {thisJobApplication.status}
-                                      </div>
-                                    );
-                                  }
-                                  return null;
-                                })()}
-                              </>
-                            ) : (
-                              <button
-                                onClick={() => handleApply(job._id)}
-                                className="btn-primary rounded-lg flex-shrink-0"
-                              >
-                                Apply Now
-                              </button>
-                            )}
-                          </div>
+                                </div>
+                              );
+                            })()
+                          ) : (
+                            <button
+                              onClick={() => handleApply(job._id)}
+                              className="btn-primary rounded-lg flex-shrink-0"
+                            >
+                              Apply Now
+                            </button>
+                          )
                         )}
                       </div>
                       <p className="text-gray-600 leading-relaxed">
