@@ -27,16 +27,27 @@ const LoginVerify = () => {
         setStatus('success');
         setMessage(res.data.msg || 'Login successful!');
         
-        // CRITICAL: Call login() to update AuthContext immediately
+        // CRITICAL: Call login() to update AuthContext immediately with profile data
+        const profileData = {
+          hasProfile: res.data.hasProfile,
+          applicationStatus: res.data.applicationStatus
+        };
+        
         if (res.data.token && res.data.email) {
-          login(res.data.token, res.data.email);
+          login(res.data.token, res.data.email, profileData);
         } else if (res.data.token) {
-          login(res.data.token, email);
+          login(res.data.token, email, profileData);
         }
 
-        // Redirect
+        // Conditional routing based on profile status
         setTimeout(() => {
-          navigate('/careers');
+          if (res.data.hasProfile === false) {
+            // No profile exists - redirect to create profile
+            navigate('/create-profile');
+          } else {
+            // Profile exists - redirect to careers/jobs page
+            navigate('/careers');
+          }
         }, 1500);
       } catch (err) {
         setStatus('error');

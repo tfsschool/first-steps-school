@@ -12,18 +12,23 @@ const Careers = () => {
     isAuthenticated, 
     userEmail, 
     loading: authLoading, 
-    authChecked, 
+    authChecked,
+    hasProfile: authHasProfile,
+    applicationStatus,
     logout
   } = useAuth();
   
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [hasProfile, setHasProfile] = useState(false);
+  const [localHasProfile, setLocalHasProfile] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileName, setProfileName] = useState(null);
-  const [isProfileLocked, setIsProfileLocked] = useState(false);
   const [appliedJobIds, setAppliedJobIds] = useState(new Set());
+  
+  // Use hasProfile from AuthContext (more reliable) or fallback to local state
+  const hasProfile = authHasProfile || localHasProfile;
+  const isProfileLocked = applicationStatus?.isLocked || false;
   
   // Modal states
   const [showInitialModal, setShowInitialModal] = useState(false);
@@ -82,10 +87,9 @@ const Careers = () => {
 
     if (!isAuthenticated) {
       console.log('[Careers] User not authenticated, clearing profile state');
-      setHasProfile(false);
+      setLocalHasProfile(false);
       setProfileName(null);
       setProfileLoading(false);
-      setIsProfileLocked(false);
       setAppliedJobIds(new Set());
       return;
     }
@@ -97,9 +101,8 @@ const Careers = () => {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        setHasProfile(false);
+        setLocalHasProfile(false);
         setProfileName(null);
-        setIsProfileLocked(false);
         setProfileLoading(false);
         return;
       }
@@ -114,17 +117,14 @@ const Careers = () => {
       
       if (profileRes.data) {
         console.log('[Careers] Profile found:', {
-          fullName: profileRes.data.fullName,
-          isLocked: profileRes.data.isLocked
+          fullName: profileRes.data.fullName
         });
-        setHasProfile(true);
+        setLocalHasProfile(true);
         setProfileName(profileRes.data.fullName || userEmail);
-        setIsProfileLocked(profileRes.data.isLocked || false);
       } else {
         console.log('[Careers] No profile data returned');
-        setHasProfile(false);
+        setLocalHasProfile(false);
         setProfileName(null);
-        setIsProfileLocked(false);
       }
       
       // Store applied job IDs as a Set for O(1) lookup
@@ -136,16 +136,14 @@ const Careers = () => {
       // Handle 404 - profile not found (normal for new users)
       if (err.response?.status === 404) {
         console.log('[Careers] Profile not found (404) - new user, showing Create Profile');
-        setHasProfile(false);
+        setLocalHasProfile(false);
         setProfileName(null);
-        setIsProfileLocked(false);
       }
       // Handle 401/403 - token invalid, clear state and logout
       else if (err.response?.status === 401 || err.response?.status === 403) {
         console.log('[Careers] Invalid token (401/403), logging out');
-        setHasProfile(false);
+        setLocalHasProfile(false);
         setProfileName(null);
-        setIsProfileLocked(false);
         setAppliedJobIds(new Set());
         // Token is invalid, trigger logout
         logout();
@@ -153,9 +151,8 @@ const Careers = () => {
       // Handle 503 - service unavailable (don't retry)
       else if (err.response?.status === 503) {
         console.log('[Careers] Service unavailable (503)');
-        setHasProfile(false);
+        setLocalHasProfile(false);
         setProfileName(null);
-        setIsProfileLocked(false);
       }
       // Other errors - don't clear state, just log
       else {
@@ -575,6 +572,34 @@ const Careers = () => {
                 {isAuthenticated && hasProfile && (
                   <div className="max-w-5xl mx-auto mb-8">
                     <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-5 sm:p-6">
+                      {/* Application Status Badge */}
+                      {applicationStatus && (
+                        <div className={`mb-4 p-4 rounded-lg border-2 ${
+                          applicationStatus.isLocked 
+                            ? 'bg-yellow-50 border-yellow-300' 
+                            : 'bg-green-50 border-green-300'
+                        }`}>
+                          <div className="flex items-center gap-3">
+                            <svg className={`w-6 h-6 ${applicationStatus.isLocked ? 'text-yellow-600' : 'text-green-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              {applicationStatus.isLocked ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              )}
+                            </svg>
+                            <div className="flex-1">
+                              <p className={`font-bold ${applicationStatus.isLocked ? 'text-yellow-800' : 'text-green-800'}`}>
+                                {applicationStatus.isLocked ? 'Application Under Review' : 'Application Submitted'}
+                              </p>
+                              <p className={`text-sm ${applicationStatus.isLocked ? 'text-yellow-700' : 'text-green-700'}`}>
+                                {applicationStatus.jobTitle} • Status: {applicationStatus.status}
+                                {applicationStatus.isLocked && ' • Profile Locked'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex-1">
                           <p className="text-sm sm:text-base text-gray-700 mb-2">

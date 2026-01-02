@@ -489,12 +489,34 @@ router.get('/verify-login', async (req, res) => {
             const decoded = jwt.verify(existingToken, process.env.JWT_SECRET);
             if (decoded.candidateId && decoded.candidateId.toString() === candidate._id.toString()) {
               // User is already authenticated, return success (200) instead of error
+              // Check profile and application status
+              const UserProfile = require('../models/UserProfile');
+              const Application = require('../models/Application');
+              
+              const profile = await UserProfile.findOne({ candidateId: candidate._id }).lean();
+              const hasProfile = !!profile;
+              
+              const latestApplication = await Application.findOne({ candidateId: candidate._id })
+                .sort({ appliedAt: -1 })
+                .populate('jobId', 'title')
+                .lean();
+              
+              const applicationStatus = latestApplication ? {
+                jobId: latestApplication.jobId?._id,
+                jobTitle: latestApplication.jobId?.title,
+                status: latestApplication.status,
+                appliedAt: latestApplication.appliedAt,
+                isLocked: ['Pending', 'Reviewed'].includes(latestApplication.status)
+              } : null;
+              
               return res.json({ 
                 msg: 'You are already logged in!',
                 email: candidate.email,
                 authenticated: true,
                 token: existingToken,
-                alreadyLoggedIn: true
+                alreadyLoggedIn: true,
+                hasProfile,
+                applicationStatus
               });
             }
           } catch (e) {
@@ -517,13 +539,35 @@ router.get('/verify-login', async (req, res) => {
           sameSite: 'none'
         };
         res.cookie('authToken', authToken, options);
+        
+        // Check profile and application status
+        const UserProfile = require('../models/UserProfile');
+        const Application = require('../models/Application');
+        
+        const profile = await UserProfile.findOne({ candidateId: candidate._id }).lean();
+        const hasProfile = !!profile;
+        
+        const latestApplication = await Application.findOne({ candidateId: candidate._id })
+          .sort({ appliedAt: -1 })
+          .populate('jobId', 'title')
+          .lean();
+        
+        const applicationStatus = latestApplication ? {
+          jobId: latestApplication.jobId?._id,
+          jobTitle: latestApplication.jobId?.title,
+          status: latestApplication.status,
+          appliedAt: latestApplication.appliedAt,
+          isLocked: ['Pending', 'Reviewed'].includes(latestApplication.status)
+        } : null;
 
         return res.json({ 
           msg: 'Login successful!',
           email: candidate.email,
           authenticated: true,
           token: authToken,
-          tokenReused: true
+          tokenReused: true,
+          hasProfile,
+          applicationStatus
         });
       }
       
@@ -574,12 +618,34 @@ router.get('/verify-login', async (req, res) => {
       sameSite: 'none'
     };
     res.cookie('authToken', authToken, options);
+    
+    // Check profile and application status
+    const UserProfile = require('../models/UserProfile');
+    const Application = require('../models/Application');
+    
+    const profile = await UserProfile.findOne({ candidateId: candidate._id }).lean();
+    const hasProfile = !!profile;
+    
+    const latestApplication = await Application.findOne({ candidateId: candidate._id })
+      .sort({ appliedAt: -1 })
+      .populate('jobId', 'title')
+      .lean();
+    
+    const applicationStatus = latestApplication ? {
+      jobId: latestApplication.jobId?._id,
+      jobTitle: latestApplication.jobId?.title,
+      status: latestApplication.status,
+      appliedAt: latestApplication.appliedAt,
+      isLocked: ['Pending', 'Reviewed'].includes(latestApplication.status)
+    } : null;
 
     res.json({ 
       msg: 'Login successful!',
       email: candidate.email,
       authenticated: true,
-      token: authToken
+      token: authToken,
+      hasProfile,
+      applicationStatus
     });
   } catch (err) {
     console.error('Verify login error:', err);
@@ -593,11 +659,32 @@ router.get('/check-auth', authenticate, async (req, res) => {
     // If middleware passes, user is authenticated
     const candidate = await Candidate.findById(req.candidate.id);
     
+    // Check profile and application status
+    const UserProfile = require('../models/UserProfile');
+    const Application = require('../models/Application');
+    
+    const profile = await UserProfile.findOne({ candidateId: candidate._id }).lean();
+    const hasProfile = !!profile;
+    
+    const latestApplication = await Application.findOne({ candidateId: candidate._id })
+      .sort({ appliedAt: -1 })
+      .populate('jobId', 'title')
+      .lean();
+    
+    const applicationStatus = latestApplication ? {
+      jobId: latestApplication.jobId?._id,
+      jobTitle: latestApplication.jobId?.title,
+      status: latestApplication.status,
+      appliedAt: latestApplication.appliedAt,
+      isLocked: ['Pending', 'Reviewed'].includes(latestApplication.status)
+    } : null;
+    
     res.json({
       authenticated: true,
       email: candidate.email,
       emailVerified: candidate.emailVerified,
-      profileExists: !!candidate.profileId
+      hasProfile,
+      applicationStatus
     });
   } catch (err) {
     console.error('Check auth error:', err);

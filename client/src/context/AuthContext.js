@@ -22,6 +22,10 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
+  
+  // Profile and application status from backend
+  const [hasProfile, setHasProfile] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState(null);
 
   // Check authentication status ONCE on mount
   useEffect(() => {
@@ -70,9 +74,15 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true);
         setUserEmail(res.data.email);
         localStorage.setItem('userEmail', res.data.email);
+        
+        // Store profile and application status
+        setHasProfile(res.data.hasProfile || false);
+        setApplicationStatus(res.data.applicationStatus || null);
       } else {
         setIsAuthenticated(false);
         setUserEmail(null);
+        setHasProfile(false);
+        setApplicationStatus(null);
         localStorage.removeItem('token');
         localStorage.removeItem('userEmail');
       }
@@ -81,6 +91,8 @@ export const AuthProvider = ({ children }) => {
       if (err.response?.status === 401 || err.response?.status === 403) {
         setIsAuthenticated(false);
         setUserEmail(null);
+        setHasProfile(false);
+        setApplicationStatus(null);
         localStorage.removeItem('token');
         localStorage.removeItem('userEmail');
       }
@@ -91,12 +103,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = (token, email) => {
+  const login = (token, email, profileData = {}) => {
     localStorage.setItem('token', token);
     localStorage.setItem('userEmail', email);
     setIsAuthenticated(true);
     setUserEmail(email);
     setAuthChecked(true);
+    
+    // Store profile and application status if provided
+    if (profileData.hasProfile !== undefined) {
+      setHasProfile(profileData.hasProfile);
+    }
+    if (profileData.applicationStatus !== undefined) {
+      setApplicationStatus(profileData.applicationStatus);
+    }
   };
 
 
@@ -113,6 +133,8 @@ export const AuthProvider = ({ children }) => {
       // Update state
       setIsAuthenticated(false);
       setUserEmail(null);
+      setHasProfile(false);
+      setApplicationStatus(null);
     }
   };
 
@@ -121,6 +143,8 @@ export const AuthProvider = ({ children }) => {
     userEmail,
     loading,
     authChecked,
+    hasProfile,
+    applicationStatus,
     checkAuth,
     login,
     logout,

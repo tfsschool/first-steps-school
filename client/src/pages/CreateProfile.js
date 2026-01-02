@@ -8,7 +8,7 @@ const CreateProfile = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const jobIdParam = searchParams.get('jobId');
-  const { isAuthenticated, userEmail, loading: authLoading } = useAuth();
+  const { isAuthenticated, userEmail, loading: authLoading, hasProfile, authChecked, applicationStatus } = useAuth();
 
   const formatCnic = (value) => {
     const digitsOnly = String(value || '').replace(/[^\d]/g, '').slice(0, 13);
@@ -25,6 +25,17 @@ const CreateProfile = () => {
       {renderStep5()}
     </div>
   );
+  
+  // Route guard: Redirect if profile already exists
+  useEffect(() => {
+    if (authChecked && hasProfile && !authLoading) {
+      // Profile already exists, redirect to careers
+      navigate('/careers', { replace: true });
+    }
+  }, [authChecked, hasProfile, authLoading, navigate]);
+  
+  // Determine if profile is locked (read-only mode)
+  const isProfileLocked = applicationStatus?.isLocked || false;
   
   const [formData, setFormData] = useState({
     // Personal Information
