@@ -1277,15 +1277,20 @@ const CreateProfile = () => {
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">
-              {profileLoaded ? 'Edit Your Profile' : 'Create Your Profile'}
+              {isLocked ? 'Viewing Your Profile' : (profileLoaded ? 'Edit Your Profile' : 'Create Your Profile')}
             </h1>
-            {profileLoaded && (
+            {profileLoaded && !isLocked && (
               <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold">
                 ✓ Profile Found
               </span>
             )}
+            {isLocked && (
+              <span className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-semibold">
+                🔒 Locked
+              </span>
+            )}
           </div>
-          {profileLoaded && (
+          {profileLoaded && !isLocked && (
             <div className="bg-theme-blue/5 border border-theme-blue/15 rounded-lg p-4 mb-6">
               <p className="text-theme-blue text-sm">
                 <strong>Your profile has been loaded.</strong> You can review and update your information, then click "Save Profile" to save changes.
@@ -1318,31 +1323,33 @@ const CreateProfile = () => {
                {renderSinglePageForm()}
             </fieldset>
 
-            {/* Save Progress Indicator */}
-            <div className="mt-4 flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2">
-                {saving ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-theme-green"></div>
-                    <span className="text-theme-blue">Saving progress...</span>
-                  </>
-                ) : lastSaved ? (
-                  <span className="text-gray-500">
-                    ✓ Saved {lastSaved.toLocaleTimeString()}
-                  </span>
-                ) : (
-                  <span className="text-gray-400">Your progress will be saved automatically</span>
-                )}
+            {/* Save Progress Indicator - Only show when not locked */}
+            {!isLocked && (
+              <div className="mt-4 flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  {saving ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-theme-green"></div>
+                      <span className="text-theme-blue">Saving progress...</span>
+                    </>
+                  ) : lastSaved ? (
+                    <span className="text-gray-500">
+                      ✓ Saved {lastSaved.toLocaleTimeString()}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">Your progress will be saved automatically</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => autoSave(true)}
+                  disabled={saving || !isAuthenticated}
+                  className="text-theme-blue hover:text-theme-green text-sm font-semibold underline disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  {saving ? 'Saving...' : 'Save Progress'}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => autoSave(true)}
-                disabled={saving || !isAuthenticated}
-                className="text-theme-blue hover:text-theme-green text-sm font-semibold underline disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                {saving ? 'Saving...' : 'Save Progress'}
-              </button>
-            </div>
+            )}
 
             {/* Action Buttons */}
             {!isLocked && (
@@ -1358,8 +1365,8 @@ const CreateProfile = () => {
               </div>
             )}
 
-            {/* Show Apply and Edit buttons after profile is saved */}
-            {(profileLoaded || showApplyButton) && (
+            {/* Show Apply and Edit buttons after profile is saved - Only when NOT locked */}
+            {(profileLoaded || showApplyButton) && !isLocked && (
               <div className="mt-6 p-6 bg-green-50 border-2 border-green-200 rounded-lg">
                 <div className="flex items-start gap-3 mb-4">
                   <div className="flex-shrink-0">
@@ -1382,32 +1389,33 @@ const CreateProfile = () => {
                         </svg>
                         Apply for Jobs
                       </button>
-                      {!isLocked && (
-                        <button
-                          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                          className="bg-white text-theme-blue border-2 border-theme-blue px-6 py-3 rounded-lg font-semibold hover:bg-theme-blue hover:text-white transition flex items-center justify-center gap-2"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      <button
+                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                        className="bg-white text-theme-blue border-2 border-theme-blue px-6 py-3 rounded-lg font-semibold hover:bg-theme-blue hover:text-white transition flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                           Edit Profile
                         </button>
-                      )}
-                      {isLocked && (
-                        <button
-                          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                          className="bg-white text-theme-blue border-2 border-theme-blue px-6 py-3 rounded-lg font-semibold hover:bg-theme-blue hover:text-white transition flex items-center justify-center gap-2"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                          View Profile
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Locked Profile Action - Show Apply for Jobs button */}
+            {isLocked && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => navigate('/careers')}
+                  className="bg-theme-green text-white px-8 py-3 rounded-lg font-semibold hover:brightness-95 transition flex items-center justify-center gap-2 text-lg"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Back to Careers
+                </button>
               </div>
             )}
           </form>

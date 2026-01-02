@@ -488,10 +488,17 @@ const Careers = () => {
                           <p className="text-sm text-gray-600">
                             {userEmail}
                           </p>
-                          <p className="text-sm sm:text-base text-gray-700 mt-1">
-                            You may update your profile or apply for available positions.
-                            Please note that once you submit an application, your profile will no longer be editable.
-                          </p>
+                          {!isProfileLocked && (
+                            <p className="text-sm sm:text-base text-gray-700 mt-1">
+                              You may update your profile or apply for available positions.
+                              Please note that once you submit an application, your profile will no longer be editable.
+                            </p>
+                          )}
+                          {isProfileLocked && (
+                            <p className="text-sm sm:text-base text-yellow-700 mt-1 font-semibold">
+                              Your profile is locked due to active job applications.
+                            </p>
+                          )}
                         </div>
                         <div className="flex items-center gap-4">
                           <button
