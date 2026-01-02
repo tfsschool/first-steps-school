@@ -33,6 +33,17 @@ const Careers = () => {
   const hasProfile = authHasProfile || localHasProfile;
   const isProfileLocked = applicationStatus?.isLocked || false;
   
+  // Debug logging
+  console.log('[Careers] Render state:', {
+    isAuthenticated,
+    hasProfile,
+    authHasProfile,
+    localHasProfile,
+    profileLoading,
+    authLoading,
+    authChecked
+  });
+  
   // Helper function to get status colors
   const getStatusColor = (status) => {
     switch (status) {
