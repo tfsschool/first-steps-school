@@ -133,8 +133,6 @@ app.get('/health', async (req, res) => {
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/public', require('./routes/publicRoutes'));
 app.use('/api/profile', require('./routes/profileRoutes'));
-app.use('/api/candidate/login', authLimiter);
-app.use('/api/candidate/register', authLimiter);
 app.use('/api/candidate', require('./routes/candidateRoutes'));
 
 // --- GLOBAL ERROR HANDLING MIDDLEWARE ---

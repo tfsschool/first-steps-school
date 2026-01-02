@@ -6,6 +6,7 @@ const Candidate = require('../models/Candidate');
 const UserProfile = require('../models/UserProfile');
 const { sendEmail } = require('../config/email');
 const { authenticate } = require('../middleware/auth');
+const { authLimiter } = require('../middleware/rateLimiter');
 
 // Helper function to get frontend URL with proper trailing slash handling
 const getFrontendUrl = () => {
@@ -23,8 +24,8 @@ const getFrontendUrl = () => {
   return 'http://localhost:3000';
 };
 
-// 1. Request Email Verification (Registration)
-router.post('/register', async (req, res) => {
+// 1. Register Candidate (Email-based)
+router.post('/register', authLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -369,7 +370,7 @@ router.get('/check/:email', async (req, res) => {
 });
 
 // 4. Passwordless Login - Request Login Link
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 
