@@ -74,6 +74,7 @@ const Careers = () => {
         setProfileName(null);
         setProfileLoading(false);
         setIsProfileLocked(false);
+        setAppliedJobIds(new Set());
         return;
       }
 
@@ -121,11 +122,14 @@ const Careers = () => {
           setProfileName(null);
           setIsProfileLocked(false);
         }
-        // Handle 401/403 - token invalid, clear state
+        // Handle 401/403 - token invalid, clear state and logout
         else if (err.response?.status === 401 || err.response?.status === 403) {
           setHasProfile(false);
           setProfileName(null);
           setIsProfileLocked(false);
+          setAppliedJobIds(new Set());
+          // Token is invalid, trigger logout
+          logout();
         }
         // Handle 503 - service unavailable (don't retry)
         else if (err.response?.status === 503) {
@@ -133,11 +137,9 @@ const Careers = () => {
           setProfileName(null);
           setIsProfileLocked(false);
         }
-        // Other errors
+        // Other errors - don't clear state, just log
         else {
-          setHasProfile(false);
-          setProfileName(null);
-          setIsProfileLocked(false);
+          console.error('Error fetching profile:', err);
         }
       } finally {
         setProfileLoading(false);
@@ -145,7 +147,7 @@ const Careers = () => {
     };
 
     fetchProfile();
-  }, [isAuthenticated, authChecked, authLoading, userEmail]);
+  }, [isAuthenticated, authChecked, authLoading, userEmail, logout]);
 
   if (loading || authLoading || profileLoading) {
     return (

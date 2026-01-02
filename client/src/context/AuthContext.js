@@ -74,23 +74,24 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
       }
     } catch (err) {
-      // Handle 401/403 - clear zombie states
+      // Handle 401/403 - clear zombie states (invalid/expired token)
       if (err.response?.status === 401 || err.response?.status === 403) {
         setIsAuthenticated(false);
         setUserEmail(null);
         localStorage.removeItem('token');
       }
-      // Handle 503 - service unavailable
+      // Handle 503 - service unavailable (keep token, might be temporary)
       else if (err.response?.status === 503) {
         setIsAuthenticated(false);
         setUserEmail(null);
-        localStorage.removeItem('token');
+        // Don't remove token - service might come back
       }
-      // Other errors
+      // Network errors or other issues - keep token, might be temporary
       else {
         setIsAuthenticated(false);
         setUserEmail(null);
-        localStorage.removeItem('token');
+        // Don't remove token on network errors - keep it for retry
+        console.error('Auth check failed (network/server error):', err.message);
       }
     } finally {
       setLoading(false);
