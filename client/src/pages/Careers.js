@@ -609,7 +609,7 @@ const Careers = () => {
 
                 {/* Case C: Logged In and Profile EXISTS */}
                 {isAuthenticated && hasProfile && (
-                  <div className="max-w-5xl mx-auto mb-8">
+                  <div className="max-w-5xl mx-auto mb-8" style={{backgroundColor: 'red', minHeight: '200px', border: '5px solid blue'}}>
                     {console.log('[Careers] ✅ Rendering Case C: Profile EXISTS section')}
                     <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-5 sm:p-6">
                       {/* Minimal Profile Locked Message */}
