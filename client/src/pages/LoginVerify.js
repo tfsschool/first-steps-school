@@ -11,105 +11,34 @@ const LoginVerify = () => {
   const email = searchParams.get('email');
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [message, setMessage] = useState('');
-  const { login, checkAuth } = useAuth();
+  const { login } = useAuth();
 
   useEffect(() => {
     const verifyLogin = async () => {
-      console.log('[LoginVerify] Starting verification', { token: !!token, email });
-      
       if (!token || !email) {
-        console.log('[LoginVerify] Missing token or email');
         setStatus('error');
         setMessage('Invalid login link');
         return;
       }
 
-      // First, check if user is already authenticated (before trying to verify token)
-      // Get token from localStorage and include in headers
-      const tokenFromStorage = localStorage.getItem('token');
-      const authConfig = tokenFromStorage ? { headers: { 'x-auth-token': tokenFromStorage } } : {};
       try {
-        const authCheck = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH, authConfig);
+        const res = await axios.get(API_ENDPOINTS.CANDIDATE.VERIFY_LOGIN(token, email));
         
-        if (authCheck.data.authenticated && authCheck.data.email && 
-            authCheck.data.email.toLowerCase() === email.toLowerCase()) {
-          // User is already logged in, sync state and redirect
-          console.log('[LoginVerify] User already authenticated, syncing state');
-          
-          // IMPORTANT: Update React state to match backend authentication
-          if (tokenFromStorage) {
-            login(tokenFromStorage, authCheck.data.email);
-            console.log('[LoginVerify] ✅ State synchronized with existing token');
-          }
-          
-          setStatus('success');
-          setMessage('You are already logged in! Redirecting...');
-          setTimeout(() => {
-            navigate('/careers');
-          }, 1000);
-          return;
-        }
-      } catch (authErr) {
-        // Not authenticated, continue with token verification
-      }
-
-      // User is not authenticated, verify the login token
-      try {
-        // Cookies are automatically sent via axios defaults
-        // Include auth headers if token exists in storage
-        const res = await axios.get(API_ENDPOINTS.CANDIDATE.VERIFY_LOGIN(token, email), authConfig);
-        
-        console.log('[LoginVerify] Verification successful', { hasToken: !!res.data.token, hasEmail: !!res.data.email });
         setStatus('success');
         setMessage(res.data.msg || 'Login successful!');
         
-        // Use login() helper to set token and update state
+        // CRITICAL: Call login() to update AuthContext immediately
         if (res.data.token && res.data.email) {
-          console.log('[LoginVerify] ✅ Calling login() with token and email');
           login(res.data.token, res.data.email);
-          console.log('[LoginVerify] ✅ Token saved to localStorage successfully');
         } else if (res.data.token) {
-          console.log('[LoginVerify] ✅ Calling login() with token only');
           login(res.data.token, email);
-          console.log('[LoginVerify] ✅ Token saved to localStorage successfully');
-        } else {
-          console.log('[LoginVerify] ⚠️ No token in response, calling checkAuth()');
-          // Fallback: refresh auth status
-          await checkAuth();
         }
 
-        console.log('[LoginVerify] 🔄 Redirecting to /careers in 2 seconds');
-        // Redirect to careers after 2 seconds
+        // Redirect
         setTimeout(() => {
           navigate('/careers');
-        }, 2000);
+        }, 1500);
       } catch (err) {
-        // If token verification fails, check authentication status again
-        // (The backend might have set the cookie even if token was already used)
-        try {
-          const finalAuthCheck = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH, authConfig);
-          
-          if (finalAuthCheck.data.authenticated && finalAuthCheck.data.email && 
-              finalAuthCheck.data.email.toLowerCase() === email.toLowerCase()) {
-            // User is authenticated (backend handled it), show success and redirect
-            console.log('[LoginVerify] Final auth check successful');
-            setStatus('success');
-            setMessage('Login successful! Redirecting...');
-            if (finalAuthCheck.data.token) {
-              console.log('[LoginVerify] Calling login() from final check');
-              login(finalAuthCheck.data.token, finalAuthCheck.data.email);
-            }
-            setTimeout(() => {
-              navigate('/careers');
-            }, 1500);
-            return;
-          }
-        } catch (checkErr) {
-          // Authentication check failed, continue to show error
-        }
-        
-        // Only show error if user is truly not authenticated
-        console.log('[LoginVerify] Verification failed', { status: err.response?.status, msg: err.response?.data?.msg });
         setStatus('error');
         setMessage(err.response?.data?.msg || 'Login verification failed. Please try again.');
       }
