@@ -696,7 +696,9 @@ router.get('/check-auth', authenticate, async (req, res) => {
 router.get('/applications', authenticate, async (req, res) => {
   try {
     const applications = await Application.find({ candidateId: req.candidate.id })
-      .select('jobId status')
+      .populate('jobId', 'title')
+      .select('jobId status appliedAt')
+      .sort({ appliedAt: -1 })
       .lean();
     
     res.json(applications);

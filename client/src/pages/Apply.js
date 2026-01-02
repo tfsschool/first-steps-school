@@ -9,7 +9,7 @@ import { showWarning } from '../utils/toast';
 const Apply = () => {
   const { jobId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, refreshApplications } = useAuth();
   
   const [profile, setProfile] = useState(null);
   const [job, setJob] = useState(null);
@@ -295,18 +295,22 @@ const Apply = () => {
         withCredentials: true
       });
       
+      // Immediately refresh application status in AuthContext
+      if (refreshApplications) {
+        await refreshApplications();
+      }
+      
       setShowThankYou(true);
-      // Redirect to thank you page after 3 seconds
+      // Redirect to careers page after 3 seconds (removed /thank-you redirect)
       setTimeout(() => {
-        navigate('/thank-you');
+        navigate('/careers');
       }, 3000);
     } catch (err) {
       const errorMsg = err.response?.data?.msg || 'Error submitting application. Please try again.';
       setError(errorMsg);
       
-      // If already applied, show warning and redirect
+      // If already applied, redirect without double popup
       if (errorMsg.includes('already applied')) {
-        showWarning('You have already applied for this job.');
         setTimeout(() => {
           navigate('/careers');
         }, 2000);

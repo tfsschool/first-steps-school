@@ -138,6 +138,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshApplications = async () => {
+    // Re-run checkAuth to refresh application status
+    await checkAuth();
+  };
+
   const value = {
     isAuthenticated,
     userEmail,
@@ -148,6 +153,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth,
     login,
     logout,
+    refreshApplications,
     setAuthenticated: (auth, email) => {
       setIsAuthenticated(auth);
       setUserEmail(email);

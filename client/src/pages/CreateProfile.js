@@ -465,34 +465,36 @@ const CreateProfile = () => {
     setFormData({ ...formData, certifications: updated });
   };
 
-  const getMissingRequiredFields = () => {
+  const getMissingRequiredFields = (profile) => {
     const missing = [];
 
-    if (!formData.fullName.trim()) missing.push('Full Name');
-    if (!formData.dateOfBirth) missing.push('Date of Birth');
-    if (!formData.gender) missing.push('Gender');
-    if (!formData.cnic.trim()) {
-      missing.push('CNIC');
-    } else {
-      const cleanedCnic = formData.cnic.replace(/[-\s]/g, '');
-      if (!/^\d{13}$/.test(cleanedCnic)) missing.push('CNIC (must be 13 digits)');
-    }
-    if (!formData.phone.trim()) missing.push('Cell Number');
-    if (!formData.email.trim()) missing.push('Email');
-    if (!formData.address.trim()) missing.push('Address');
+    if (!profile.fullName || !profile.fullName.trim()) missing.push('Full Name');
+    if (!profile.dateOfBirth) missing.push('Date of Birth');
+    if (!profile.gender) missing.push('Gender');
+    if (!profile.cnic || !profile.cnic.trim()) missing.push('CNIC');
+    if (!profile.phone || !profile.phone.trim()) missing.push('Phone');
+    if (!profile.email || !profile.email.trim()) missing.push('Email');
+    if (!profile.address || !profile.address.trim()) missing.push('Address');
 
-    if (formData.education.length === 0) {
-      missing.push('Education (at least one entry)');
+    // Education validation
+    if (!profile.education || profile.education.length === 0) {
+      missing.push('Education - At least one entry required');
     } else {
-      formData.education.forEach((edu, index) => {
-        const row = index + 1;
-        if (!edu.degree.trim()) missing.push(`Education #${row}: Degree`);
-        if (!edu.institution.trim()) missing.push(`Education #${row}: Institution`);
-        if (!edu.yearOfCompletion.trim()) missing.push(`Education #${row}: Year`);
+      profile.education.forEach((edu, idx) => {
+        if (!edu.degree || !edu.degree.trim()) {
+          missing.push(`Education ${idx + 1} - Degree`);
+        }
+        if (!edu.institution || !edu.institution.trim()) {
+          missing.push(`Education ${idx + 1} - Institution`);
+        }
+        if (!edu.yearOfCompletion || !edu.yearOfCompletion.trim()) {
+          missing.push(`Education ${idx + 1} - Year of Completion`);
+        }
       });
     }
 
-    if (!formData.resume) missing.push('Resume');
+    // Resume validation - only required if no existing resume AND no new file selected
+    if (!formData.resume && !preview.resume) missing.push('Resume');
 
     return missing;
   };

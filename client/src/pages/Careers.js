@@ -25,10 +25,27 @@ const Careers = () => {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileName, setProfileName] = useState(null);
   const [appliedJobIds, setAppliedJobIds] = useState(new Set());
+  const [allApplications, setAllApplications] = useState([]);
   
   // Use hasProfile from AuthContext (more reliable) or fallback to local state
   const hasProfile = authHasProfile || localHasProfile;
   const isProfileLocked = applicationStatus?.isLocked || false;
+  
+  // Helper function to get status colors
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Pending':
+        return { bg: 'bg-orange-50', border: 'border-orange-300', text: 'text-orange-800', textLight: 'text-orange-700', icon: 'text-orange-600' };
+      case 'Reviewed':
+        return { bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-800', textLight: 'text-blue-700', icon: 'text-blue-600' };
+      case 'Rejected':
+        return { bg: 'bg-red-50', border: 'border-red-300', text: 'text-red-800', textLight: 'text-red-700', icon: 'text-red-600' };
+      case 'Selected':
+        return { bg: 'bg-green-50', border: 'border-green-300', text: 'text-green-800', textLight: 'text-green-700', icon: 'text-green-600' };
+      default:
+        return { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-800', textLight: 'text-gray-700', icon: 'text-gray-600' };
+    }
+  };
   
   // Modal states
   const [showInitialModal, setShowInitialModal] = useState(false);
@@ -127,10 +144,11 @@ const Careers = () => {
         setProfileName(null);
       }
       
-      // Store applied job IDs as a Set for O(1) lookup
+      // Store applied job IDs as a Set for O(1) lookup and all applications
       if (applicationsRes.data && Array.isArray(applicationsRes.data)) {
-        const jobIds = applicationsRes.data.map(app => app.jobId);
+        const jobIds = applicationsRes.data.map(app => app.jobId?._id || app.jobId);
         setAppliedJobIds(new Set(jobIds));
+        setAllApplications(applicationsRes.data);
       }
     } catch (err) {
       // Handle 404 - profile not found (normal for new users)
@@ -572,31 +590,38 @@ const Careers = () => {
                 {isAuthenticated && hasProfile && (
                   <div className="max-w-5xl mx-auto mb-8">
                     <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-5 sm:p-6">
-                      {/* Application Status Badge */}
-                      {applicationStatus && (
-                        <div className={`mb-4 p-4 rounded-lg border-2 ${
-                          applicationStatus.isLocked 
-                            ? 'bg-yellow-50 border-yellow-300' 
-                            : 'bg-green-50 border-green-300'
-                        }`}>
-                          <div className="flex items-center gap-3">
-                            <svg className={`w-6 h-6 ${applicationStatus.isLocked ? 'text-yellow-600' : 'text-green-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              {applicationStatus.isLocked ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                              ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              )}
-                            </svg>
-                            <div className="flex-1">
-                              <p className={`font-bold ${applicationStatus.isLocked ? 'text-yellow-800' : 'text-green-800'}`}>
-                                {applicationStatus.isLocked ? 'Application Under Review' : 'Application Submitted'}
-                              </p>
-                              <p className={`text-sm ${applicationStatus.isLocked ? 'text-yellow-700' : 'text-green-700'}`}>
-                                {applicationStatus.jobTitle} • Status: {applicationStatus.status}
-                                {applicationStatus.isLocked && ' • Profile Locked'}
-                              </p>
-                            </div>
-                          </div>
+                      {/* Application Status Badges - Show ALL applications */}
+                      {allApplications.length > 0 && (
+                        <div className="mb-4 space-y-3">
+                          {allApplications.map((app, index) => {
+                            const colors = getStatusColor(app.status);
+                            const isLocked = ['Pending', 'Reviewed'].includes(app.status);
+                            return (
+                              <div key={app._id || index} className={`p-4 rounded-lg border-2 ${colors.bg} ${colors.border}`}>
+                                <div className="flex items-center gap-3">
+                                  <svg className={`w-6 h-6 ${colors.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    {isLocked ? (
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    ) : app.status === 'Rejected' ? (
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    ) : (
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    )}
+                                  </svg>
+                                  <div className="flex-1">
+                                    <p className={`font-bold ${colors.text}`}>
+                                      {app.jobId?.title || 'Job Application'}
+                                    </p>
+                                    <p className={`text-sm ${colors.textLight}`}>
+                                      Status: <span className="font-semibold">{app.status}</span>
+                                      {isLocked && ' • Profile Locked'}
+                                      {app.appliedAt && ` • Applied ${new Date(app.appliedAt).toLocaleDateString()}`}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                       
