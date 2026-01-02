@@ -149,7 +149,9 @@ const submitApplication = async (req, res) => {
       email: email.toLowerCase().trim(),
       phone: req.body.phone.trim(),
       education: educationText || 'Not provided',
-      cvPath: cvPath
+      cvPath: cvPath,
+      minimumSalary: req.body.minimumSalary || '',
+      expectedSalary: req.body.expectedSalary || ''
     });
 
     await newApp.save();

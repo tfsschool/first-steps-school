@@ -14,6 +14,8 @@ const ApplicationSchema = new mongoose.Schema({
     phone: { type: String, required: true },
     education: { type: String, required: true },
     cvPath: { type: String, required: true },
+    minimumSalary: { type: String },
+    expectedSalary: { type: String },
     status: { type: String, enum: ['Pending', 'Reviewed', 'Rejected', 'Selected'], default: 'Pending' },
     appliedAt: { type: Date, default: Date.now }
 });

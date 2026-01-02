@@ -18,6 +18,9 @@ const Apply = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [isProfileLocked, setIsProfileLocked] = useState(false);
+  const [minimumSalary, setMinimumSalary] = useState('');
+  const [expectedSalary, setExpectedSalary] = useState('');
+  const [showProfileReview, setShowProfileReview] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -253,11 +256,19 @@ const Apply = () => {
     setError('');
     setSubmitting(true);
 
+    // Validate salary fields
+    if (!minimumSalary.trim() || !expectedSalary.trim()) {
+      setError('Please enter both minimum and expected salary.');
+      return;
+    }
+
     const data = new FormData();
     // Use profile data instead of form data
     data.append('fullName', profile.fullName);
     data.append('phone', profile.phone);
     data.append('education', JSON.stringify(profile.education || []));
+    data.append('minimumSalary', minimumSalary);
+    data.append('expectedSalary', expectedSalary);
     // Use profile's resume path (handle both string and object format)
     if (profile.resumePath) {
       const resumePath = typeof profile.resumePath === 'object' 
@@ -382,43 +393,82 @@ const Apply = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                   <div>
                     <div className="text-xs tracking-[0.25em] uppercase text-theme-dark/50 font-semibold">
-                      Candidate Profile
+                      Job Application
                     </div>
-                    <h2 className="mt-2 text-2xl font-extrabold text-theme-dark">Your Profile</h2>
-                    <p className="mt-2 text-gray-600">
-                      Your application will be submitted using your saved profile information.
-                    </p>
+                    <h2 className="mt-2 text-2xl font-extrabold text-theme-dark">{job?.title}</h2>
                   </div>
                   <button
                     type="button"
-                    onClick={() => navigate('/create-profile')}
-                    className="bg-theme-blue text-white px-6 py-3 rounded-lg font-semibold hover:brightness-95 transition"
+                    onClick={() => setShowProfileReview(!showProfileReview)}
+                    className="bg-theme-blue text-white px-6 py-3 rounded-lg font-semibold hover:brightness-95 transition flex items-center gap-2"
                   >
-                    {isProfileLocked ? 'View Profile' : 'Edit Profile'}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    {showProfileReview ? 'Hide Profile' : 'Profile Review'}
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
-                    <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Name</div>
-                    <div className="mt-2 font-semibold text-theme-dark">
-                      {profile.fullName}
+                {showProfileReview && (
+                  <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 className="text-lg font-bold text-theme-dark mb-4">Your Profile Summary</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="rounded-xl border border-gray-200 bg-white p-4">
+                        <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Name</div>
+                        <div className="mt-2 font-semibold text-theme-dark">{profile.fullName}</div>
+                      </div>
+                      <div className="rounded-xl border border-gray-200 bg-white p-4">
+                        <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Email</div>
+                        <div className="mt-2 font-semibold text-theme-dark break-all">{profile.email}</div>
+                      </div>
+                      <div className="rounded-xl border border-gray-200 bg-white p-4">
+                        <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Cell Number</div>
+                        <div className="mt-2 font-semibold text-theme-dark">{profile.phone}</div>
+                      </div>
+                      <div className="rounded-xl border border-gray-200 bg-white p-4">
+                        <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Education / Experience</div>
+                        <div className="mt-2 text-theme-dark">
+                          <span className="font-semibold">{profile.education?.length || 0}</span> education entries
+                          <span className="mx-2 text-gray-300">|</span>
+                          <span className="font-semibold">{profile.workExperience?.length || 0}</span> experience entries
+                        </div>
+                      </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/create-profile')}
+                      className="mt-4 bg-theme-blue text-white px-6 py-2 rounded-lg font-semibold hover:brightness-95 transition text-sm"
+                    >
+                      {isProfileLocked ? 'View Full Profile' : 'Edit Profile'}
+                    </button>
                   </div>
-                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
-                    <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Email</div>
-                    <div className="mt-2 font-semibold text-theme-dark break-all">{profile.email}</div>
-                  </div>
-                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
-                    <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Cell Number</div>
-                    <div className="mt-2 font-semibold text-theme-dark">{profile.phone}</div>
-                  </div>
-                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
-                    <div className="text-xs tracking-[0.22em] uppercase text-theme-dark/50 font-semibold">Education / Experience</div>
-                    <div className="mt-2 text-theme-dark">
-                      <span className="font-semibold">{profile.education?.length || 0}</span> education entries
-                      <span className="mx-2 text-gray-300">|</span>
-                      <span className="font-semibold">{profile.workExperience?.length || 0}</span> experience entries
+                )}
+
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-theme-dark mb-2">Salary Expectations</h3>
+                  <p className="text-gray-600 mb-4">What salary do you expect as per your qualification?</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Minimum Salary *</label>
+                      <input
+                        type="text"
+                        value={minimumSalary}
+                        onChange={(e) => setMinimumSalary(e.target.value)}
+                        placeholder="e.g., 30,000"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-theme-blue"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Expected Salary *</label>
+                      <input
+                        type="text"
+                        value={expectedSalary}
+                        onChange={(e) => setExpectedSalary(e.target.value)}
+                        placeholder="e.g., 50,000"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-theme-blue"
+                        required
+                      />
                     </div>
                   </div>
                 </div>

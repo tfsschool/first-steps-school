@@ -342,20 +342,53 @@ const Candidates = () => {
         {/* Candidate Details Modal */}
         {showModal && selectedApplication && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-soft border border-gray-100 max-w-4xl w-full max-h-[90vh]" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="bg-white rounded-2xl shadow-soft border border-gray-100 max-w-4xl w-full max-h-[90vh] candidate-details-modal" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <style>{`
+                @media print {
+                  body * {
+                    visibility: hidden;
+                  }
+                  .candidate-details-modal,
+                  .candidate-details-modal * {
+                    visibility: visible;
+                  }
+                  .candidate-details-modal {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    max-height: none;
+                    overflow: visible;
+                  }
+                  .no-print {
+                    display: none !important;
+                  }
+                }
+              `}</style>
               <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-800">
                   {selectedApplication.fullName}
                 </h2>
-                <button
-                  onClick={() => {
-                    setShowModal(false);
-                    setSelectedApplication(null);
-                  }}
-                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
-                >
-                  ×
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => window.print()}
+                    className="no-print bg-theme-blue text-white px-4 py-2 rounded-lg text-sm font-semibold hover:brightness-95 transition flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Print
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowModal(false);
+                      setSelectedApplication(null);
+                    }}
+                    className="no-print text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
               <div className="p-6">
                 <CandidateDetails application={selectedApplication} />
@@ -627,6 +660,31 @@ const CandidateDetails = ({ application }) => {
               </div>
             );
           })()}
+        </div>
+      </div>
+
+      {/* Application Details */}
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+        <h4 className="font-semibold text-gray-700 mb-3">Application Details</h4>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-600">Minimum Salary:</span>
+            <span className="ml-2 font-medium">{application.minimumSalary || 'Not specified'}</span>
+          </div>
+          <div>
+            <span className="text-gray-600">Expected Salary:</span>
+            <span className="ml-2 font-medium">{application.expectedSalary || 'Not specified'}</span>
+          </div>
+          <div className="col-span-2">
+            <span className="text-gray-600">Date Applied:</span>
+            <span className="ml-2 font-medium">
+              {application.appliedAt ? new Date(application.appliedAt).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              }) : 'N/A'}
+            </span>
+          </div>
         </div>
       </div>
     </div>

@@ -35,6 +35,7 @@ const Careers = () => {
   const [loginMessage, setLoginMessage] = useState('');
   const [isUnverified, setIsUnverified] = useState(false);
   const [showNotRegisteredInLogin, setShowNotRegisteredInLogin] = useState(false);
+  const [bannerStatus, setBannerStatus] = useState('idle'); // 'idle', 'verification_sent', 'login_link_sent'
 
   // Fetch jobs ONCE on mount
   useEffect(() => {
@@ -174,6 +175,8 @@ const Careers = () => {
       // Login link sent successfully
       setLoginMessage('Login link has been sent to your mail. Please check your inbox.');
       setIsUnverified(false);
+      setBannerStatus('login_link_sent');
+      setShowLoginModal(false);
     } catch (err) {
       if (err.response?.data?.notRegistered) {
         // Email not registered - show message with register button
@@ -215,13 +218,10 @@ const Careers = () => {
 
       setRegisterMessage('Verification email has been sent to your mail. Please check your inbox.');
       setIsUnverified(false);
-      
-      setTimeout(() => {
-        setShowRegisterModal(false);
-        setEmailInput('');
-        setRegisterMessage('');
-        setIsUnverified(false);
-      }, 4000);
+      setBannerStatus('verification_sent');
+      setShowRegisterModal(false);
+      setEmailInput('');
+      setRegisterMessage('');
     } catch (err) {
       if (err.response?.data?.alreadyRegistered) {
         setRegisterMessage('This email is already registered and verified. Please login.');
@@ -409,24 +409,42 @@ const Careers = () => {
                     <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-5 sm:p-6">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex-1">
-                          <p className="text-sm sm:text-base text-gray-700">
-                            You must be registered to apply for any job or position.
-                          </p>
+                          {bannerStatus === 'idle' && (
+                            <p className="text-sm sm:text-base text-gray-700">
+                              You must be registered to apply for any job or position.
+                            </p>
+                          )}
+                          {bannerStatus === 'verification_sent' && (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                              <p className="text-sm sm:text-base text-green-700 font-semibold">
+                                ✓ Verification email has been sent to your mail box. Please verify your account.
+                              </p>
+                            </div>
+                          )}
+                          {bannerStatus === 'login_link_sent' && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                              <p className="text-sm sm:text-base text-blue-700 font-semibold">
+                                ✓ Login link has been sent to your email box. Please login.
+                              </p>
+                            </div>
+                          )}
                         </div>
-                        <div className="flex flex-col xs:flex-row gap-3 sm:items-center">
-                          <button
-                            onClick={handleRegisteredNo}
-                            className="btn-primary w-full sm:w-auto"
-                          >
-                            Create an account to get started
-                          </button>
-                          <button
-                            onClick={handleRegisteredYes}
-                            className="bg-theme-blue text-white px-6 py-3 font-semibold hover:brightness-95 transition w-full sm:w-auto"
-                          >
-                            Already have an account? Log in
-                          </button>
-                        </div>
+                        {bannerStatus === 'idle' && (
+                          <div className="flex flex-col xs:flex-row gap-3 sm:items-center">
+                            <button
+                              onClick={handleRegisteredNo}
+                              className="btn-primary w-full sm:w-auto"
+                            >
+                              Create an account to get started
+                            </button>
+                            <button
+                              onClick={handleRegisteredYes}
+                              className="bg-theme-blue text-white px-6 py-3 font-semibold hover:brightness-95 transition w-full sm:w-auto"
+                            >
+                              Already have an account? Log in
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
