@@ -21,9 +21,14 @@ const getBaseURL = () => {
 const BASE_URL = getBaseURL();
 const FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3000';
 
-// Log the API URL in development for debugging
-if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-  console.log('🔗 API Base URL:', BASE_URL);
+// Log the API URL for debugging (including production)
+if (typeof window !== 'undefined') {
+  console.log('🔗 API Configuration:');
+  console.log('  - Environment:', process.env.NODE_ENV);
+  console.log('  - REACT_APP_API_URL:', process.env.REACT_APP_API_URL || '(not set)');
+  console.log('  - Computed BASE_URL:', BASE_URL || '(empty - relative paths)');
+  console.log('  - Current Origin:', window.location.origin);
+  console.log('  - Sample API URL:', `${BASE_URL}/api/public/jobs`);
 }
 
 export const API_ENDPOINTS = {

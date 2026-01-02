@@ -32,9 +32,17 @@ const AdminDashboard = () => {
   const fetchJobs = useCallback(async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.ADMIN.JOBS, config);
+      
+      // Check for HTML response (routing error)
+      if (typeof res.data === 'string' && res.data.includes('<!doctype html>')) {
+        console.error('❌ API Routing Error: /api/admin/jobs returned HTML instead of JSON');
+        console.error('This means the API request is being handled by frontend routing, not the backend.');
+        return;
+      }
+      
       const jobs = Array.isArray(res.data) ? res.data : [];
       if (!Array.isArray(res.data)) {
-        console.warn('Warning: fetchJobs received non-array data:', res.data);
+        console.warn('Warning: fetchJobs received non-array data:', typeof res.data);
       }
       const totalJobs = jobs.length;
       const openJobs = jobs.filter(j => j.status === 'Open').length;
@@ -53,9 +61,17 @@ const AdminDashboard = () => {
   const fetchApplications = useCallback(async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.ADMIN.APPLICATIONS, config);
-      const applications = Array.isArray(res.data.applications) ? res.data.applications : [];
-      if (!Array.isArray(res.data.applications)) {
-        console.warn('Warning: fetchApplications received non-array data:', res.data.applications);
+      
+      // Check for HTML response (routing error)
+      if (typeof res.data === 'string' && res.data.includes('<!doctype html>')) {
+        console.error('❌ API Routing Error: /api/admin/applications returned HTML instead of JSON');
+        console.error('This means the API request is being handled by frontend routing, not the backend.');
+        return;
+      }
+      
+      const applications = Array.isArray(res.data?.applications) ? res.data.applications : [];
+      if (!Array.isArray(res.data?.applications)) {
+        console.warn('Warning: fetchApplications received non-array data:', typeof res.data?.applications);
       }
       const totalApplications = applications.length;
       const pendingApplications = applications.filter(a => a.status === 'Pending').length;
@@ -74,9 +90,17 @@ const AdminDashboard = () => {
   const fetchCandidates = useCallback(async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.ADMIN.REGISTERED_EMAILS, config);
+      
+      // Check for HTML response (routing error)
+      if (typeof res.data === 'string' && res.data.includes('<!doctype html>')) {
+        console.error('❌ API Routing Error: /api/admin/candidates returned HTML instead of JSON');
+        console.error('This means the API request is being handled by frontend routing, not the backend.');
+        return;
+      }
+      
       const candidates = Array.isArray(res.data) ? res.data : [];
       if (!Array.isArray(res.data)) {
-        console.warn('Warning: fetchCandidates received non-array data:', res.data);
+        console.warn('Warning: fetchCandidates received non-array data:', typeof res.data);
       }
       const totalRegisteredEmails = candidates.length;
       const verifiedEmails = candidates.filter(c => c.emailVerified).length;
