@@ -36,6 +36,7 @@ const Careers = () => {
   const [isUnverified, setIsUnverified] = useState(false);
   const [showNotRegisteredInLogin, setShowNotRegisteredInLogin] = useState(false);
   const [bannerStatus, setBannerStatus] = useState('idle'); // 'idle', 'verification_sent', 'login_link_sent'
+  const [bannerEmail, setBannerEmail] = useState(''); // Store email for banner display
 
   // Fetch jobs ONCE on mount
   useEffect(() => {
@@ -192,6 +193,7 @@ const Careers = () => {
       setLoginMessage('Login link has been sent to your mail. Please check your inbox.');
       setIsUnverified(false);
       setBannerStatus('login_link_sent');
+      setBannerEmail(emailInput.trim());
       setShowLoginModal(false);
     } catch (err) {
       if (err.response?.data?.notRegistered) {
@@ -440,7 +442,7 @@ const Careers = () => {
                           {bannerStatus === 'login_link_sent' && (
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                               <p className="text-sm sm:text-base text-blue-700 font-semibold">
-                                ✓ Login link has been sent to your email box. Please login.
+                                ✓ Login link has been sent to your email <span className="font-bold">({bannerEmail})</span> box to login.
                               </p>
                             </div>
                           )}
