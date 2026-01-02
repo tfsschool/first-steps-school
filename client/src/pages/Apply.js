@@ -450,24 +450,24 @@ const Apply = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Expected Salary *</label>
-                      <p className="text-xs text-gray-500 mb-2">Monthly salary appropriate to your qualifications and experience</p>
+                      <p className="text-xs text-gray-500 mb-2">The monthly salary you believe is appropriate based on your qualifications, experience, and skills.</p>
                       <input
                         type="text"
                         value={expectedSalary}
                         onChange={(e) => setExpectedSalary(e.target.value)}
-                        placeholder="e.g., 50,000"
+                        placeholder="e.g., 30,000"
                         className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-theme-blue"
                         required
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Minimum Acceptable Salary *</label>
-                      <p className="text-xs text-gray-500 mb-2">Lowest salary you are willing to accept</p>
+                      <p className="text-xs text-gray-500 mb-2">The lowest salary you are willing to work for. Please do not enter an amount you would not accept.</p>
                       <input
                         type="text"
                         value={minimumSalary}
                         onChange={(e) => setMinimumSalary(e.target.value)}
-                        placeholder="e.g., 30,000"
+                        placeholder="e.g., 15,000"
                         className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-theme-blue"
                         required
                       />
