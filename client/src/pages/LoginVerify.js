@@ -33,8 +33,15 @@ const LoginVerify = () => {
         
         if (authCheck.data.authenticated && authCheck.data.email && 
             authCheck.data.email.toLowerCase() === email.toLowerCase()) {
-          // User is already logged in, just redirect without showing error
-          console.log('[LoginVerify] User already authenticated, redirecting');
+          // User is already logged in, sync state and redirect
+          console.log('[LoginVerify] User already authenticated, syncing state');
+          
+          // IMPORTANT: Update React state to match backend authentication
+          if (tokenFromStorage) {
+            login(tokenFromStorage, authCheck.data.email);
+            console.log('[LoginVerify] ✅ State synchronized with existing token');
+          }
+          
           setStatus('success');
           setMessage('You are already logged in! Redirecting...');
           setTimeout(() => {
