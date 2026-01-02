@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import axios from '../config/axios';
 import { API_ENDPOINTS } from '../config/api';
 import { useAuth } from '../context/AuthContext';
 
 const CreateProfile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const jobIdParam = searchParams.get('jobId');
   const { isAuthenticated, userEmail, loading: authLoading, hasProfile, authChecked, applicationStatus } = useAuth();
+  
+  // Check if we're in editing mode (came from Update Profile button)
+  const isEditingMode = location.state?.isEditing || false;
 
   const formatCnic = (value) => {
     const digitsOnly = String(value || '').replace(/[^\d]/g, '').slice(0, 13);
@@ -26,13 +30,13 @@ const CreateProfile = () => {
     </div>
   );
   
-  // Route guard: Redirect if profile already exists
+  // Route guard: Redirect if profile already exists (but NOT in editing mode)
   useEffect(() => {
-    if (authChecked && hasProfile && !authLoading) {
-      // Profile already exists, redirect to careers
+    if (authChecked && hasProfile && !authLoading && !isEditingMode) {
+      // Profile already exists and not editing, redirect to careers
       navigate('/careers', { replace: true });
     }
-  }, [authChecked, hasProfile, authLoading, navigate]);
+  }, [authChecked, hasProfile, authLoading, isEditingMode, navigate]);
   
   // Determine if profile is locked (read-only mode)
   const isProfileLocked = applicationStatus?.isLocked || false;
@@ -1290,7 +1294,7 @@ const CreateProfile = () => {
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">
-              {isLocked ? 'Viewing Your Profile' : (profileLoaded ? 'Edit Your Profile' : 'Create Your Profile')}
+              {isLocked ? 'Viewing Your Profile' : (profileLoaded || isEditingMode ? 'Update Your Profile' : 'Create Your Profile')}
             </h1>
             {profileLoaded && !isLocked && (
               <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold">

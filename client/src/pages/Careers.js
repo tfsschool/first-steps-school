@@ -33,17 +33,6 @@ const Careers = () => {
   const hasProfile = authHasProfile || localHasProfile;
   const isProfileLocked = applicationStatus?.isLocked || false;
   
-  // Debug logging
-  console.log('[Careers] Render state:', {
-    isAuthenticated,
-    hasProfile,
-    authHasProfile,
-    localHasProfile,
-    profileLoading,
-    authLoading,
-    authChecked
-  });
-  
   // Helper function to get status colors
   const getStatusColor = (status) => {
     switch (status) {
@@ -518,7 +507,6 @@ const Careers = () => {
 
             {!profileLoading && (
               <>
-                {console.log('[Careers] Rendering profile sections - isAuthenticated:', isAuthenticated, 'hasProfile:', hasProfile)}
                 {/* Case A: Not Logged In */}
                 {!isAuthenticated && (
                   <div className="max-w-5xl mx-auto mb-8">
@@ -609,8 +597,7 @@ const Careers = () => {
 
                 {/* Case C: Logged In and Profile EXISTS */}
                 {isAuthenticated && hasProfile && (
-                  <div className="max-w-5xl mx-auto mb-8" style={{backgroundColor: 'red', minHeight: '200px', border: '5px solid blue'}}>
-                    {console.log('[Careers] ✅ Rendering Case C: Profile EXISTS section')}
+                  <div className="max-w-5xl mx-auto mb-8">
                     <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-5 sm:p-6">
                       {/* Minimal Profile Locked Message */}
                       {/* {isProfileLocked && (
@@ -652,10 +639,11 @@ const Careers = () => {
                             Logout
                           </button>
                           <button
-                            onClick={() => navigate('/create-profile')}
+                            onClick={() => navigate('/create-profile', { state: { isEditing: true } })}
                             className="btn-primary"
+                            disabled={isProfileLocked}
                           >
-                            {isProfileLocked ? 'View Profile' : 'Update Profile'}
+                            {isProfileLocked ? 'Profile Locked' : 'Update Profile'}
                           </button>
                         </div>
                       </div>
