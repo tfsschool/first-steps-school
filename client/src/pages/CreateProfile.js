@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../config/axios';
 import { API_ENDPOINTS } from '../config/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -74,6 +74,11 @@ const CreateProfile = () => {
   useEffect(() => {
     formDataRef.current = formData;
   }, [formData]);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   // Load existing profile and check authentication on mount
   useEffect(() => {

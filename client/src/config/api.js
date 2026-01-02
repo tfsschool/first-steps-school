@@ -4,22 +4,17 @@
 // Automatically detect the hostname for local development
 // This allows the frontend to connect to the backend when accessing via network IP
 const getBaseURL = () => {
-  // Use environment variable if set (for production)
+  // Use environment variable if set
   if (process.env.REACT_APP_API_URL) {
     return String(process.env.REACT_APP_API_URL).trim().replace(/\/+$/, '');
   }
   
-  // In browser environment, detect hostname dynamically
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    const protocol = window.location.protocol;
-    const port = '5000';
-    
-    // Use the same hostname as the frontend (localhost or network IP)
-    return `${protocol}//${hostname}:${port}`;
+  // In production, use relative path (same origin)
+  if (process.env.NODE_ENV === 'production') {
+    return '';
   }
   
-  // Fallback for server-side rendering
+  // Fallback for local development
   return 'http://localhost:5000';
 };
 

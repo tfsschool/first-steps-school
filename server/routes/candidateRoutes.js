@@ -9,17 +9,18 @@ const { authenticate } = require('../middleware/auth');
 
 // Helper function to get frontend URL with proper trailing slash handling
 const getFrontendUrl = () => {
-  // 1. Force custom domain in production if set, or fallback to tfs.school
-  if (process.env.NODE_ENV === 'production') {
-     // If FRONTEND_URL is the vercel default or missing, force tfs.school
-     if (!process.env.FRONTEND_URL || process.env.FRONTEND_URL.includes('vercel.app')) {
-        return 'https://tfs.school';
-     }
+  // 1. If FRONTEND_URL is set, use it (supports Vercel Previews)
+  if (process.env.FRONTEND_URL) {
+    return process.env.FRONTEND_URL.replace(/\/+$/, '');
   }
   
-  const url = process.env.FRONTEND_URL || 'http://localhost:3000';
-  // Remove trailing slash to avoid double slashes
-  return url.replace(/\/+$/, '');
+  // 2. If in production but no FRONTEND_URL, default to main site
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://tfs.school';
+  }
+  
+  // 3. Otherwise, use localhost for development
+  return 'http://localhost:3000';
 };
 
 // 1. Request Email Verification (Registration)
@@ -201,8 +202,8 @@ router.get('/verify-email', async (req, res) => {
             const options = {
               expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
               httpOnly: true,
-              secure: true,        // REQUIRED: Must be true for Vercel/HTTPS
-              sameSite: 'none'     // REQUIRED: Allows Frontend to talk to Backend
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'none'
             };
             res.cookie('authToken', authToken, options);
 
@@ -274,8 +275,8 @@ router.get('/verify-email', async (req, res) => {
     const options = {
       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       httpOnly: true,
-      secure: true,        // REQUIRED: Must be true for Vercel/HTTPS
-      sameSite: 'none'     // REQUIRED: Allows Frontend to talk to Backend
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none'
     };
     res.cookie('authToken', authToken, options);
 
@@ -442,12 +443,7 @@ router.get('/verify-login', async (req, res) => {
   try {
     const { token, email } = req.query;
 
-    console.log('=== LOGIN VERIFICATION DEBUG ===');
-    console.log('Raw token from query:', token);
-    console.log('Raw email from query:', email);
-
     if (!token || !email) {
-      console.log('Missing token or email');
       return res.status(400).json({ msg: 'Invalid login link' });
     }
 
@@ -455,35 +451,22 @@ router.get('/verify-login', async (req, res) => {
     let cleanToken;
     try {
       cleanToken = decodeURIComponent(token).trim();
-      console.log('Decoded token:', cleanToken);
     } catch (e) {
       cleanToken = token.trim();
-      console.log('Token decode failed, using raw:', cleanToken);
     }
 
     // Decode email (might be double-encoded)
     let cleanEmail;
     try {
       cleanEmail = decodeURIComponent(email).toLowerCase().trim();
-      console.log('Decoded email:', cleanEmail);
     } catch (e) {
       cleanEmail = email.toLowerCase().trim();
-      console.log('Email decode failed, using raw:', cleanEmail);
     }
 
     // First find candidate by email
     const candidate = await Candidate.findOne({ 
       email: cleanEmail
     });
-
-    console.log('Candidate found:', !!candidate);
-    if (candidate) {
-      console.log('Candidate email:', candidate.email);
-      console.log('Stored loginToken:', candidate.loginToken);
-      console.log('Token matches:', candidate.loginToken === cleanToken);
-      console.log('Token expiry:', candidate.loginTokenExpiry);
-      console.log('Email verified:', candidate.emailVerified);
-    }
 
     if (!candidate) {
       return res.status(400).json({ 
@@ -528,8 +511,8 @@ router.get('/verify-login', async (req, res) => {
         const options = {
           expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
           httpOnly: true,
-          secure: true,        // REQUIRED: Must be true for Vercel/HTTPS
-          sameSite: 'none'     // REQUIRED: Allows Frontend to talk to Backend
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'none'
         };
         res.cookie('authToken', authToken, options);
 
@@ -585,8 +568,8 @@ router.get('/verify-login', async (req, res) => {
     const options = {
       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       httpOnly: true,
-      secure: true,        // REQUIRED: Must be true for Vercel/HTTPS
-      sameSite: 'none'     // REQUIRED: Allows Frontend to talk to Backend
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none'
     };
     res.cookie('authToken', authToken, options);
 
