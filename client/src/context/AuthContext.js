@@ -59,9 +59,11 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     // Always read token from localStorage at start
     const token = localStorage.getItem('token');
+    console.log('[AuthContext] checkAuth called, token exists:', !!token);
     
     // If no token, immediately set unauthenticated
     if (!token) {
+      console.log('[AuthContext] No token found, setting unauthenticated');
       setIsAuthenticated(false);
       setUserEmail(null);
       setLoading(false);
@@ -71,22 +73,28 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const config = { headers: { 'x-auth-token': token } };
+      console.log('[AuthContext] Calling check-auth endpoint');
       const res = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH, config);
+      console.log('[AuthContext] check-auth response:', res.data);
       
       if (res.data.authenticated) {
+        console.log('[AuthContext] User authenticated:', res.data.email);
         setIsAuthenticated(true);
         setUserEmail(res.data.email);
         // Persist email to localStorage
         localStorage.setItem('userEmail', res.data.email);
       } else {
+        console.log('[AuthContext] User not authenticated');
         setIsAuthenticated(false);
         setUserEmail(null);
         localStorage.removeItem('token');
         localStorage.removeItem('userEmail');
       }
     } catch (err) {
+      console.error('[AuthContext] checkAuth error:', err.response?.status, err.message);
       // Handle 401/403 - clear zombie states (invalid/expired token)
       if (err.response?.status === 401 || err.response?.status === 403) {
+        console.log('[AuthContext] Invalid token (401/403), clearing auth');
         setIsAuthenticated(false);
         setUserEmail(null);
         localStorage.removeItem('token');
@@ -94,16 +102,17 @@ export const AuthProvider = ({ children }) => {
       }
       // Handle 503 - service unavailable (keep token, might be temporary)
       else if (err.response?.status === 503) {
+        console.log('[AuthContext] Service unavailable (503), keeping token');
         setIsAuthenticated(false);
         setUserEmail(null);
         // Don't remove token - service might come back
       }
       // Network errors or other issues - keep token, might be temporary
       else {
+        console.log('[AuthContext] Network/server error, keeping token');
         setIsAuthenticated(false);
         setUserEmail(null);
         // Don't remove token on network errors - keep it for retry
-        console.error('Auth check failed (network/server error):', err.message);
       }
     } finally {
       setLoading(false);
@@ -112,14 +121,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = (token, email) => {
+    console.log('[AuthContext] login() called with email:', email);
     // Set token and email in localStorage
     localStorage.setItem('token', token);
     localStorage.setItem('userEmail', email);
+    console.log('[AuthContext] Token and email stored in localStorage');
     // Update state
     setIsAuthenticated(true);
     setUserEmail(email);
     setLoading(false);
     setAuthChecked(true);
+    console.log('[AuthContext] Auth state updated: authenticated=true');
   };
 
 
