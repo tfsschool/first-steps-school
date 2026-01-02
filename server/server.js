@@ -44,7 +44,6 @@ app.use(xss());
 const allowedOrigins = [
   'https://www.tfs.school',
   'https://tfs.school',
-  'https://first-steps-school.vercel.app', // Fallback for testing
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
