@@ -233,18 +233,21 @@ const CreateProfile = () => {
         submitData.append('resume', currentFormData.resume);
       }
       
-      // Filter out empty entries before sending
-      const filteredEducation = currentFormData.education.filter(edu => 
+      // Filter out empty entries before sending (with array safety)
+      const educationArray = Array.isArray(currentFormData.education) ? currentFormData.education : [];
+      const filteredEducation = educationArray.filter(edu => 
         edu.degree && edu.degree.trim() && 
         edu.institution && edu.institution.trim()
       );
       
-      const filteredWorkExperience = currentFormData.workExperience.filter(exp => 
+      const workExpArray = Array.isArray(currentFormData.workExperience) ? currentFormData.workExperience : [];
+      const filteredWorkExperience = workExpArray.filter(exp => 
         exp.companyName && exp.companyName.trim() && 
         exp.jobTitle && exp.jobTitle.trim()
       );
       
-      const filteredCertifications = currentFormData.certifications.filter(cert => 
+      const certsArray = Array.isArray(currentFormData.certifications) ? currentFormData.certifications : [];
+      const filteredCertifications = certsArray.filter(cert => 
         cert.name && cert.name.trim()
       );
       
@@ -259,7 +262,7 @@ const CreateProfile = () => {
         address: currentFormData.address || '',
         education: filteredEducation,
         workExperience: filteredWorkExperience,
-        skills: currentFormData.skills.filter(s => s && s.trim()),
+        skills: (Array.isArray(currentFormData.skills) ? currentFormData.skills : []).filter(s => s && s.trim()),
         certifications: filteredCertifications
       };
       
@@ -351,17 +354,21 @@ const CreateProfile = () => {
 
   // Remove education entry
   const removeEducation = (index) => {
+    const educationArray = Array.isArray(formData.education) ? formData.education : [];
     setFormData({
       ...formData,
-      education: formData.education.filter((_, i) => i !== index)
+      education: educationArray.filter((_, i) => i !== index)
     });
   };
 
   // Update education entry
   const updateEducation = (index, field, value) => {
-    const updated = [...formData.education];
-    updated[index][field] = value;
-    setFormData({ ...formData, education: updated });
+    const educationArray = Array.isArray(formData.education) ? formData.education : [];
+    const updated = [...educationArray];
+    if (updated[index]) {
+      updated[index][field] = value;
+      setFormData({ ...formData, education: updated });
+    }
   };
 
   // Add work experience
@@ -381,9 +388,10 @@ const CreateProfile = () => {
 
   // Remove work experience
   const removeWorkExperience = (index) => {
+    const workExpArray = Array.isArray(formData.workExperience) ? formData.workExperience : [];
     setFormData({
       ...formData,
-      workExperience: formData.workExperience.filter((_, i) => i !== index)
+      workExperience: workExpArray.filter((_, i) => i !== index)
     });
   };
 
@@ -407,9 +415,10 @@ const CreateProfile = () => {
 
   // Remove skill
   const removeSkill = (index) => {
+    const skillsArray = Array.isArray(formData.skills) ? formData.skills : [];
     setFormData({
       ...formData,
-      skills: formData.skills.filter((_, i) => i !== index)
+      skills: skillsArray.filter((_, i) => i !== index)
     });
   };
 
@@ -430,9 +439,10 @@ const CreateProfile = () => {
 
   // Remove certification
   const removeCertification = (index) => {
+    const certsArray = Array.isArray(formData.certifications) ? formData.certifications : [];
     setFormData({
       ...formData,
-      certifications: formData.certifications.filter((_, i) => i !== index)
+      certifications: certsArray.filter((_, i) => i !== index)
     });
   };
 
@@ -535,18 +545,21 @@ const CreateProfile = () => {
         submitData.append('resume', formData.resume);
       }
       
-      // Filter out empty entries before sending
-      const filteredEducation = formData.education.filter(edu => 
+      // Filter out empty entries before sending (with array safety)
+      const educationArray = Array.isArray(formData.education) ? formData.education : [];
+      const filteredEducation = educationArray.filter(edu => 
         edu.degree && edu.degree.trim() && 
         edu.institution && edu.institution.trim()
       );
       
-      const filteredWorkExperience = formData.workExperience.filter(exp => 
+      const workExpArray = Array.isArray(formData.workExperience) ? formData.workExperience : [];
+      const filteredWorkExperience = workExpArray.filter(exp => 
         exp.companyName && exp.companyName.trim() && 
         exp.jobTitle && exp.jobTitle.trim()
       );
       
-      const filteredCertifications = formData.certifications.filter(cert => 
+      const certsArray = Array.isArray(formData.certifications) ? formData.certifications : [];
+      const filteredCertifications = certsArray.filter(cert => 
         cert.name && cert.name.trim()
       );
       
@@ -561,7 +574,7 @@ const CreateProfile = () => {
         address: formData.address,
         education: filteredEducation,
         workExperience: filteredWorkExperience,
-        skills: formData.skills.filter(s => s && s.trim()),
+        skills: (Array.isArray(formData.skills) ? formData.skills : []).filter(s => s && s.trim()),
         certifications: filteredCertifications
       };
       

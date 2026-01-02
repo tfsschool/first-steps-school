@@ -36,11 +36,13 @@ const JobManagement = () => {
   const fetchJobs = useCallback(async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.ADMIN.JOBS, config);
-      setJobs(res.data);
+      // Ensure res.data is an array
+      setJobs(Array.isArray(res.data) ? res.data : []);
       
       // Fetch applicant counts for each job
       const counts = {};
-      for (const job of res.data) {
+      const jobsArray = Array.isArray(res.data) ? res.data : [];
+      for (const job of jobsArray) {
         try {
           const appsRes = await axios.get(API_ENDPOINTS.ADMIN.APPLICATIONS_BY_JOB(job._id), config);
           counts[job._id] = appsRes.data.length;
@@ -55,6 +57,7 @@ const JobManagement = () => {
       if (!handleAuthError(err)) {
         showError('Error loading jobs: ' + (err.response?.data?.msg || err.message));
       }
+      setJobs([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -112,7 +115,7 @@ const JobManagement = () => {
     }
   };
 
-  const filteredJobs = jobs.filter(job => {
+  const filteredJobs = (Array.isArray(jobs) ? jobs : []).filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (job.department && job.department.toLowerCase().includes(searchTerm.toLowerCase()));

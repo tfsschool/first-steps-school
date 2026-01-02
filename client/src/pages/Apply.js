@@ -37,7 +37,9 @@ const Apply = () => {
       try {
         // Fetch job
         const jobRes = await axios.get(API_ENDPOINTS.PUBLIC.JOBS);
-        const foundJob = jobRes.data.find(j => j._id === jobId);
+        // Ensure jobRes.data is an array before using find
+        const jobsArray = Array.isArray(jobRes.data) ? jobRes.data : [];
+        const foundJob = jobsArray.find(j => j._id === jobId);
         if (!foundJob) {
           setError('Job position not found.');
           setLoading(false);

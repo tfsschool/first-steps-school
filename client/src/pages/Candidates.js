@@ -51,13 +51,16 @@ const Candidates = () => {
       }
       
       const res = await axios.get(`${API_ENDPOINTS.ADMIN.APPLICATIONS}?${params.toString()}`, config);
-      setApplications(res.data.applications || []);
-      setTotalPages(res.data.totalPages || 1);
-      setTotalApplications(res.data.totalApplications || 0);
+      // Ensure applications is always an array
+      const apps = res.data?.applications;
+      setApplications(Array.isArray(apps) ? apps : []);
+      setTotalPages(res.data?.totalPages || 1);
+      setTotalApplications(res.data?.totalApplications || 0);
     } catch (err) {
       if (!handleAuthError(err)) {
         showError('Error loading applications: ' + (err.response?.data?.msg || err.message));
       }
+      setApplications([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -141,7 +144,7 @@ const Candidates = () => {
     const fetchJobs = async () => {
       try {
         const res = await axios.get(API_ENDPOINTS.ADMIN.JOBS, config);
-        setUniqueJobs(res.data || []);
+        setUniqueJobs(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         if (!handleAuthError(err)) {
           console.error('Error fetching jobs:', err);
@@ -484,7 +487,7 @@ const CandidateDetails = ({ application }) => {
       </div>
 
       {/* Education */}
-      {profile.education && profile.education.length > 0 && (
+      {profile.education && Array.isArray(profile.education) && profile.education.length > 0 && (
         <div className="bg-white p-4 rounded-lg shadow-sm">
           <h4 className="font-semibold text-gray-700 mb-3">Education</h4>
           <div className="space-y-3">
@@ -500,7 +503,7 @@ const CandidateDetails = ({ application }) => {
       )}
 
       {/* Work Experience */}
-      {profile.workExperience && profile.workExperience.length > 0 && (
+      {profile.workExperience && Array.isArray(profile.workExperience) && profile.workExperience.length > 0 && (
         <div className="bg-white p-4 rounded-lg shadow-sm">
           <h4 className="font-semibold text-gray-700 mb-3">Work Experience</h4>
           <div className="space-y-3">
@@ -520,7 +523,7 @@ const CandidateDetails = ({ application }) => {
       )}
 
       {/* Skills */}
-      {profile.skills && profile.skills.length > 0 && (
+      {profile.skills && Array.isArray(profile.skills) && profile.skills.length > 0 && (
         <div className="bg-white p-4 rounded-lg shadow-sm">
           <h4 className="font-semibold text-gray-700 mb-3">Skills</h4>
           <div className="flex flex-wrap gap-2">
@@ -534,7 +537,7 @@ const CandidateDetails = ({ application }) => {
       )}
 
       {/* Certifications */}
-      {profile.certifications && profile.certifications.length > 0 && (
+      {profile.certifications && Array.isArray(profile.certifications) && profile.certifications.length > 0 && (
         <div className="bg-white p-4 rounded-lg shadow-sm">
           <h4 className="font-semibold text-gray-700 mb-3">Certifications</h4>
           <div className="space-y-2">

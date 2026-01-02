@@ -100,8 +100,12 @@ router.delete('/job/:id', adminAuth, async (req, res) => {
 router.get('/jobs', adminAuth, async (req, res) => {
     try {
         const jobs = await Job.find().sort({ createdAt: -1 });
-        res.json(jobs);
-    } catch (err) { res.status(500).send('Server Error'); }
+        // Always return an array
+        res.json(Array.isArray(jobs) ? jobs : []);
+    } catch (err) {
+        console.error('Error fetching jobs:', err);
+        res.status(500).json([]);
+    }
 });
 
 // 5. Get All Registered Candidates (Protected) - MUST come before /applications routes
@@ -129,10 +133,12 @@ router.get('/candidates', adminAuth, async (req, res) => {
         );
         
         console.log('Returning candidates with stats');
-        res.json(candidatesWithStats);
+        // Always return an array
+        res.json(Array.isArray(candidatesWithStats) ? candidatesWithStats : []);
     } catch (err) {
         console.error('Error fetching candidates:', err);
-        res.status(500).json({ msg: 'Server Error', error: err.message });
+        // Return empty array on error to prevent frontend crashes
+        res.status(500).json([]);
     }
 });
 
@@ -199,14 +205,20 @@ router.get('/applications', adminAuth, async (req, res) => {
         const totalPages = Math.ceil(totalApplications / limit);
         
         res.json({
-            applications: normalizedApps,
+            applications: Array.isArray(normalizedApps) ? normalizedApps : [],
             totalApplications,
             totalPages,
             currentPage: page
         });
     } catch (err) {
         console.error('Error fetching all applications:', err);
-        res.status(500).json({ msg: 'Server Error', error: err.message });
+        // Return safe paginated structure on error
+        res.status(500).json({
+            applications: [],
+            totalApplications: 0,
+            totalPages: 1,
+            currentPage: 1
+        });
     }
 });
 
@@ -303,10 +315,12 @@ router.get('/applications/:jobId', adminAuth, async (req, res) => {
             return appData;
         });
         
-        res.json(normalizedApps);
+        // Always return an array
+        res.json(Array.isArray(normalizedApps) ? normalizedApps : []);
     } catch (err) {
         console.error('Error fetching applications:', err);
-        res.status(500).json({ msg: 'Server Error', error: err.message });
+        // Return empty array on error
+        res.status(500).json([]);
     }
 });
 

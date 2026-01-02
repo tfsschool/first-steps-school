@@ -34,11 +34,13 @@ const RegisteredEmails = () => {
   const fetchCandidates = useCallback(async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.ADMIN.REGISTERED_EMAILS, config);
-      setCandidates(res.data);
+      // Ensure res.data is an array
+      setCandidates(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       if (!handleAuthError(err)) {
         showError('Error loading registered emails: ' + (err.response?.data?.msg || err.message));
       }
+      setCandidates([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -88,7 +90,7 @@ const RegisteredEmails = () => {
     }
   };
 
-  const filteredCandidates = candidates.filter(candidate => {
+  const filteredCandidates = (Array.isArray(candidates) ? candidates : []).filter(candidate => {
     const matchesSearch = candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (candidate.profileId?.fullName && candidate.profileId.fullName.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesFilter = filterVerified === 'All' || 
@@ -97,8 +99,9 @@ const RegisteredEmails = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const verifiedCount = candidates.filter(c => c.emailVerified).length;
-  const unverifiedCount = candidates.filter(c => !c.emailVerified).length;
+  const candidatesArray = Array.isArray(candidates) ? candidates : [];
+  const verifiedCount = candidatesArray.filter(c => c.emailVerified).length;
+  const unverifiedCount = candidatesArray.filter(c => !c.emailVerified).length;
 
   if (loading) {
     return (
