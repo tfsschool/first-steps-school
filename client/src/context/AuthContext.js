@@ -25,6 +25,16 @@ export const AuthProvider = ({ children }) => {
 
   // Check authentication status ONCE on mount
   useEffect(() => {
+    // Skip auth check on login-verify and verify-email pages
+    // These pages handle their own authentication flow
+    const currentPath = window.location.pathname;
+    if (currentPath === '/login-verify' || currentPath === '/verify-email') {
+      console.log('[AuthContext] Skipping checkAuth on verification page:', currentPath);
+      setLoading(false);
+      setAuthChecked(true);
+      return;
+    }
+
     if (!authChecked) {
       checkAuth();
     }

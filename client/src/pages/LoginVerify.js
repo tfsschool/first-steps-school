@@ -58,18 +58,20 @@ const LoginVerify = () => {
         
         // Use login() helper to set token and update state
         if (res.data.token && res.data.email) {
-          console.log('[LoginVerify] Calling login() with token and email');
+          console.log('[LoginVerify] ✅ Calling login() with token and email');
           login(res.data.token, res.data.email);
+          console.log('[LoginVerify] ✅ Token saved to localStorage successfully');
         } else if (res.data.token) {
-          console.log('[LoginVerify] Calling login() with token only');
+          console.log('[LoginVerify] ✅ Calling login() with token only');
           login(res.data.token, email);
+          console.log('[LoginVerify] ✅ Token saved to localStorage successfully');
         } else {
-          console.log('[LoginVerify] No token, calling checkAuth()');
+          console.log('[LoginVerify] ⚠️ No token in response, calling checkAuth()');
           // Fallback: refresh auth status
           await checkAuth();
         }
 
-        console.log('[LoginVerify] Redirecting to /careers in 2 seconds');
+        console.log('[LoginVerify] 🔄 Redirecting to /careers in 2 seconds');
         // Redirect to careers after 2 seconds
         setTimeout(() => {
           navigate('/careers');
