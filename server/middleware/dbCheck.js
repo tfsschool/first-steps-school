@@ -1,18 +1,49 @@
 const mongoose = require('mongoose');
+const connectDB = require('../config/db');
 
 /**
- * Middleware to check database connection health
- * Returns 503 if database is unavailable instead of crashing
+ * Middleware to ensure database connection is established
+ * Attempts to connect if not already connected (serverless-friendly)
  */
-const checkDatabaseConnection = (req, res, next) => {
-  if (mongoose.connection.readyState !== 1) {
-    console.error('⚠️ Database not connected. ReadyState:', mongoose.connection.readyState);
+const checkDatabaseConnection = async (req, res, next) => {
+  try {
+    // Check if already connected
+    if (mongoose.connection.readyState === 1) {
+      return next();
+    }
+
+    // If connecting, wait briefly
+    if (mongoose.connection.readyState === 2) {
+      console.log('⏳ Database connection in progress, waiting...');
+      // Wait up to 5 seconds for connection
+      const timeout = 5000;
+      const startTime = Date.now();
+      while (mongoose.connection.readyState === 2 && Date.now() - startTime < timeout) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      if (mongoose.connection.readyState === 1) {
+        return next();
+      }
+    }
+
+    // Not connected - attempt to connect
+    console.log('🔄 Database not connected, attempting to connect...');
+    await connectDB();
+    
+    // Verify connection succeeded
+    if (mongoose.connection.readyState === 1) {
+      return next();
+    }
+
+    // Connection failed
+    throw new Error('Failed to establish database connection');
+  } catch (err) {
+    console.error('❌ Database connection check failed:', err.message);
     return res.status(503).json({
-      msg: 'Service temporarily unavailable. Database connection is not ready.',
+      msg: 'Service temporarily unavailable. Please try again in a moment.',
       error: 'DATABASE_UNAVAILABLE'
     });
   }
-  next();
 };
 
 module.exports = { checkDatabaseConnection };

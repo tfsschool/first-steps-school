@@ -37,7 +37,11 @@ const authenticate = async (req, res, next) => {
     try {
       candidate = await Candidate.findById(decoded.candidateId).lean();
     } catch (dbErr) {
-      console.error('Database error in auth middleware:', dbErr);
+      console.error('Database error in auth middleware:', {
+        error: dbErr.message,
+        candidateId: decoded.candidateId,
+        readyState: require('mongoose').connection.readyState
+      });
       return res.status(503).json({ 
         msg: 'Service temporarily unavailable. Please try again.',
         authenticated: false 

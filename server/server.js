@@ -13,10 +13,12 @@ const { checkDatabaseConnection } = require('./middleware/dbCheck');
 const app = express();
 app.set('trust proxy', 1);
 
-// Connect Database (await for Vercel cold starts)
-(async () => {
-  await connectDB();
-})();
+// Connect Database on startup (serverless-friendly)
+// Connection will be cached and reused across requests
+connectDB().catch(err => {
+  console.error('❌ FATAL: Failed to initialize database connection:', err.message);
+  // Don't exit in serverless - let middleware handle per-request connection
+});
 
 // Security Middleware
 app.use(helmet());
@@ -106,6 +108,27 @@ app.get('/', (req, res) => {
   res.send('API is Running Successfully!');
 });
 
+// 2. Health Check Endpoint (includes database status)
+app.get('/health', async (req, res) => {
+  const { getConnectionStatus } = require('./config/db');
+  const dbStatus = getConnectionStatus();
+  
+  const health = {
+    status: dbStatus.isConnected ? 'healthy' : 'degraded',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    database: {
+      connected: dbStatus.isConnected,
+      state: dbStatus.state,
+      readyState: dbStatus.readyState
+    },
+    environment: process.env.NODE_ENV || 'development'
+  };
+  
+  const statusCode = dbStatus.isConnected ? 200 : 503;
+  res.status(statusCode).json(health);
+});
+
 // 2. API Routes
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/public', require('./routes/publicRoutes'));
@@ -117,9 +140,40 @@ app.use('/api/candidate', require('./routes/candidateRoutes'));
 // --- GLOBAL ERROR HANDLING MIDDLEWARE ---
 // This must be at the very end, before app.listen/module.exports
 app.use((err, req, res, next) => {
-  console.error("🔥 SERVER CRASH:", err.stack); // This will show in Vercel logs
-  res.status(500).json({ 
-    message: "Internal Server Error", 
+  // Log detailed error information
+  console.error("🔥 ERROR CAUGHT:", {
+    message: err.message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    url: req.url,
+    method: req.method,
+    timestamp: new Date().toISOString()
+  });
+  
+  // Handle specific error types
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({ 
+      message: "Validation Error", 
+      error: err.message 
+    });
+  }
+  
+  if (err.name === 'CastError') {
+    return res.status(400).json({ 
+      message: "Invalid ID format", 
+      error: "The provided ID is not valid" 
+    });
+  }
+  
+  if (err.code === 11000) {
+    return res.status(409).json({ 
+      message: "Duplicate Entry", 
+      error: "A record with this information already exists" 
+    });
+  }
+  
+  // Default error response
+  res.status(err.status || 500).json({ 
+    message: err.message || "Internal Server Error", 
     error: process.env.NODE_ENV === 'development' ? err.message : undefined 
   });
 });

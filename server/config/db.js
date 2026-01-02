@@ -1,49 +1,106 @@
 const mongoose = require('mongoose');
 
-let isConnected = false;
+/**
+ * Cached connection promise for serverless environments
+ * This prevents creating multiple connections in serverless functions
+ */
+let cachedConnection = null;
 
+/**
+ * Check if database is connected
+ * Uses mongoose.connection.readyState as source of truth
+ */
+const isConnected = () => {
+    return mongoose.connection.readyState === 1;
+};
+
+/**
+ * Connect to MongoDB with proper serverless handling
+ * Returns a promise that resolves when connected
+ */
 const connectDB = async () => {
-    if (isConnected) {
-        console.log('✅ Using existing MongoDB connection');
-        return;
+    // Validate environment variable first
+    if (!process.env.MONGO_URI) {
+        const error = new Error('MONGO_URI is not defined in environment variables');
+        console.error('❌ CRITICAL:', error.message);
+        console.log('Please set MONGO_URI in your .env file or environment variables');
+        throw error;
     }
 
-    try {
-        if (!process.env.MONGO_URI) {
-            console.error('❌ ERROR: MONGO_URI is not defined in .env file');
-            console.log('Please create a .env file in the server folder with:');
-            console.log('MONGO_URI=mongodb://localhost:27017/first-steps-school');
-            return;
-        }
+    // If already connected, return immediately
+    if (isConnected()) {
+        console.log('✅ Using existing MongoDB connection (readyState: 1)');
+        return mongoose.connection;
+    }
 
-        const conn = await mongoose.connect(process.env.MONGO_URI, {
-            serverSelectionTimeoutMS: 5000,
-            maxPoolSize: 10,
-            minPoolSize: 2,
-            socketTimeoutMS: 45000,
-        });
-        
-        isConnected = true;
-        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    // If connection is in progress, wait for it
+    if (cachedConnection) {
+        console.log('⏳ Waiting for existing connection attempt...');
+        return cachedConnection;
+    }
+
+    // Create new connection promise and cache it
+    console.log('🔄 Establishing new MongoDB connection...');
+    cachedConnection = mongoose.connect(process.env.MONGO_URI, {
+        serverSelectionTimeoutMS: 10000,
+        maxPoolSize: 10,
+        minPoolSize: 2,
+        socketTimeoutMS: 45000,
+        family: 4,
+        // Serverless-friendly options
+        maxIdleTimeMS: 10000,
+        retryWrites: true,
+        retryReads: true
+    }).then((mongooseInstance) => {
+        console.log(`✅ MongoDB Connected: ${mongooseInstance.connection.host}`);
+        console.log(`   Database: ${mongooseInstance.connection.name}`);
+        console.log(`   ReadyState: ${mongooseInstance.connection.readyState}`);
+        return mongooseInstance.connection;
+    }).catch((err) => {
+        console.error('❌ MongoDB Connection Error:', err.message);
+        cachedConnection = null; // Clear cache on error
+        throw err;
+    });
+
+    // Setup event handlers (only once)
+    if (!mongoose.connection._eventsSetup) {
+        mongoose.connection._eventsSetup = true;
         
         mongoose.connection.on('disconnected', () => {
-            console.log('⚠️ MongoDB disconnected');
-            isConnected = false;
+            console.log('⚠️ MongoDB disconnected - will reconnect on next request');
+            cachedConnection = null;
         });
         
         mongoose.connection.on('error', (err) => {
-            console.error('❌ MongoDB connection error:', err);
-            isConnected = false;
+            console.error('❌ MongoDB connection error:', err.message);
+            cachedConnection = null;
         });
-    } catch (err) {
-        console.error('❌ MongoDB Connection Error:', err.message);
-        console.log('\n📋 Troubleshooting Steps:');
-        console.log('1. Make sure MongoDB is installed and running');
-        console.log('2. Check your .env file has the correct MONGO_URI');
-        console.log('3. For local MongoDB, start it with: mongod');
-        console.log('4. Or use MongoDB Atlas (cloud) - see README.md\n');
-        isConnected = false;
+        
+        mongoose.connection.on('reconnected', () => {
+            console.log('✅ MongoDB reconnected successfully');
+        });
     }
+
+    return cachedConnection;
+};
+
+/**
+ * Get connection status for health checks
+ */
+const getConnectionStatus = () => {
+    const states = {
+        0: 'disconnected',
+        1: 'connected',
+        2: 'connecting',
+        3: 'disconnecting'
+    };
+    return {
+        isConnected: isConnected(),
+        readyState: mongoose.connection.readyState,
+        state: states[mongoose.connection.readyState] || 'unknown'
+    };
 };
 
 module.exports = connectDB;
+module.exports.isConnected = isConnected;
+module.exports.getConnectionStatus = getConnectionStatus;
