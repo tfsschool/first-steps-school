@@ -11,7 +11,7 @@ const LoginVerify = () => {
   const email = searchParams.get('email');
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [message, setMessage] = useState('');
-  const { login, checkAuth, setAuthenticated } = useAuth();
+  const { login, checkAuth } = useAuth();
 
   useEffect(() => {
     const verifyLogin = async () => {
@@ -33,7 +33,6 @@ const LoginVerify = () => {
           // User is already logged in, just redirect without showing error
           setStatus('success');
           setMessage('You are already logged in! Redirecting...');
-          setAuthenticated(true, authCheck.data.email);
           setTimeout(() => {
             navigate('/careers');
           }, 1000);
@@ -77,7 +76,9 @@ const LoginVerify = () => {
             // User is authenticated (backend handled it), show success and redirect
             setStatus('success');
             setMessage('Login successful! Redirecting...');
-            setAuthenticated(true, finalAuthCheck.data.email);
+            if (finalAuthCheck.data.token) {
+              login(finalAuthCheck.data.token, finalAuthCheck.data.email);
+            }
             setTimeout(() => {
               navigate('/careers');
             }, 1500);

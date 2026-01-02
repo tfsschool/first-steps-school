@@ -13,7 +13,7 @@ const VerifyEmail = () => {
   const [message, setMessage] = useState('');
   const [resending, setResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
-  const { login, setAuthenticated } = useAuth();
+  const { login } = useAuth();
 
   useEffect(() => {
     const verifyEmail = async () => {
@@ -37,8 +37,6 @@ const VerifyEmail = () => {
           login(res.data.token, res.data.email);
         } else if (res.data.token && email) {
           login(res.data.token, email);
-        } else if (res.data.email) {
-          setAuthenticated(true, res.data.email);
         }
 
         // Redirect to careers after 3 seconds
@@ -55,8 +53,8 @@ const VerifyEmail = () => {
             // Check auth status
             try {
               const authCheck = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH);
-              if (authCheck.data.authenticated) {
-                setAuthenticated(true, authCheck.data.email);
+              if (authCheck.data.authenticated && authCheck.data.token) {
+                login(authCheck.data.token, authCheck.data.email);
               }
             } catch (authErr) {
               // Not authenticated yet, but that's okay
