@@ -19,11 +19,6 @@ const AdminDashboard = () => {
   const token = localStorage.getItem('token');
   const config = useMemo(() => ({ headers: { 'x-auth-token': token } }), [token]);
 
-  // Guard clause: redirect to login if no token
-  if (!token) {
-    return <Navigate to="/admin/login" replace />;
-  }
-
   const handleAuthError = useCallback((err) => {
     // Check if it's an authentication error
     if (err.response?.status === 401 || err.response?.data?.msg?.includes('token') || err.response?.data?.msg?.includes('authorization')) {
@@ -129,8 +124,15 @@ const AdminDashboard = () => {
   }, [fetchJobs, fetchApplications, fetchCandidates]);
 
   useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+    if (token) {
+      fetchStats();
+    }
+  }, [fetchStats, token]);
+
+  // Guard clause: redirect to login if no token
+  if (!token) {
+    return <Navigate to="/admin/login" replace />;
+  }
 
   if (loading) {
     return (
