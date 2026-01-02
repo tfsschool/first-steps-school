@@ -111,13 +111,17 @@ router.get('/jobs', adminAuth, async (req, res) => {
 // 5. Get All Registered Candidates (Protected) - MUST come before /applications routes
 router.get('/candidates', adminAuth, async (req, res) => {
     try {
-        console.log('=== GET /api/admin/candidates ===');
+        if (process.env.NODE_ENV === 'development') {
+            console.log('=== GET /api/admin/candidates ===');
+        }
         const candidates = await Candidate.find()
             .sort({ registeredAt: -1 })
             .populate('profileId', 'fullName phone cnic')
             .lean();
         
-        console.log(`Found ${candidates.length} candidates`);
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`Found ${candidates.length} candidates`);
+        }
         
         // Get application count for each candidate
         const candidatesWithStats = await Promise.all(
@@ -132,7 +136,9 @@ router.get('/candidates', adminAuth, async (req, res) => {
             })
         );
         
-        console.log('Returning candidates with stats');
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Returning candidates with stats');
+        }
         // Always return an array
         res.json(Array.isArray(candidatesWithStats) ? candidatesWithStats : []);
     } catch (err) {
@@ -262,26 +268,36 @@ router.put('/application/:id/status', adminAuth, async (req, res) => {
 // 5b. Delete Application (Protected) - MUST come before /applications/:jobId
 router.delete('/application/:id', adminAuth, async (req, res) => {
     try {
-        console.log('=== DELETE Application Request ===');
-        console.log('Application ID:', req.params.id);
-        console.log('Request method:', req.method);
-        console.log('Request path:', req.path);
+        if (process.env.NODE_ENV === 'development') {
+            console.log('=== DELETE Application Request ===');
+            console.log('Application ID:', req.params.id);
+            console.log('Request method:', req.method);
+            console.log('Request path:', req.path);
+        }
         
         // Validate ObjectId format
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            console.log('Invalid ObjectId format');
+            if (process.env.NODE_ENV === 'development') {
+                console.log('Invalid ObjectId format');
+            }
             return res.status(400).json({ msg: 'Invalid application ID' });
         }
 
         const application = await Application.findById(req.params.id);
         if (!application) {
-            console.log('Application not found in database');
+            if (process.env.NODE_ENV === 'development') {
+                console.log('Application not found in database');
+            }
             return res.status(404).json({ msg: 'Application not found' });
         }
 
-        console.log('Deleting application:', application._id);
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Deleting application:', application._id);
+        }
         await Application.findByIdAndDelete(req.params.id);
-        console.log('Application deleted successfully');
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Application deleted successfully');
+        }
         res.json({ msg: 'Application deleted successfully' });
     } catch (err) {
         console.error('Error deleting application:', err);

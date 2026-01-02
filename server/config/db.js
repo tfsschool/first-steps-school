@@ -23,24 +23,32 @@ const connectDB = async () => {
     if (!process.env.MONGO_URI) {
         const error = new Error('MONGO_URI is not defined in environment variables');
         console.error('❌ CRITICAL:', error.message);
-        console.log('Please set MONGO_URI in your .env file or environment variables');
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Please set MONGO_URI in your .env file or environment variables');
+        }
         throw error;
     }
 
     // If already connected, return immediately
     if (isConnected()) {
-        console.log('✅ Using existing MongoDB connection (readyState: 1)');
+        if (process.env.NODE_ENV === 'development') {
+            console.log('✅ Using existing MongoDB connection (readyState: 1)');
+        }
         return mongoose.connection;
     }
 
     // If connection is in progress, wait for it
     if (cachedConnection) {
-        console.log('⏳ Waiting for existing connection attempt...');
+        if (process.env.NODE_ENV === 'development') {
+            console.log('⏳ Waiting for existing connection attempt...');
+        }
         return cachedConnection;
     }
 
     // Create new connection promise and cache it
-    console.log('🔄 Establishing new MongoDB connection...');
+    if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Establishing new MongoDB connection...');
+    }
     cachedConnection = mongoose.connect(process.env.MONGO_URI, {
         serverSelectionTimeoutMS: 10000,
         maxPoolSize: 10,

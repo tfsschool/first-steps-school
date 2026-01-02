@@ -71,17 +71,23 @@ const submitApplication = async (req, res) => {
     let cvPath;
     if (req.body.cvPath) {
       cvPath = req.body.cvPath;
-      console.log('Using profile resume CV:', cvPath);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Using profile resume CV:', cvPath);
+      }
     } else if (req.file) {
       try {
-        console.log('Uploading CV file to Cloudinary:', req.file.originalname);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Uploading CV file to Cloudinary:', req.file.originalname);
+        }
         const fileInfo = await uploadFile(
           req.file.buffer,
           'first-steps-school/cvs',
           req.file.originalname
         );
         cvPath = fileInfo.secure_url;
-        console.log('CV uploaded successfully:', cvPath);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('CV uploaded successfully:', cvPath);
+        }
       } catch (uploadError) {
         console.error('Error uploading CV:', uploadError);
         return res.status(500).json({ msg: 'Error uploading CV', error: uploadError.message });
@@ -130,7 +136,9 @@ const submitApplication = async (req, res) => {
         profileId = profile._id;
       }
     } catch (profileErr) {
-      console.log('Profile not found for candidateId:', candidateId);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Profile not found for candidateId:', candidateId);
+      }
     }
 
     const newApp = new Application({

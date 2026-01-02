@@ -80,7 +80,9 @@ app.use(cors({
     }
 
     // 5. Block everything else
-    console.log(`❌ CORS: Blocked origin: ${origin}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`❌ CORS: Blocked origin: ${origin}`);
+    }
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true, // REQUIRED: Allows cookies to be sent cross-site

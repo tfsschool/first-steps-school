@@ -25,7 +25,9 @@ const getProfile = async (req, res) => {
   try {
     const candidateId = req.candidate.id;
     
-    console.log('Fetching profile for candidateId:', candidateId);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Fetching profile for candidateId:', candidateId);
+    }
 
     // CHECK IF LOCKED: Has the user applied to any job?
     const hasApplied = await Application.exists({ candidateId: candidateId });
@@ -34,19 +36,23 @@ const getProfile = async (req, res) => {
     const profile = await UserProfile.findOne({ candidateId: candidateId });
     
     if (!profile) {
-      console.log('Profile not found for candidateId:', candidateId);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Profile not found for candidateId:', candidateId);
+      }
       // Return isLocked even if profile doesn't exist
       return res.status(404).json({ msg: 'Profile not found', isLocked });
     }
     
-    console.log('Profile found:', {
-      id: profile._id,
-      fullName: profile.fullName,
-      email: profile.email,
-      hasProfilePicture: !!profile.profilePicture,
-      hasResumePath: !!profile.resumePath,
-      isLocked
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Profile found:', {
+        id: profile._id,
+        fullName: profile.fullName,
+        email: profile.email,
+        hasProfilePicture: !!profile.profilePicture,
+        hasResumePath: !!profile.resumePath,
+        isLocked
+      });
+    }
     
     const profileData = profile.toObject();
     if (profileData.profilePicture) {
@@ -164,12 +170,14 @@ const createOrUpdateProfile = async (req, res) => {
       profileData.certifications = [];
     }
 
-    console.log('Profile data after filtering:', {
-      education: profileData.education?.length || 0,
-      workExperience: profileData.workExperience?.length || 0,
-      skills: profileData.skills?.length || 0,
-      certifications: profileData.certifications?.length || 0
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Profile data after filtering:', {
+        education: profileData.education?.length || 0,
+        workExperience: profileData.workExperience?.length || 0,
+        skills: profileData.skills?.length || 0,
+        certifications: profileData.certifications?.length || 0
+      });
+    }
 
     profileData.email = email.toLowerCase().trim();
     profileData.candidateId = candidateId;

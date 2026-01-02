@@ -59,7 +59,9 @@ export const validateArrayResponse = (response, endpoint = 'API') => {
   const data = validateJSONResponse(response, endpoint);
   
   if (!Array.isArray(data)) {
-    console.warn(`⚠️ [${endpoint}] Expected array but got ${typeof data}. Returning empty array.`);
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`⚠️ [${endpoint}] Expected array but got ${typeof data}. Returning empty array.`);
+    }
     return [];
   }
   
@@ -76,7 +78,9 @@ export const validateObjectResponse = (response, endpoint = 'API') => {
   const data = validateJSONResponse(response, endpoint);
   
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
-    console.warn(`⚠️ [${endpoint}] Expected object but got ${typeof data}. Returning empty object.`);
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`⚠️ [${endpoint}] Expected object but got ${typeof data}. Returning empty object.`);
+    }
     return {};
   }
   
@@ -93,7 +97,9 @@ export const validatePaginatedResponse = (response, endpoint = 'API') => {
   const data = validateJSONResponse(response, endpoint);
   
   if (!data || typeof data !== 'object') {
-    console.warn(`⚠️ [${endpoint}] Invalid paginated response. Returning default structure.`);
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`⚠️ [${endpoint}] Invalid paginated response. Returning default structure.`);
+    }
     return {
       applications: [],
       totalApplications: 0,
@@ -187,7 +193,9 @@ export const safeAPICall = async (apiCall, options = {}) => {
     console.error(`❌ [${endpoint}] API call failed:`, error.message);
     
     if (fallback !== null) {
-      console.warn(`⚠️ [${endpoint}] Using fallback value`);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`⚠️ [${endpoint}] Using fallback value`);
+      }
       return fallback;
     }
     

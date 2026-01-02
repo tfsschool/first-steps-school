@@ -21,8 +21,8 @@ const getBaseURL = () => {
 const BASE_URL = getBaseURL();
 const FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3000';
 
-// Log the API URL for debugging (including production)
-if (typeof window !== 'undefined') {
+// Log the API URL for debugging (development only)
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   console.log('🔗 API Configuration:');
   console.log('  - Environment:', process.env.NODE_ENV);
   console.log('  - REACT_APP_API_URL:', process.env.REACT_APP_API_URL || '(not set)');

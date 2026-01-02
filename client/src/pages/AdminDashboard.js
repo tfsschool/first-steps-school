@@ -41,7 +41,7 @@ const AdminDashboard = () => {
       }
       
       const jobs = Array.isArray(res.data) ? res.data : [];
-      if (!Array.isArray(res.data)) {
+      if (process.env.NODE_ENV === 'development' && !Array.isArray(res.data)) {
         console.warn('Warning: fetchJobs received non-array data:', typeof res.data);
       }
       const totalJobs = jobs.length;
@@ -70,7 +70,7 @@ const AdminDashboard = () => {
       }
       
       const applications = Array.isArray(res.data?.applications) ? res.data.applications : [];
-      if (!Array.isArray(res.data?.applications)) {
+      if (process.env.NODE_ENV === 'development' && !Array.isArray(res.data?.applications)) {
         console.warn('Warning: fetchApplications received non-array data:', typeof res.data?.applications);
       }
       const totalApplications = applications.length;
@@ -99,7 +99,7 @@ const AdminDashboard = () => {
       }
       
       const candidates = Array.isArray(res.data) ? res.data : [];
-      if (!Array.isArray(res.data)) {
+      if (process.env.NODE_ENV === 'development' && !Array.isArray(res.data)) {
         console.warn('Warning: fetchCandidates received non-array data:', typeof res.data);
       }
       const totalRegisteredEmails = candidates.length;

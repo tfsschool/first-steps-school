@@ -15,7 +15,9 @@ export const ensureArray = (data, context = 'unknown') => {
     return data;
   }
   
-  console.warn(`[API Validator] Expected array but got ${typeof data} in ${context}`, data);
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(`[API Validator] Expected array but got ${typeof data} in ${context}`, data);
+  }
   return [];
 };
 
@@ -30,7 +32,9 @@ export const ensureObject = (data, context = 'unknown') => {
     return data;
   }
   
-  console.warn(`[API Validator] Expected object but got ${typeof data} in ${context}`, data);
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(`[API Validator] Expected object but got ${typeof data} in ${context}`, data);
+  }
   return {};
 };
 

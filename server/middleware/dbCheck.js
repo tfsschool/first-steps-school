@@ -14,7 +14,9 @@ const checkDatabaseConnection = async (req, res, next) => {
 
     // If connecting, wait briefly
     if (mongoose.connection.readyState === 2) {
-      console.log('⏳ Database connection in progress, waiting...');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('⏳ Database connection in progress, waiting...');
+      }
       // Wait up to 5 seconds for connection
       const timeout = 5000;
       const startTime = Date.now();
@@ -27,7 +29,9 @@ const checkDatabaseConnection = async (req, res, next) => {
     }
 
     // Not connected - attempt to connect
-    console.log('🔄 Database not connected, attempting to connect...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 Database not connected, attempting to connect...');
+    }
     await connectDB();
     
     // Verify connection succeeded
