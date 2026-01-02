@@ -250,17 +250,19 @@ const Apply = () => {
     const missing = getMissingRequiredFields(profile);
     if (missing.length > 0) {
       setError(formatMissingFieldsMessage(missing));
+      setSubmitting(false);
+      return;
+    }
+
+    // Validate salary fields BEFORE setting submitting state
+    if (!minimumSalary.trim() || !expectedSalary.trim()) {
+      setError('Please enter both minimum and expected salary.');
+      setSubmitting(false);
       return;
     }
 
     setError('');
     setSubmitting(true);
-
-    // Validate salary fields
-    if (!minimumSalary.trim() || !expectedSalary.trim()) {
-      setError('Please enter both minimum and expected salary.');
-      return;
-    }
 
     const data = new FormData();
     // Use profile data instead of form data

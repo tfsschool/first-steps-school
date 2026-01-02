@@ -378,6 +378,8 @@ router.get('/download-csv/:jobId', adminAuth, async (req, res) => {
                 'Work Experience': profile.workExperience ? JSON.stringify(profile.workExperience) : 'N/A',
                 'Skills': profile.skills ? profile.skills.join(', ') : 'N/A',
                 'Certifications': profile.certifications ? JSON.stringify(profile.certifications) : 'N/A',
+                'Minimum Salary': app.minimumSalary || 'N/A',
+                'Expected Salary': app.expectedSalary || 'N/A',
                 'Status': app.status || 'Pending',
                 'Applied Date': new Date(app.appliedAt).toLocaleString()
             };
@@ -385,7 +387,7 @@ router.get('/download-csv/:jobId', adminAuth, async (req, res) => {
 
         const fields = ['Full Name', 'Email', 'Cell Number', 'CNIC', 'Date of Birth', 'Gender', 
                        'Address', 'Education', 'Education Details', 'Work Experience', 'Skills', 
-                       'Certifications', 'Status', 'Applied Date'];
+                       'Certifications', 'Minimum Salary', 'Expected Salary', 'Status', 'Applied Date'];
         const json2csvParser = new Parser({ fields });
         const csv = json2csvParser.parse(csvData);
 
@@ -434,13 +436,15 @@ router.get('/download-csv-application/:applicationId', adminAuth, async (req, re
             'Work Experience': profile.workExperience ? JSON.stringify(profile.workExperience) : 'N/A',
             'Skills': profile.skills ? profile.skills.join(', ') : 'N/A',
             'Certifications': profile.certifications ? JSON.stringify(profile.certifications) : 'N/A',
+            'Minimum Salary': app.minimumSalary || 'N/A',
+            'Expected Salary': app.expectedSalary || 'N/A',
             'Status': app.status || 'Pending',
             'Applied Date': new Date(app.appliedAt).toLocaleString()
         }];
 
         const fields = ['Full Name', 'Email', 'Cell Number', 'Job Applied For', 'CNIC', 'Date of Birth', 
                        'Gender', 'Address', 'Education', 'Education Details', 
-                       'Work Experience', 'Skills', 'Certifications', 'Status', 'Applied Date'];
+                       'Work Experience', 'Skills', 'Certifications', 'Minimum Salary', 'Expected Salary', 'Status', 'Applied Date'];
         const json2csvParser = new Parser({ fields });
         const csv = json2csvParser.parse(csvData);
 

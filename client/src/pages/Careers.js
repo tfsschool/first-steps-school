@@ -68,11 +68,20 @@ const Careers = () => {
 
   // Fetch profile and application data - single source of truth from backend
   const fetchProfileAndApplications = useCallback(async () => {
+    console.log('[Careers] fetchProfileAndApplications called', {
+      authChecked,
+      authLoading,
+      isAuthenticated,
+      userEmail
+    });
+
     if (!authChecked || authLoading) {
+      console.log('[Careers] Waiting for auth check to complete');
       return; // Wait for auth check to complete
     }
 
     if (!isAuthenticated) {
+      console.log('[Careers] User not authenticated, clearing profile state');
       setHasProfile(false);
       setProfileName(null);
       setProfileLoading(false);
@@ -81,6 +90,7 @@ const Careers = () => {
       return;
     }
 
+    console.log('[Careers] User authenticated, fetching profile...');
     setProfileLoading(true);
     try {
       // Always get fresh token from localStorage
@@ -103,10 +113,15 @@ const Careers = () => {
       ]);
       
       if (profileRes.data) {
+        console.log('[Careers] Profile found:', {
+          fullName: profileRes.data.fullName,
+          isLocked: profileRes.data.isLocked
+        });
         setHasProfile(true);
         setProfileName(profileRes.data.fullName || userEmail);
         setIsProfileLocked(profileRes.data.isLocked || false);
       } else {
+        console.log('[Careers] No profile data returned');
         setHasProfile(false);
         setProfileName(null);
         setIsProfileLocked(false);
@@ -120,12 +135,14 @@ const Careers = () => {
     } catch (err) {
       // Handle 404 - profile not found (normal for new users)
       if (err.response?.status === 404) {
+        console.log('[Careers] Profile not found (404) - new user, showing Create Profile');
         setHasProfile(false);
         setProfileName(null);
         setIsProfileLocked(false);
       }
       // Handle 401/403 - token invalid, clear state and logout
       else if (err.response?.status === 401 || err.response?.status === 403) {
+        console.log('[Careers] Invalid token (401/403), logging out');
         setHasProfile(false);
         setProfileName(null);
         setIsProfileLocked(false);
@@ -135,15 +152,17 @@ const Careers = () => {
       }
       // Handle 503 - service unavailable (don't retry)
       else if (err.response?.status === 503) {
+        console.log('[Careers] Service unavailable (503)');
         setHasProfile(false);
         setProfileName(null);
         setIsProfileLocked(false);
       }
       // Other errors - don't clear state, just log
       else {
-        console.error('Error fetching profile:', err);
+        console.error('[Careers] Error fetching profile:', err);
       }
     } finally {
+      console.log('[Careers] Profile fetch complete, hasProfile:', hasProfile);
       setProfileLoading(false);
     }
   }, [isAuthenticated, authChecked, authLoading, userEmail, logout]);

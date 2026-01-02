@@ -15,7 +15,10 @@ const LoginVerify = () => {
 
   useEffect(() => {
     const verifyLogin = async () => {
+      console.log('[LoginVerify] Starting verification', { token: !!token, email });
+      
       if (!token || !email) {
+        console.log('[LoginVerify] Missing token or email');
         setStatus('error');
         setMessage('Invalid login link');
         return;
@@ -31,6 +34,7 @@ const LoginVerify = () => {
         if (authCheck.data.authenticated && authCheck.data.email && 
             authCheck.data.email.toLowerCase() === email.toLowerCase()) {
           // User is already logged in, just redirect without showing error
+          console.log('[LoginVerify] User already authenticated, redirecting');
           setStatus('success');
           setMessage('You are already logged in! Redirecting...');
           setTimeout(() => {
@@ -48,19 +52,24 @@ const LoginVerify = () => {
         // Include auth headers if token exists in storage
         const res = await axios.get(API_ENDPOINTS.CANDIDATE.VERIFY_LOGIN(token, email), authConfig);
         
+        console.log('[LoginVerify] Verification successful', { hasToken: !!res.data.token, hasEmail: !!res.data.email });
         setStatus('success');
         setMessage(res.data.msg || 'Login successful!');
         
         // Use login() helper to set token and update state
         if (res.data.token && res.data.email) {
+          console.log('[LoginVerify] Calling login() with token and email');
           login(res.data.token, res.data.email);
         } else if (res.data.token) {
+          console.log('[LoginVerify] Calling login() with token only');
           login(res.data.token, email);
         } else {
+          console.log('[LoginVerify] No token, calling checkAuth()');
           // Fallback: refresh auth status
           await checkAuth();
         }
 
+        console.log('[LoginVerify] Redirecting to /careers in 2 seconds');
         // Redirect to careers after 2 seconds
         setTimeout(() => {
           navigate('/careers');
@@ -74,9 +83,11 @@ const LoginVerify = () => {
           if (finalAuthCheck.data.authenticated && finalAuthCheck.data.email && 
               finalAuthCheck.data.email.toLowerCase() === email.toLowerCase()) {
             // User is authenticated (backend handled it), show success and redirect
+            console.log('[LoginVerify] Final auth check successful');
             setStatus('success');
             setMessage('Login successful! Redirecting...');
             if (finalAuthCheck.data.token) {
+              console.log('[LoginVerify] Calling login() from final check');
               login(finalAuthCheck.data.token, finalAuthCheck.data.email);
             }
             setTimeout(() => {
@@ -89,6 +100,7 @@ const LoginVerify = () => {
         }
         
         // Only show error if user is truly not authenticated
+        console.log('[LoginVerify] Verification failed', { status: err.response?.status, msg: err.response?.data?.msg });
         setStatus('error');
         setMessage(err.response?.data?.msg || 'Login verification failed. Please try again.');
       }
