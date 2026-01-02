@@ -83,7 +83,7 @@ const createOrUpdateProfile = async (req, res) => {
     const hasApplied = await Application.exists({ candidateId: candidateId });
     if (hasApplied) {
       return res.status(403).json({ 
-        msg: 'Profile is locked. You cannot update your profile after submitting an application.' 
+        msg: 'Profile is locked and cannot be edited.' 
       });
     }
 
