@@ -505,7 +505,7 @@ const CreateProfile = () => {
 
   // Submit form
   const handleSubmit = async () => {
-    const missing = getMissingRequiredFields();
+    const missing = getMissingRequiredFields(formData);
 
     const formatMissingFieldsMessage = (items) => {
       const personal = [];
