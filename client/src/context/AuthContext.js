@@ -97,16 +97,22 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('userEmail');
       }
     } catch (err) {
+      console.error('[AuthContext] checkAuth error:', err.response?.status, err.message);
+      
       // Only clear auth on 401 (Unauthorized) or 403 (Forbidden)
       if (err.response?.status === 401 || err.response?.status === 403) {
+        console.log('[AuthContext] Invalid token, clearing auth state');
         setIsAuthenticated(false);
         setUserEmail(null);
         setHasProfile(false);
         setApplicationStatus(null);
         localStorage.removeItem('token');
         localStorage.removeItem('userEmail');
+      } else {
+        // For 429, 500s, or Network Errors: PRESERVE existing state
+        // This prevents UI flipping when rate limited or server errors occur
+        console.log('[AuthContext] Non-auth error, preserving existing state');
       }
-      // For 500s or Network Errors, KEEP the user logged in (Optimistic)
     } finally {
       setLoading(false);
       setAuthChecked(true);

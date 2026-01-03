@@ -23,18 +23,16 @@ const Careers = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [localHasProfile, setLocalHasProfile] = useState(false);
-  const [profileLoading, setProfileLoading] = useState(false);
-  const [profileName, setProfileName] = useState(null);
   const [appliedJobIds, setAppliedJobIds] = useState(new Set());
   const [allApplications, setAllApplications] = useState([]);
   
   // Request guard to prevent duplicate API calls
   const fetchInProgress = React.useRef(false);
   
-  // Use hasProfile from AuthContext (more reliable) or fallback to local state
-  const hasProfile = authHasProfile || localHasProfile;
+  // SINGLE SOURCE OF TRUTH: Use ONLY AuthContext for profile state
+  const hasProfile = authHasProfile;
   const isProfileLocked = applicationStatus?.isLocked || false;
+  const profileName = userEmail; // Use email as display name
   
   // Helper function to get status colors
   const getStatusColor = (status) => {
@@ -93,15 +91,15 @@ const Careers = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch profile and application data - single source of truth from backend
-  const fetchProfileAndApplications = useCallback(async () => {
+  // Fetch ONLY applications data - profile state comes from AuthContext
+  const fetchApplications = useCallback(async () => {
     // Prevent duplicate calls
     if (fetchInProgress.current) {
       console.log('[Careers] Fetch already in progress, skipping');
       return;
     }
     
-    console.log('[Careers] fetchProfileAndApplications called', {
+    console.log('[Careers] fetchApplications called', {
       authChecked,
       authLoading,
       isAuthenticated,
@@ -110,131 +108,75 @@ const Careers = () => {
 
     if (!authChecked || authLoading) {
       console.log('[Careers] Waiting for auth check to complete');
-      return; // Wait for auth check to complete
-    }
-
-    if (!isAuthenticated) {
-      console.log('[Careers] User not authenticated, clearing profile state');
-      setLocalHasProfile(false);
-      setProfileName(null);
-      setProfileLoading(false);
-      setAppliedJobIds(new Set());
       return;
     }
 
-    console.log('[Careers] User authenticated, fetching profile...');
+    if (!isAuthenticated) {
+      console.log('[Careers] User not authenticated, clearing applications');
+      setAppliedJobIds(new Set());
+      setAllApplications([]);
+      return;
+    }
+
+    console.log('[Careers] Fetching applications...');
     fetchInProgress.current = true;
-    setProfileLoading(true);
     try {
-      // Always get fresh token from localStorage
       const token = localStorage.getItem('token');
-      
-      if (!token) {
-        setLocalHasProfile(false);
-        setProfileName(null);
-        setProfileLoading(false);
-        return;
-      }
+      if (!token) return;
       
       const config = { headers: { 'x-auth-token': token }, withCredentials: true };
       
-      // Fetch profile and applications in parallel from backend
-      const [profileRes, applicationsRes] = await Promise.all([
-        axios.get(API_ENDPOINTS.PROFILE.GET, config),
-        axios.get(API_ENDPOINTS.CANDIDATE.APPLICATIONS, config).catch(() => ({ data: [] }))
-      ]);
+      // Fetch ONLY applications - profile state is already in AuthContext
+      const applicationsRes = await axios.get(API_ENDPOINTS.CANDIDATE.APPLICATIONS, config);
       
-      if (profileRes.data) {
-        console.log('[Careers] Profile found:', {
-          fullName: profileRes.data.fullName
-        });
-        setLocalHasProfile(true);
-        setProfileName(profileRes.data.fullName || userEmail);
-      } else {
-        console.log('[Careers] No profile data returned');
-        setLocalHasProfile(false);
-        setProfileName(null);
-      }
-      
-      // Store applied job IDs as a Set for O(1) lookup and all applications
+      // Store applied job IDs as a Set for O(1) lookup
       if (applicationsRes.data && Array.isArray(applicationsRes.data)) {
         const jobIds = applicationsRes.data.map(app => app.jobId?._id || app.jobId);
         setAppliedJobIds(new Set(jobIds));
         setAllApplications(applicationsRes.data);
+        console.log('[Careers] Applications loaded:', applicationsRes.data.length);
       }
     } catch (err) {
-      // Handle 404 - profile not found (normal for new users)
-      if (err.response?.status === 404) {
-        console.log('[Careers] Profile not found (404) - new user, showing Create Profile');
-        setLocalHasProfile(false);
-        setProfileName(null);
-      }
-      // Handle 401/403 - token invalid, clear state and logout
-      else if (err.response?.status === 401 || err.response?.status === 403) {
-        console.log('[Careers] Invalid token (401/403), logging out');
-        setLocalHasProfile(false);
-        setProfileName(null);
-        setAppliedJobIds(new Set());
-        // Token is invalid, trigger logout
+      console.error('[Careers] Error fetching applications:', err);
+      // Don't clear state on errors - preserve existing data
+      if (err.response?.status === 401 || err.response?.status === 403) {
         logout();
       }
-      // Handle 503 - service unavailable (don't retry)
-      else if (err.response?.status === 503) {
-        console.log('[Careers] Service unavailable (503)');
-        setLocalHasProfile(false);
-        setProfileName(null);
-      }
-      // Other errors - don't clear state, just log
-      else {
-        console.error('[Careers] Error fetching profile:', err);
-      }
     } finally {
-      console.log('[Careers] Profile fetch complete, hasProfile:', hasProfile);
-      setProfileLoading(false);
       fetchInProgress.current = false;
     }
-  }, [isAuthenticated, authChecked, authLoading, userEmail, logout, hasProfile]);
+  }, [isAuthenticated, authChecked, authLoading, userEmail, logout]);
 
-  // Fetch on mount and when auth changes
+  // Fetch applications when auth is ready
   useEffect(() => {
-    fetchProfileAndApplications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authChecked, authLoading, isAuthenticated, userEmail]);
-
-  // Refresh AuthContext data when navigating to this page
-  useEffect(() => {
-    if (isAuthenticated && refreshApplications) {
-      refreshApplications();
+    if (authChecked && !authLoading && isAuthenticated) {
+      fetchApplications();
     }
-  }, [location.pathname, isAuthenticated, refreshApplications]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authChecked, authLoading, isAuthenticated]);
 
-  // Re-fetch when page becomes visible (user returns from another tab/page)
+  // Refresh applications when navigating to this page
+  useEffect(() => {
+    if (isAuthenticated && authChecked && !authLoading) {
+      fetchApplications();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  // Re-fetch applications when page becomes visible
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!document.hidden && isAuthenticated) {
-        // Page is now visible - re-fetch to ensure fresh data
-        fetchProfileAndApplications();
-      }
-    };
-
-    const handleFocus = () => {
-      if (isAuthenticated) {
-        // Window regained focus - re-fetch to ensure fresh data
-        fetchProfileAndApplications();
+      if (!document.hidden && isAuthenticated && authChecked) {
+        fetchApplications();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-    };
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
+  }, [isAuthenticated, authChecked]);
 
-  if (loading || authLoading || profileLoading || !authChecked) {
+  if (loading || authLoading || !authChecked) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
