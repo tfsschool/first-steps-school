@@ -29,6 +29,9 @@ const Careers = () => {
   const [appliedJobIds, setAppliedJobIds] = useState(new Set());
   const [allApplications, setAllApplications] = useState([]);
   
+  // Request guard to prevent duplicate API calls
+  const fetchInProgress = React.useRef(false);
+  
   // Use hasProfile from AuthContext (more reliable) or fallback to local state
   const hasProfile = authHasProfile || localHasProfile;
   const isProfileLocked = applicationStatus?.isLocked || false;
@@ -92,6 +95,12 @@ const Careers = () => {
 
   // Fetch profile and application data - single source of truth from backend
   const fetchProfileAndApplications = useCallback(async () => {
+    // Prevent duplicate calls
+    if (fetchInProgress.current) {
+      console.log('[Careers] Fetch already in progress, skipping');
+      return;
+    }
+    
     console.log('[Careers] fetchProfileAndApplications called', {
       authChecked,
       authLoading,
@@ -114,6 +123,7 @@ const Careers = () => {
     }
 
     console.log('[Careers] User authenticated, fetching profile...');
+    fetchInProgress.current = true;
     setProfileLoading(true);
     try {
       // Always get fresh token from localStorage
@@ -181,8 +191,9 @@ const Careers = () => {
     } finally {
       console.log('[Careers] Profile fetch complete, hasProfile:', hasProfile);
       setProfileLoading(false);
+      fetchInProgress.current = false;
     }
-  }, [isAuthenticated, authChecked, authLoading, userEmail, logout]);
+  }, [isAuthenticated, authChecked, authLoading, userEmail, logout, hasProfile]);
 
   // Fetch on mount and when auth changes
   useEffect(() => {

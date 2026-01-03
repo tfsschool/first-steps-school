@@ -120,18 +120,21 @@ const AdminDashboard = () => {
     }
   }, [config, handleAuthError]);
 
-  const fetchStats = useCallback(async () => {
-    setLoading(false);
-    fetchJobs();
-    fetchApplications();
-    fetchCandidates();
-  }, [fetchJobs, fetchApplications, fetchCandidates]);
-
   useEffect(() => {
-    if (token) {
-      fetchStats();
-    }
-  }, [fetchStats, token]);
+    if (!token) return;
+    
+    const fetchAllStats = async () => {
+      setLoading(false);
+      await Promise.all([
+        fetchJobs(),
+        fetchApplications(),
+        fetchCandidates()
+      ]);
+    };
+    
+    fetchAllStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   // Guard clause: redirect to login if no token
   if (!token) {

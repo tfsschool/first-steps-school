@@ -7,7 +7,7 @@ const UserProfile = require('../models/UserProfile');
 const Application = require('../models/Application');
 const { sendEmail } = require('../config/email');
 const { authenticate } = require('../middleware/auth');
-const { authLimiter } = require('../middleware/rateLimiter');
+const { authLimiter, checkAuthLimiter } = require('../middleware/rateLimiter');
 
 // Helper function to get frontend URL with proper trailing slash handling
 const getFrontendUrl = () => {
@@ -653,8 +653,8 @@ router.get('/verify-login', async (req, res) => {
   }
 });
 
-// 6. Check Authentication Status
-router.get('/check-auth', authenticate, async (req, res) => {
+// 6. Check Authentication Status (uses lenient rate limiter)
+router.get('/check-auth', checkAuthLimiter, authenticate, async (req, res) => {
   try {
     // If middleware passes, user is authenticated
     const candidate = await Candidate.findById(req.candidate.id);

@@ -15,7 +15,7 @@ const globalLimiter = rateLimit({
 
 /**
  * Authentication Rate Limiter
- * Stricter limits for auth endpoints (5 attempts per hour)
+ * Stricter limits for login/register endpoints (5 attempts per hour)
  */
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
@@ -24,6 +24,20 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false
+});
+
+/**
+ * Check Auth Rate Limiter
+ * Lenient limits for check-auth endpoint (100 per 15 minutes)
+ * This is called frequently by frontend to verify auth status
+ */
+const checkAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Same as global limiter
+  message: 'Too many authentication checks from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true // Don't count successful checks
 });
 
 /**
@@ -41,5 +55,6 @@ const applicationLimiter = rateLimit({
 module.exports = {
   globalLimiter,
   authLimiter,
+  checkAuthLimiter,
   applicationLimiter
 };

@@ -613,15 +613,21 @@ const CreateProfile = () => {
 
       if (missing.length > 0) {
         setPopupMessage(`Profile saved, but it is incomplete.\n\n${formatMissingFieldsMessage(missing)}`);
+        setShowSuccessPopup(true);
+        // For incomplete profiles, just close popup after 4 seconds
+        setTimeout(() => {
+          setShowSuccessPopup(false);
+        }, 4000);
       } else {
-        setPopupMessage('Profile saved successfully! You can now apply for jobs or continue editing your profile.');
+        // Complete profile - show success message then redirect
+        setPopupMessage('Profile saved successfully! Redirecting to careers page...');
+        setShowSuccessPopup(true);
+        // Show message for 4 seconds, then redirect
+        setTimeout(() => {
+          setShowSuccessPopup(false);
+          navigate('/careers');
+        }, 4000);
       }
-      setShowSuccessPopup(true);
-      
-      // Don't auto-redirect, let user choose next action
-      setTimeout(() => {
-        setShowSuccessPopup(false);
-      }, 3000);
     } catch (err) {
       setPopupMessage('Error saving profile: ' + (err.response?.data?.msg || err.message));
       setShowErrorPopup(true);

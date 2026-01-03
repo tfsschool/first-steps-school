@@ -26,6 +26,9 @@ export const AuthProvider = ({ children }) => {
   // Profile and application status from backend
   const [hasProfile, setHasProfile] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState(null);
+  
+  // Request guard to prevent duplicate check-auth calls
+  const checkAuthInProgress = React.useRef(false);
 
   // Check authentication status ONCE on mount
   useEffect(() => {
@@ -56,6 +59,12 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAuth = async () => {
+    // Prevent duplicate calls
+    if (checkAuthInProgress.current) {
+      console.log('[AuthContext] checkAuth already in progress, skipping');
+      return;
+    }
+    
     const token = localStorage.getItem('token');
     
     if (!token) {
@@ -66,6 +75,7 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
+    checkAuthInProgress.current = true;
     try {
       const config = { headers: { 'x-auth-token': token } };
       const res = await axios.get(API_ENDPOINTS.CANDIDATE.CHECK_AUTH, config);
@@ -100,6 +110,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
       setAuthChecked(true);
+      checkAuthInProgress.current = false;
     }
   };
 
