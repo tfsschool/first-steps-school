@@ -301,7 +301,7 @@ const Apply = () => {
       }
       
       setShowThankYou(true);
-      // Redirect to thank you page after 3
+      // Redirect to thank you page after 3 seconds
       setTimeout(() => {
         navigate('/thank-you');
       }, 3000);
