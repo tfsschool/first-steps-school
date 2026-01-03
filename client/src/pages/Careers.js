@@ -460,7 +460,7 @@ const Careers = () => {
         <section className="bg-gray-50 py-12">
           <div className="container mx-auto px-4">
 
-            {!profileLoading && (
+            {(
               <>
                 {/* Case A: Not Logged In */}
                 {!isAuthenticated && (
