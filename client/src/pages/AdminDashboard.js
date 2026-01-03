@@ -282,7 +282,7 @@ const AdminDashboard = () => {
               <div className="text-sm opacity-90">View and manage all registered emails</div>
             </button>
             <button
-              onClick={fetchStats}
+              onClick={() => window.location.reload()}
               className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition text-left"
             >
               <div className="font-semibold">Refresh Stats</div>
