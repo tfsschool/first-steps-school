@@ -187,7 +187,8 @@ const Careers = () => {
   // Fetch on mount and when auth changes
   useEffect(() => {
     fetchProfileAndApplications();
-  }, [fetchProfileAndApplications]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authChecked, authLoading, isAuthenticated, userEmail]);
 
   // Refresh AuthContext data when navigating to this page
   useEffect(() => {
@@ -219,7 +220,8 @@ const Careers = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [isAuthenticated, fetchProfileAndApplications]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   if (loading || authLoading || profileLoading || !authChecked) {
     return (
@@ -641,9 +643,8 @@ const Careers = () => {
                           <button
                             onClick={() => navigate('/create-profile', { state: { isEditing: true } })}
                             className="btn-primary"
-                            disabled={isProfileLocked}
                           >
-                            {isProfileLocked ? 'Profile Locked' : 'Update Profile'}
+                            {isProfileLocked ? 'View Profile' : 'Update Profile'}
                           </button>
                         </div>
                       </div>

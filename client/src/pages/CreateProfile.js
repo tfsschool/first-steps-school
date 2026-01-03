@@ -471,27 +471,31 @@ const CreateProfile = () => {
 
   const getMissingRequiredFields = (profile) => {
     const missing = [];
+    
+    // Safe access to profile properties
+    const safeProfile = profile || {};
 
-    if (!profile.fullName || !profile.fullName.trim()) missing.push('Full Name');
-    if (!profile.dateOfBirth) missing.push('Date of Birth');
-    if (!profile.gender) missing.push('Gender');
-    if (!profile.cnic || !profile.cnic.trim()) missing.push('CNIC');
-    if (!profile.phone || !profile.phone.trim()) missing.push('Phone');
-    if (!profile.email || !profile.email.trim()) missing.push('Email');
-    if (!profile.address || !profile.address.trim()) missing.push('Address');
+    if (!safeProfile.fullName || !safeProfile.fullName.trim()) missing.push('Full Name');
+    if (!safeProfile.dateOfBirth) missing.push('Date of Birth');
+    if (!safeProfile.gender) missing.push('Gender');
+    if (!safeProfile.cnic || !safeProfile.cnic.trim()) missing.push('CNIC');
+    if (!safeProfile.phone || !safeProfile.phone.trim()) missing.push('Phone');
+    if (!safeProfile.email || !safeProfile.email.trim()) missing.push('Email');
+    if (!safeProfile.address || !safeProfile.address.trim()) missing.push('Address');
 
-    // Education validation
-    if (!profile.education || profile.education.length === 0) {
+    // Education validation with safe access
+    const education = Array.isArray(safeProfile.education) ? safeProfile.education : [];
+    if (education.length === 0) {
       missing.push('Education - At least one entry required');
     } else {
-      profile.education.forEach((edu, idx) => {
-        if (!edu.degree || !edu.degree.trim()) {
+      education.forEach((edu, idx) => {
+        if (!edu?.degree || !edu.degree.trim()) {
           missing.push(`Education ${idx + 1} - Degree`);
         }
-        if (!edu.institution || !edu.institution.trim()) {
+        if (!edu?.institution || !edu.institution.trim()) {
           missing.push(`Education ${idx + 1} - Institution`);
         }
-        if (!edu.yearOfCompletion || !edu.yearOfCompletion.trim()) {
+        if (!edu?.yearOfCompletion || !edu.yearOfCompletion.trim()) {
           missing.push(`Education ${idx + 1} - Year of Completion`);
         }
       });
@@ -1382,8 +1386,8 @@ const CreateProfile = () => {
               </div>
             )}
 
-            {/* Show Apply and Edit buttons after profile is saved - Only when NOT locked */}
-            {(profileLoaded || showApplyButton) && !isLocked && (
+            {/* Show Apply and Edit buttons after profile is saved - Only when NOT locked and NOT in editing mode */}
+            {(profileLoaded || showApplyButton) && !isLocked && !isEditingMode && (
               <div className="mt-6 p-6 bg-green-50 border-2 border-green-200 rounded-lg">
                 <div className="flex items-start gap-3 mb-4">
                   <div className="flex-shrink-0">
