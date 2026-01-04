@@ -462,49 +462,61 @@ const Careers = () => {
 
             {(
               <>
-                {/* Case A: Not Logged In */}
+                {/* Case A: Not Logged In - Vertical Layout */}
                 {!isAuthenticated && (
                   <div className="max-w-5xl mx-auto mb-8">
-                    <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-5 sm:p-6">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="flex-1">
-                          {bannerStatus === 'idle' && (
-                            <p className="text-sm sm:text-base text-gray-700">
+                    <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8 sm:p-10">
+                      {bannerStatus === 'idle' && (
+                        <div className="flex flex-col items-center text-center gap-6">
+                          <div className="space-y-3">
+                            <p className="text-lg sm:text-xl text-gray-800 font-medium">
                               You must be registered to apply for any job or position.
                             </p>
-                          )}
-                          {bannerStatus === 'verification_sent' && (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                              <p className="text-sm sm:text-base text-green-700 font-semibold">
-                                ✓ Verification email has been sent to your mail box. Please verify your account.
-                              </p>
-                            </div>
-                          )}
-                          {bannerStatus === 'login_link_sent' && (
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                              <p className="text-sm sm:text-base text-blue-700 font-semibold">
-                                ✓ Login link has been sent to your email <span className="font-bold">({bannerEmail})</span> box to login.
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                        {bannerStatus === 'idle' && (
-                          <div className="flex flex-col xs:flex-row gap-3 sm:items-center">
-                            <button
-                              onClick={handleRegisteredNo}
-                              className="btn-primary w-full sm:w-auto"
-                            >
-                              Create an account to get started
-                            </button>
-                            <button
-                              onClick={handleRegisteredYes}
-                              className="bg-theme-blue text-white px-6 py-3 font-semibold hover:brightness-95 transition w-full sm:w-auto"
-                            >
-                              Already have an account? Log in
-                            </button>
                           </div>
-                        )}
-                      </div>
+                          
+                          <div className="w-full max-w-md space-y-4">
+                            <div className="space-y-2">
+                              <p className="text-base text-gray-700">
+                                Create an account to get started
+                              </p>
+                              <button
+                                onClick={handleRegisteredNo}
+                                className="w-full bg-theme-green text-white px-8 py-4 rounded-lg font-semibold text-lg hover:brightness-95 transition shadow-sm"
+                              >
+                                Create Account / Register
+                              </button>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <p className="text-base text-gray-700">
+                                Already have an account?
+                              </p>
+                              <button
+                                onClick={handleRegisteredYes}
+                                className="w-full bg-theme-blue text-white px-8 py-4 rounded-lg font-semibold text-lg hover:brightness-95 transition shadow-sm"
+                              >
+                                Login
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {bannerStatus === 'verification_sent' && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                          <p className="text-base sm:text-lg text-green-700 font-semibold">
+                            ✓ Verification email has been sent to your mail box. Please verify your account.
+                          </p>
+                        </div>
+                      )}
+                      
+                      {bannerStatus === 'login_link_sent' && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+                          <p className="text-base sm:text-lg text-blue-700 font-semibold">
+                            ✓ Login link has been sent to your email <span className="font-bold">({bannerEmail})</span> box to login.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -957,22 +969,12 @@ const Careers = () => {
                         </div>
                         {isAuthenticated && hasProfile && (
                           appliedJobIds.has(job._id) ? (
-                            (() => {
-                              const thisJobApplication = allApplications.find(app => app.jobId?._id === job._id);
-                              if (thisJobApplication) {
-                                const colors = getStatusColor(thisJobApplication.status);
-                                return (
-                                  <div className={`px-4 py-2.5 rounded-lg text-sm font-semibold ${colors.bg} ${colors.text} border-2 ${colors.border} flex-shrink-0`}>
-                                    Status: {thisJobApplication.status}
-                                  </div>
-                                );
-                              }
-                              return (
-                                <div className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-gray-100 text-gray-700 border-2 border-gray-300 flex-shrink-0">
-                                  Already Applied
-                                </div>
-                              );
-                            })()
+                            <button
+                              disabled
+                              className="px-6 py-3 rounded-lg text-sm font-semibold bg-gray-200 text-gray-500 border-2 border-gray-300 cursor-not-allowed flex-shrink-0"
+                            >
+                              Already Applied
+                            </button>
                           ) : (
                             <button
                               onClick={() => handleApply(job._id)}

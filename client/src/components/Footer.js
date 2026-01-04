@@ -5,9 +5,9 @@ import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube, FaMapMarkerAlt, FaPh
 const Footer = () => {
   const socialLinks = {
     facebook: 'https://www.facebook.com/school.tfs/',
-    instagram: 'https://www.instagram.com/your-profile',
+    instagram: 'https://www.instagram.com/school.tfs/',
     youtube: 'https://www.youtube.com/@thefirststeps1143',
-    linkedin: 'https://www.linkedin.com/company/your-profile',
+    linkedin: 'https://www.linkedin.com/company/the-first-steps/posts/?feedView=all',
   };
 
   return (

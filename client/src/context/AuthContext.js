@@ -36,6 +36,62 @@ export const AuthProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Token expiration check - runs every minute
+  useEffect(() => {
+    const checkTokenExpiration = () => {
+      const token = localStorage.getItem('token');
+      const tokenTimestamp = localStorage.getItem('tokenTimestamp');
+      
+      if (token && tokenTimestamp) {
+        const currentTime = Date.now();
+        const tokenAge = currentTime - parseInt(tokenTimestamp, 10);
+        const ONE_HOUR = 60 * 60 * 1000;
+        
+        if (tokenAge >= ONE_HOUR) {
+          console.log('[AuthContext] Token expired after 1 hour, auto-logout');
+          logout();
+          // Redirect to careers page with message
+          window.location.href = '/careers';
+        }
+      }
+    };
+
+    // Check immediately
+    checkTokenExpiration();
+    
+    // Check every minute (60000ms)
+    const intervalId = setInterval(checkTokenExpiration, 60000);
+    
+    return () => clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Page visibility check - validate token when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isAuthenticated) {
+        const token = localStorage.getItem('token');
+        const tokenTimestamp = localStorage.getItem('tokenTimestamp');
+        
+        if (token && tokenTimestamp) {
+          const currentTime = Date.now();
+          const tokenAge = currentTime - parseInt(tokenTimestamp, 10);
+          const ONE_HOUR = 60 * 60 * 1000;
+          
+          if (tokenAge >= ONE_HOUR) {
+            console.log('[AuthContext] Token expired on visibility change, logging out');
+            logout();
+            window.location.href = '/careers';
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
   // Listen for storage events (cross-tab synchronization)
   useEffect(() => {
     const handleStorageChange = (e) => {
@@ -66,6 +122,7 @@ export const AuthProvider = ({ children }) => {
     }
     
     const token = localStorage.getItem('token');
+    const tokenTimestamp = localStorage.getItem('tokenTimestamp');
     
     if (!token) {
       setIsAuthenticated(false);
@@ -73,6 +130,23 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       setAuthChecked(true);
       return;
+    }
+
+    // Check token expiration (1 hour = 3600000 milliseconds)
+    if (tokenTimestamp) {
+      const currentTime = Date.now();
+      const tokenAge = currentTime - parseInt(tokenTimestamp, 10);
+      const ONE_HOUR = 60 * 60 * 1000;
+      
+      if (tokenAge >= ONE_HOUR) {
+        console.log('[AuthContext] Token expired, logging out');
+        await logout();
+        setLoading(false);
+        setAuthChecked(true);
+        // Redirect to login page
+        window.location.href = '/careers';
+        return;
+      }
     }
 
     checkAuthInProgress.current = true;
@@ -121,8 +195,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = (token, email, profileData = {}) => {
+    const loginTimestamp = Date.now();
     localStorage.setItem('token', token);
     localStorage.setItem('userEmail', email);
+    localStorage.setItem('tokenTimestamp', loginTimestamp.toString());
     setIsAuthenticated(true);
     setUserEmail(email);
     setAuthChecked(true);
@@ -144,9 +220,10 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
-      // Remove token and email from localStorage
+      // Remove token, email, and timestamp from localStorage
       localStorage.removeItem('token');
       localStorage.removeItem('userEmail');
+      localStorage.removeItem('tokenTimestamp');
       // Update state
       setIsAuthenticated(false);
       setUserEmail(null);

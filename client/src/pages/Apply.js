@@ -29,10 +29,8 @@ const Apply = () => {
         return;
       }
 
-      // Check authentication
+      // Check authentication - don't redirect, just set loading to false
       if (!isAuthenticated) {
-        setError('Please login to apply for jobs. Redirecting...');
-        setTimeout(() => navigate('/careers'), 2000);
         setLoading(false);
         return;
       }
@@ -319,6 +317,56 @@ const Apply = () => {
       setSubmitting(false);
     }
   };
+
+  // Show authentication required UI for non-logged-in users
+  if (!authLoading && !isAuthenticated) {
+    return (
+      <>
+        <SEO 
+          title="Apply - The First Steps School" 
+          description="Apply for a position at The First Steps School."
+          canonicalUrl={`/apply/${jobId}`}
+        />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8 sm:p-10 max-w-md w-full">
+            <div className="flex flex-col items-center text-center gap-6">
+              <div className="space-y-3">
+                <p className="text-lg sm:text-xl text-gray-800 font-medium">
+                  You must be registered to apply for any job or position.
+                </p>
+              </div>
+              
+              <div className="w-full space-y-4">
+                <div className="space-y-2">
+                  <p className="text-base text-gray-700">
+                    Create an account to get started
+                  </p>
+                  <button
+                    onClick={() => navigate('/careers')}
+                    className="w-full bg-theme-green text-white px-8 py-4 rounded-lg font-semibold text-lg hover:brightness-95 transition shadow-sm"
+                  >
+                    Create Account / Register
+                  </button>
+                </div>
+                
+                <div className="space-y-2">
+                  <p className="text-base text-gray-700">
+                    Already have an account?
+                  </p>
+                  <button
+                    onClick={() => navigate('/careers')}
+                    className="w-full bg-theme-blue text-white px-8 py-4 rounded-lg font-semibold text-lg hover:brightness-95 transition shadow-sm"
+                  >
+                    Login
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   if (authLoading || loading) {
     return (

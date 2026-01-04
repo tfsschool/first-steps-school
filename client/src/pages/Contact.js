@@ -11,12 +11,12 @@ import {
 } from 'react-icons/fa';
 
 const Contact = () => {
-  // Social media links - update these with your actual profile URLs
+  // Social media links
   const socialLinks = {
-    facebook: 'https://www.facebook.com/your-profile', // Update with actual Facebook URL
-    linkedin: 'https://www.linkedin.com/company/your-profile', // Update with actual LinkedIn URL
-    youtube: 'https://www.youtube.com/@your-channel', // Update with actual YouTube URL
-    instagram: 'https://www.instagram.com/your-profile', // Update with actual Instagram URL
+    facebook: 'https://www.facebook.com/school.tfs/',
+    linkedin: 'https://www.linkedin.com/company/the-first-steps/posts/?feedView=all',
+    youtube: 'https://www.youtube.com/@thefirststeps1143',
+    instagram: 'https://www.instagram.com/school.tfs/',
   };
 
   // Google Maps embed URL for The First Steps School
