@@ -17,9 +17,9 @@ const Footer = () => {
           <div className="md:col-span-1">
             <div className="flex items-center gap-3">
               <img
-                src="/logo192.jpeg"
+                src="/logo 2025 color.png"
                 alt="The First Steps School"
-                className="h-12 w-12 rounded bg-white object-contain"
+                className="h-12 w-auto object-contain"
               />
               <div>
                 <div className="text-lg font-extrabold tracking-tight">The First Steps School</div>

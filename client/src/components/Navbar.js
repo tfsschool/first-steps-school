@@ -26,13 +26,18 @@ const Navbar = ({ isShrunk = false }) => {
         <div className="flex items-center justify-between py-5">
           <Link to="/" className="flex items-center gap-3">
           <img
-            src="/logo192.jpeg"
+            src="/logo 2025 color.png"
             alt="The First Steps School"
-            className={`${isShrunk ? 'h-11 w-11' : 'h-14 w-14'} rounded bg-white object-contain transition-all duration-200`}
+            className={`${isShrunk ? 'h-10' : 'h-12'} w-auto object-contain transition-all duration-200`}
           />
-          <h1 className="text-2xl md:text-3xl font-bold text-blue-900">
-            The First Steps School
-          </h1>
+          <div>
+            <h1 className={`${isShrunk ? 'text-xl' : 'text-2xl'} font-bold text-gray-900 transition-all duration-200`}>
+              The First Steps School
+            </h1>
+            <p className={`${isShrunk ? 'text-xs' : 'text-sm'} text-gray-600 transition-all duration-200`}>
+              Empowering Young Minds
+            </p>
+          </div>
           </Link>
 
           <div className="hidden lg:flex flex-1 justify-end">
