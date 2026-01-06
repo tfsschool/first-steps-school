@@ -271,7 +271,11 @@ const Careers = () => {
       setBannerEmail(emailInput.trim());
       setShowLoginModal(false);
     } catch (err) {
-      if (err.response?.data?.notRegistered) {
+      if (err.response?.status === 429) {
+        const retryAfter = err.response?.data?.retryAfter;
+        const minutes = retryAfter ? Math.ceil(retryAfter / 60) : 60;
+        setLoginMessage(`Too many attempts. Please try again after ${minutes} minutes.`);
+      } else if (err.response?.data?.notRegistered) {
         // Email not registered - show message with register button
         setShowNotRegisteredInLogin(true);
         setLoginMessage('');
@@ -316,7 +320,11 @@ const Careers = () => {
       setEmailInput('');
       setRegisterMessage('');
     } catch (err) {
-      if (err.response?.data?.alreadyRegistered) {
+      if (err.response?.status === 429) {
+        const retryAfter = err.response?.data?.retryAfter;
+        const minutes = retryAfter ? Math.ceil(retryAfter / 60) : 60;
+        setRegisterMessage(`Too many attempts. Please try again after ${minutes} minutes.`);
+      } else if (err.response?.data?.alreadyRegistered) {
         setRegisterMessage('This email is already registered and verified. Please login.');
         setIsUnverified(false);
       } else {
@@ -896,7 +904,7 @@ const Careers = () => {
                   disabled={registering}
                 />
                 {registerMessage && (
-                  <div className={`mb-4 p-3 rounded text-sm ${registerMessage.includes('sent') || registerMessage.includes('resent') || registerMessage.includes('verified') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  <div className={`mb-4 p-3 rounded text-sm ${registerMessage.includes('sent') || registerMessage.includes('resent') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {registerMessage}
                   </div>
                 )}

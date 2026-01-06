@@ -17,15 +17,22 @@ const globalLimiter = rateLimit({
 
 /**
  * Authentication Rate Limiter
- * Stricter limits for login/register endpoints (5 attempts per hour)
+ * Increased limits for login/register endpoints (20 attempts per hour)
  */
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // Limit each IP to 5 auth attempts per hour
-  message: 'Too many authentication attempts from this IP, please try again after an hour.',
+  max: 20, // Limit each IP to 20 auth attempts per hour
+  message: 'Too many authentication attempts from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: false
+  skipSuccessfulRequests: false,
+  handler: (req, res) => {
+    const retryAfter = Math.ceil(req.rateLimit.resetTime / 1000 - Date.now() / 1000);
+    res.status(429).json({
+      msg: `Too many attempts. Please try again after ${Math.ceil(retryAfter / 60)} minutes.`,
+      retryAfter: retryAfter
+    });
+  }
 });
 
 /**
