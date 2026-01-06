@@ -329,18 +329,58 @@ const CreateProfile = () => {
     
     if (type === 'file') {
       if (name === 'profilePicture') {
-        setFormData({ ...formData, profilePicture: files[0] });
-        if (files[0]) {
+        const file = files[0];
+        if (file) {
+          // Validate file type
+          const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+          if (!validTypes.includes(file.type)) {
+            setErrors({ ...errors, profilePicture: 'Only JPEG and PNG images are allowed' });
+            return;
+          }
+          
+          // Validate file size (max 5MB)
+          const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+          if (file.size > maxSize) {
+            setErrors({ ...errors, profilePicture: 'Image size must be less than 5MB' });
+            return;
+          }
+          
+          setFormData({ ...formData, profilePicture: file });
           const reader = new FileReader();
           reader.onloadend = () => {
             setPreview({ ...preview, profilePicture: reader.result });
           };
-          reader.readAsDataURL(files[0]);
+          reader.readAsDataURL(file);
+          
+          // Clear error
+          if (errors.profilePicture) {
+            setErrors({ ...errors, profilePicture: '' });
+          }
         }
       } else if (name === 'resume') {
-        setFormData({ ...formData, resume: files[0] });
-        if (files[0]) {
-          setPreview({ ...preview, resume: files[0].name });
+        const file = files[0];
+        if (file) {
+          // Validate file type
+          const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+          if (!validTypes.includes(file.type)) {
+            setErrors({ ...errors, resume: 'Only PDF and DOC/DOCX files are allowed' });
+            return;
+          }
+          
+          // Validate file size (max 10MB)
+          const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+          if (file.size > maxSize) {
+            setErrors({ ...errors, resume: 'Resume size must be less than 10MB' });
+            return;
+          }
+          
+          setFormData({ ...formData, resume: file });
+          setPreview({ ...preview, resume: file.name });
+          
+          // Clear error
+          if (errors.resume) {
+            setErrors({ ...errors, resume: '' });
+          }
         }
       }
     } else if (type === 'checkbox') {
@@ -613,20 +653,25 @@ const CreateProfile = () => {
 
       if (missing.length > 0) {
         setPopupMessage(`Profile saved, but it is incomplete.\n\n${formatMissingFieldsMessage(missing)}`);
-        setShowSuccessPopup(true);
-        // For incomplete profiles, just close popup after 4 seconds
+        setShowErrorPopup(true);
+        // For incomplete profiles, just close popup after 5 seconds
         setTimeout(() => {
-          setShowSuccessPopup(false);
-        }, 4000);
+          setShowErrorPopup(false);
+        }, 5000);
       } else {
         // Complete profile - show success message then redirect
         setPopupMessage('Profile saved successfully! Redirecting to careers page...');
         setShowSuccessPopup(true);
-        // Show message for 4 seconds, then redirect
+        // Show message for 2 seconds, then redirect
         setTimeout(() => {
           setShowSuccessPopup(false);
-          navigate('/careers');
-        }, 4000);
+          // If we came from a job application, redirect to that job
+          if (jobIdParam) {
+            navigate(`/careers?apply=${jobIdParam}`);
+          } else {
+            navigate('/careers');
+          }
+        }, 2000);
       }
     } catch (err) {
       setPopupMessage('Error saving profile: ' + (err.response?.data?.msg || err.message));
@@ -642,14 +687,17 @@ const CreateProfile = () => {
       <h2 className="text-2xl font-bold mb-4">Personal Information</h2>
       
       <div>
-        <label className="block text-sm font-semibold mb-2">Profile Picture</label>
+        <label className="block text-sm font-semibold mb-2">Profile Picture (JPEG/PNG, max 5MB)</label>
         <input
           type="file"
           name="profilePicture"
-          accept="image/*"
+          accept="image/jpeg,image/jpg,image/png"
           onChange={handleChange}
-          className="w-full border p-2 rounded"
+          className={`w-full border p-2 rounded ${errors.profilePicture ? 'border-red-500' : ''}`}
         />
+        {errors.profilePicture && (
+          <p className="text-red-600 text-sm mt-1">{errors.profilePicture}</p>
+        )}
         {preview.profilePicture && (
           <img src={preview.profilePicture} alt="Profile" className="mt-2 w-32 h-32 object-cover rounded" />
         )}
@@ -1170,7 +1218,7 @@ const CreateProfile = () => {
       <h2 className="text-2xl font-bold mb-4">Resume / CV Upload</h2>
       
       <div>
-        <label className="block text-sm font-semibold mb-2">Upload Resume (PDF/Doc) *</label>
+        <label className="block text-sm font-semibold mb-2">Upload Resume (PDF/DOC/DOCX, max 10MB) *</label>
         
         {/* DISPLAY SAVED RESUME NAME */}
         {preview.resume && !formData.resume && (
@@ -1188,10 +1236,10 @@ const CreateProfile = () => {
         <input
           type="file"
           name="resume"
-          accept=".pdf,.doc,.docx"
+          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           onChange={handleChange}
           disabled={isLocked}
-          className="w-full border p-2 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className={`w-full border p-2 rounded disabled:bg-gray-100 disabled:cursor-not-allowed ${errors.resume ? 'border-red-500' : ''}`}
           // Only required if we don't have a saved one AND haven't picked a new one
           required={!preview.resume && !formData.resume}
         />

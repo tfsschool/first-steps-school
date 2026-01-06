@@ -155,13 +155,23 @@ const Careers = () => {
       setSearchParams({});
     }
 
+    // Check if we need to auto-apply after profile creation
+    const applyJobId = searchParams.get('apply');
+    if (applyJobId && isAuthenticated && authChecked) {
+      // Remove the apply parameter and trigger apply
+      setSearchParams({});
+      setTimeout(() => {
+        handleApply(applyJobId);
+      }, 500);
+    }
+
     // Cleanup interval and event listener on unmount
     return () => {
       clearInterval(pollInterval);
       window.removeEventListener('storage', handleStorageChange);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAuthenticated, authChecked]);
 
   // Fetch ONLY applications data - profile state comes from AuthContext
   const fetchApplications = useCallback(async () => {
