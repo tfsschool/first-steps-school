@@ -30,14 +30,6 @@ const Navbar = ({ isShrunk = false }) => {
             alt="The First Steps School"
             className={`${isShrunk ? 'h-10' : 'h-10 lg:h-12'} w-auto object-contain transition-all duration-200`}
           />
-          <div>
-            <h1 className={`${isShrunk ? 'text-xl' : 'text-2xl'} font-bold text-gray-900 transition-all duration-200`}>
-              The First Steps School
-            </h1>
-            <p className={`${isShrunk ? 'text-xs' : 'text-sm'} text-gray-600 transition-all duration-200`}>
-              Empowering Young Minds
-            </p>
-          </div>
           </Link>
 
           <div className="hidden lg:flex flex-1 justify-end">
