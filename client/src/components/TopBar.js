@@ -2,7 +2,6 @@ import React from 'react';
 import {
   FaFacebookF,
   FaInstagram,
-  FaLinkedinIn,
   FaYoutube,
   FaEnvelope,
   FaPhoneAlt,
@@ -17,7 +16,7 @@ const TopBar = () => {
     facebook: 'https://www.facebook.com/school.tfs/',
     instagram: 'https://www.instagram.com/school.tfs/',
     youtube: 'https://www.youtube.com/@thefirststeps1143',
-    linkedin: 'https://www.linkedin.com/company/the-first-steps/posts/?feedView=all',
+    // linkedin: 'https://www.linkedin.com/company/the-first-steps/posts/?feedView=all',
   };
 
   const iconClass =
@@ -74,7 +73,7 @@ const TopBar = () => {
             >
               <FaInstagram />
             </a>
-            <a
+            {/* <a
               href={socialLinks.linkedin}
               target="_blank"
               rel="noopener noreferrer"
@@ -82,7 +81,7 @@ const TopBar = () => {
               className={iconClass}
             >
               <FaLinkedinIn />
-            </a>
+            </a> */}
           </div>
         </div>
       </div>

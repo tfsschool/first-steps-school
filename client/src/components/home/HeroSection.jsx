@@ -29,12 +29,13 @@ const HeroSection = () => {
         <div className="relative h-full flex items-center">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl text-white">
-              <div className="text-white/90 text-lg md:text-xl font-medium">
+              
+              <h1 className="mt-3 text-5xl md:text-7xl font-extrabold leading-[1.05] tracking-tight" style={{ fontFamily: "var(--serif-font, 'Playfair Display', Georgia, serif)" }}>
                 The First Steps School
-              </div>
-              <h1 className="mt-3 text-5xl md:text-7xl font-extrabold leading-[1.05] tracking-tight">
-                Empowering Young Minds
               </h1>
+              <div className="mt-4 ml-1 text-white/90 text-lg md:text-xl font-medium tracking-wide">
+               Where bright minds and compassionate hearts grow together
+              </div>
               <div className="mt-8">
                 <button
                   type="button"

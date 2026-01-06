@@ -1,0 +1,320 @@
+/* ========================================
+   CLEAN & MODERN LIGHT THEME SECTIONS
+   ======================================== */
+
+/* Section 1: Educational Vision - Clean White Background */
+.clean-light-section {
+  background: #ffffff;
+  padding: 80px 0;
+}
+
+.clean-gray-section {
+  background: #F9FAFB;
+  padding: 80px 0;
+}
+
+/* Section Headers */
+.clean-section-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 60px;
+}
+
+.clean-section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.clean-section-title.clean-left-align {
+  text-align: left;
+}
+
+.clean-section-subtitle {
+  font-size: 1.125rem;
+  color: #4a5568;
+  line-height: 1.7;
+}
+
+/* Cards Grid */
+.clean-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Minimalist Cards */
+.clean-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 40px 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+}
+
+.clean-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Green Circular Icons */
+.clean-icon-circle {
+  width: 70px;
+  height: 70px;
+  background: #2D6A4F;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 25px;
+}
+
+.clean-icon {
+  color: #ffffff;
+  font-size: 32px;
+}
+
+/* Card Typography */
+.clean-card-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 15px;
+  line-height: 1.3;
+}
+
+.clean-card-text {
+  font-size: 1rem;
+  color: #4a5568;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+/* Section 2: Large Serif Numbers */
+.clean-numbered-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.clean-serif-number {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 6rem;
+  font-weight: 700;
+  color: #2D6A4F;
+  line-height: 1;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+/* Badge at Bottom of Card */
+.clean-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f7fafc;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #2d3748;
+  margin-top: auto;
+}
+
+.clean-badge-icon {
+  color: #2D6A4F;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* Section 3: Hybrid Layout (Clean Left + Dark Right) */
+.clean-hybrid-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.clean-hybrid-left {
+  padding-right: 20px;
+}
+
+.clean-hybrid-right {
+  padding-left: 20px;
+}
+
+/* Clean Text Styles */
+.clean-lead-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.clean-body-text {
+  font-size: 1rem;
+  color: #4a5568;
+  line-height: 1.8;
+  margin-bottom: 30px;
+}
+
+.clean-body-text strong {
+  color: #1a202c;
+  font-weight: 600;
+}
+
+/* Stats Row */
+.clean-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.clean-stat-box {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.clean-stat-box:hover {
+  border-color: #2D6A4F;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.1);
+}
+
+.clean-stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 5px;
+}
+
+.clean-stat-label {
+  font-size: 0.875rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Dark Navy Quote Card */
+.clean-dark-quote-card {
+  background: #0B132B;
+  border-radius: 16px;
+  padding: 50px 40px;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(11, 19, 43, 0.3);
+}
+
+.clean-quote-icon {
+  color: #D4AF37;
+  font-size: 48px;
+  margin-bottom: 25px;
+  opacity: 0.8;
+}
+
+.clean-quote-text {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #ffffff;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  font-style: italic;
+}
+
+.clean-quote-highlight {
+  color: #D4AF37;
+  font-weight: 700;
+}
+
+.clean-quote-author {
+  font-size: 0.875rem;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .clean-hybrid-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .clean-hybrid-left,
+  .clean-hybrid-right {
+    padding: 0;
+  }
+  
+  .clean-section-title {
+    font-size: 2rem;
+  }
+  
+  .clean-serif-number {
+    font-size: 4.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .clean-light-section,
+  .clean-gray-section {
+    padding: 60px 0;
+  }
+  
+  .clean-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  
+  .clean-stats-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .clean-section-title {
+    font-size: 1.75rem;
+  }
+  
+  .clean-section-subtitle {
+    font-size: 1rem;
+  }
+  
+  .clean-serif-number {
+    font-size: 3.5rem;
+  }
+  
+  .clean-quote-text {
+    font-size: 1.25rem;
+  }
+  
+  .clean-dark-quote-card {
+    padding: 35px 25px;
+  }
+}
+
+@media (max-width: 480px) {
+  .clean-card {
+    padding: 30px 20px;
+  }
+  
+  .clean-icon-circle {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .clean-icon {
+    font-size: 28px;
+  }
+  
+  .clean-serif-number {
+    font-size: 3rem;
+  }
+}

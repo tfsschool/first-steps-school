@@ -6,7 +6,6 @@ import {
   FaEnvelope,
   FaFacebookF,
   FaInstagram,
-  FaLinkedinIn,
   FaYoutube,
 } from 'react-icons/fa';
 
@@ -14,7 +13,7 @@ const Contact = () => {
   // Social media links
   const socialLinks = {
     facebook: 'https://www.facebook.com/school.tfs/',
-    linkedin: 'https://www.linkedin.com/company/the-first-steps/posts/?feedView=all',
+    // linkedin: 'https://www.linkedin.com/company/the-first-steps/posts/?feedView=all',
     youtube: 'https://www.youtube.com/@thefirststeps1143',
     instagram: 'https://www.instagram.com/school.tfs/',
   };
@@ -185,7 +184,7 @@ const Contact = () => {
                     <div className="font-semibold text-theme-dark">Instagram</div>
                   </a>
 
-                  <a
+                  {/* <a
                     href={socialLinks.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -196,7 +195,7 @@ const Contact = () => {
                       <FaLinkedinIn />
                     </div>
                     <div className="font-semibold text-theme-dark">LinkedIn</div>
-                  </a>
+                  </a> */}
                 </div>
               </div>
             </div>

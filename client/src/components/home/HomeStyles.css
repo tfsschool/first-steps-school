@@ -909,9 +909,9 @@ body {
 }
 
 .families-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: var(--spacing-xxl);
+  display: block;
+  max-width: 900px;
+  margin: 0 auto;
   align-items: start;
   position: relative;
   z-index: 2;
@@ -936,6 +936,7 @@ body {
   margin-bottom: var(--spacing-xl);
   font-weight: 300;
   line-height: 1.6;
+  text-align: justify;
 }
 
 .reasons-grid {
@@ -948,7 +949,7 @@ body {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  padding: var(--spacing-md);
+  padding: 0.75rem;
   background: rgba(255, 255, 255, 0.05);
   border-radius: var(--border-radius);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -984,7 +985,7 @@ body {
 }
 
 .reason-item span {
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: var(--neutral-white);
   flex: 1;
 }
@@ -1953,7 +1954,7 @@ body {
   background: rgba(15, 23, 42, 0.5);
   border: 1px solid rgba(71, 85, 105, 0.5);
   border-radius: 0.5rem;
-  margin-top: auto;
+  margin-top: 17px;
 }
 
 .badge-icon {
@@ -1966,6 +1967,7 @@ body {
   color: #d1d5db;
   font-size: 0.875rem;
   line-height: 1.4;
+  
 }
 
 /* Identity/Who We Are Modern */

@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaYoutube, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
 
 const Footer = () => {
   const socialLinks = {
     facebook: 'https://www.facebook.com/school.tfs/',
     instagram: 'https://www.instagram.com/school.tfs/',
     youtube: 'https://www.youtube.com/@thefirststeps1143',
-    linkedin: 'https://www.linkedin.com/company/the-first-steps/posts/?feedView=all',
+    // linkedin: 'https://www.linkedin.com/company/the-first-steps/posts/?feedView=all',
   };
 
   return (
@@ -21,10 +21,10 @@ const Footer = () => {
                 alt="The First Steps School"
                 className="h-12 w-auto object-contain"
               />
-              <div>
+              {/* <div>
                 <div className="text-lg font-extrabold tracking-tight">The First Steps School</div>
                 <div className="text-white/70 text-sm">Empowering Young Minds</div>
-              </div>
+              </div> */}
             </div>
 
             <p className="mt-5 text-white/80 text-sm leading-relaxed">
@@ -59,7 +59,7 @@ const Footer = () => {
               >
                 <FaInstagram />
               </a>
-              <a
+              {/* <a
                 href={socialLinks.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -67,7 +67,7 @@ const Footer = () => {
                 className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/30 hover:bg-white/5 transition"
               >
                 <FaLinkedinIn />
-              </a>
+              </a> */}
             </div>
           </div>
 
@@ -89,11 +89,6 @@ const Footer = () => {
               <li>
                 <Link className="text-white/80 hover:text-theme-green transition" to="/contact">
                   Contact
-                </Link>
-              </li>
-              <li>
-                <Link className="text-white/80 hover:text-theme-green transition" to="/create-profile">
-                  Create Profile
                 </Link>
               </li>
             </ul>

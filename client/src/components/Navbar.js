@@ -23,12 +23,12 @@ const Navbar = ({ isShrunk = false }) => {
   return (
     <nav className="bg-white shadow-soft border-b border-gray-100">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-5">
+        <div className="flex items-center justify-between py-3 lg:py-5">
           <Link to="/" className="flex items-center gap-3">
           <img
             src="/logo 2025 color.png"
             alt="The First Steps School"
-            className={`${isShrunk ? 'h-10' : 'h-12'} w-auto object-contain transition-all duration-200`}
+            className={`${isShrunk ? 'h-10' : 'h-10 lg:h-12'} w-auto object-contain transition-all duration-200`}
           />
           <div>
             <h1 className={`${isShrunk ? 'text-xl' : 'text-2xl'} font-bold text-gray-900 transition-all duration-200`}>

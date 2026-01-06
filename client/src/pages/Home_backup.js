@@ -48,7 +48,6 @@ const Home = () => {
       
       <div className="academic-website">
         <HeroSection />
-        {/* <FeaturesStrip /> */}
         
         {/* Educational Vision - Modern Dark Theme */}
         <motion.section 
@@ -79,9 +78,7 @@ const Home = () => {
                 variants={cardVariant}
               >
                 <div className="distinction-icon-box">
-                  <div className="distinction-icon">
-                    <CheckCircle2 size={24} />
-                  </div>
+                  <CheckCircle2 className="distinction-icon" size={24} />
                 </div>
                 <h3 className="distinction-title">Purpose-Driven Education</h3>
                 <p className="distinction-text">
@@ -95,9 +92,7 @@ const Home = () => {
                 variants={cardVariant}
               >
                 <div className="distinction-icon-box">
-                  <div className="distinction-icon">
-                    <CheckCircle2 size={24} />
-                  </div>
+                  <CheckCircle2 className="distinction-icon" size={24} />
                 </div>
                 <h3 className="distinction-title">Individualized Learning</h3>
                 <p className="distinction-text">
@@ -111,92 +106,13 @@ const Home = () => {
                 variants={cardVariant}
               >
                 <div className="distinction-icon-box">
-                  <div className="distinction-icon">
-                    <CheckCircle2 size={24} />
-                  </div>
+                  <CheckCircle2 className="distinction-icon" size={24} />
                 </div>
                 <h3 className="distinction-title">Structured Environment</h3>
                 <p className="distinction-text">
                   Our environment nurtures curiosity with structure, independence with guidance, 
                   and creativity with academic rigor.
                 </p>
-              </motion.div>
-            </motion.div>
-          </div>
-        </motion.section>
-{/* Who We Are Section - Modern Dark Theme */}
-        <motion.section 
-          className="modern-dark-section"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-        >
-          <div className="academic-container">
-            <motion.div 
-              className="identity-grid-modern"
-              variants={staggerContainerVariant}
-            >
-              <motion.div 
-                className="identity-left-modern"
-                variants={fadeUpVariant}
-              >
-                <span className="section-label">Our Institution</span>
-                <h2 className="section-title gradient-text">Who We Are</h2>
-                <p className="identity-lead-modern">
-                  The First Steps School is an independent, progressive day school committed 
-                  to nurturing the whole child.
-                </p>
-                <p className="identity-text-modern">
-                  Founded and led by <strong>Imdad Baloch</strong>, the school combines progressive teaching 
-                  with the cultural values that anchor our community. Every lesson, project, 
-                  and conversation is designed to strengthen learning, character, and the 
-                  practical life skills students need to thrive in a changing world.
-                </p>
-                
-                <motion.div 
-                  className="stats-grid-modern"
-                  variants={staggerContainerVariant}
-                >
-                  <motion.div 
-                    className="stat-item-modern stat-green"
-                    variants={cardVariant}
-                  >
-                    {/* <div className="stat-number-modern">PG</div>
-                    <div className="stat-label-modern">Start</div> */}
-                  </motion.div>
-                  <motion.div 
-                    className="stat-item-modern stat-blue"
-                    variants={cardVariant}
-                  >
-                    {/* <div className="stat-number-modern">10th</div>
-                    <div className="stat-label-modern">Grade</div> */}
-                  </motion.div>
-                  <motion.div 
-                    className="stat-item-modern stat-purple"
-                    variants={cardVariant}
-                  >
-                    {/* <div className="stat-number-modern">1:15</div>
-                    <div className="stat-label-modern">Ratio</div> */}
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-
-              <motion.div 
-                className="identity-right-modern"
-                variants={fadeUpVariant}
-              >
-                <div className="quote-card-modern">
-                  <div className="quote-icon-modern">
-                    <div>
-                      <Quote size={32} />
-                    </div>
-                  </div>
-                  <blockquote className="quote-text-modern">
-                    "Teaching students <span className="gradient-text">how to think</span>, not just what to learn."
-                  </blockquote>
-                  <div className="quote-divider"></div>
-                  <div className="quote-author-modern">Our Philosophy</div>
-                </div>
               </motion.div>
             </motion.div>
           </div>
@@ -236,16 +152,14 @@ const Home = () => {
                 className="modern-card distinction-card approach-card-modern"
                 variants={cardVariant}
               >
-                {/* <div className="approach-number-modern">01</div> */}
+                <div className="approach-number-modern">01</div>
                 <h3 className="distinction-title approach-title-green">Developmentally Appropriate</h3>
                 <p className="distinction-text">
                   Instruction is clearly sequenced across grades and balanced between 
                   knowledge, skills, and application.
                 </p>
                 <div className="approach-badge">
-                  <div className="badge-icon">
-                    <CheckCircle2 size={20} />
-                  </div>
+                  <CheckCircle2 className="badge-icon" size={20} />
                   <span>Deep understanding over surface coverage</span>
                 </div>
               </motion.div>
@@ -254,21 +168,14 @@ const Home = () => {
                 className="modern-card distinction-card approach-card-modern"
                 variants={cardVariant}
               >
-                {/* <div className="approach-number-modern">02</div> */}
+                <div className="approach-number-modern">02</div>
                 <h3 className="distinction-title approach-title-blue">Teaching Independent Thinkers</h3>
                 <p className="distinction-text">
                   Our teachers are trained to teach students how to think, not just what to learn. 
-                <p> <strong> Learning is supported through: </strong></p>
-                <ul>
-                   <li>• clear modelling and guided practice.</li>
-                   <li>• Consistent feedback</li>
-                   <li>• Steady, measurable progress</li>
-                </ul>
+                  Learning is supported through clear modelling and guided practice.
                 </p>
                 <div className="approach-badge">
-                  <div className="badge-icon">
-                    <CheckCircle2 size={20} />
-                  </div>
+                  <CheckCircle2 className="badge-icon" size={20} />
                   <span>No child is rushed. No child is overlooked.</span>
                 </div>
               </motion.div>
@@ -277,20 +184,14 @@ const Home = () => {
                 className="modern-card distinction-card approach-card-modern"
                 variants={cardVariant}
               >
-                {/* <div className="approach-number-modern">03</div> */}
+                <div className="approach-number-modern">03</div>
                 <h3 className="distinction-title approach-title-purple">Balanced Use of Technology</h3>
                 <p className="distinction-text">
-                <strong>  Technology is used purposefully, not excessively—to support: </strong>
-                  <ul>
-                   <li>• research and exploration </li>
-                   <li>•  skill reinforcement</li>
-                   <li>• Communication and organization</li>
-                  </ul>
+                  Technology is used purposefully, not excessively—to support research and 
+                  exploration, skill reinforcement, and communication.
                 </p>
                 <div className="approach-badge">
-                  <div className="badge-icon">
-                    <CheckCircle2 size={20} />
-                  </div>
+                  <CheckCircle2 className="badge-icon" size={20} />
                   <span>Screens never replace teachers, books, or hands-on learning</span>
                 </div>
               </motion.div>
@@ -298,8 +199,81 @@ const Home = () => {
           </div>
         </motion.section>
 
-        
+        {/* Who We Are Section - Modern Dark Theme */}
+        <motion.section 
+          className="modern-dark-section"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
+          <div className="academic-container">
+            <motion.div 
+              className="identity-grid-modern"
+              variants={staggerContainerVariant}
+            >
+              <motion.div 
+                className="identity-left-modern"
+                variants={fadeUpVariant}
+              >
+                <span className="section-label">Our Institution</span>
+                <h2 className="section-title gradient-text">Who We Are</h2>
+                <p className="identity-lead-modern">
+                  The First Steps School is an independent, progressive day school committed 
+                  to nurturing the whole child.
+                </p>
+                <p className="identity-text-modern">
+                  Founded and led by <strong>Imdad Baloch</strong>, the school combines progressive teaching 
+                  with the cultural values that anchor our community. Every lesson, project, 
+                  and conversation is designed to strengthen learning, character, and the 
+                  practical life skills students need to thrive in a changing world.
+                </p>
+                
+                <motion.div 
+                  className="stats-grid-modern"
+                  variants={staggerContainerVariant}
+                >
+                  <motion.div 
+                    className="stat-item-modern stat-green"
+                    variants={cardVariant}
+                  >
+                    <div className="stat-number-modern">PG</div>
+                    <div className="stat-label-modern">Start</div>
+                  </motion.div>
+                  <motion.div 
+                    className="stat-item-modern stat-blue"
+                    variants={cardVariant}
+                  >
+                    <div className="stat-number-modern">10th</div>
+                    <div className="stat-label-modern">Grade</div>
+                  </motion.div>
+                  <motion.div 
+                    className="stat-item-modern stat-purple"
+                    variants={cardVariant}
+                  >
+                    <div className="stat-number-modern">1:15</div>
+                    <div className="stat-label-modern">Ratio</div>
+                  </motion.div>
+                </motion.div>
+              </motion.div>
 
+              <motion.div 
+                className="identity-right-modern"
+                variants={fadeUpVariant}
+              >
+                <div className="quote-card-modern">
+                  <div className="quote-icon-modern">
+                    <Quote size={32} />
+                  </div>
+                  <blockquote className="quote-text-modern">
+                    "Teaching students <span className="gradient-text">how to think</span>, not just what to learn."
+                  </blockquote>
+                  <div className="quote-divider"></div>
+                  <div className="quote-author-modern">Our Philosophy</div>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </motion.section>
 
         {/* Distinctions Section */}
         <motion.section 
@@ -329,9 +303,7 @@ const Home = () => {
                 variants={cardVariant}
               >
                 <div className="distinction-icon-box">
-                  <div className="distinction-icon">
-                    <Users size={24} />
-                  </div>
+                  <Users className="distinction-icon" size={24} />
                 </div>
                 <h3 className="distinction-title">Small Class Sizes</h3>
                 <p className="distinction-text">
@@ -345,11 +317,9 @@ const Home = () => {
                 variants={cardVariant}
               >
                 <div className="distinction-icon-box">
-                  <div className="distinction-icon">
-                    <HeartHandshake size={24} />
-                  </div>
+                  <HeartHandshake className="distinction-icon" size={24} />
                 </div>
-                <h3 className="distinction-title">Inclusive, Respectful Culture</h3>
+                <h3 className="distinction-title">Inclusive Culture</h3>
                 <p className="distinction-text">
                   We welcome diversity of belief, ability, and background—while actively building 
                   empathy, dignity, and civic responsibility.
@@ -361,11 +331,9 @@ const Home = () => {
                 variants={cardVariant}
               >
                 <div className="distinction-icon-box">
-                  <div className="distinction-icon">
-                    <Leaf size={24} />
-                  </div>
+                  <Leaf className="distinction-icon" size={24} />
                 </div>
-                <h3 className="distinction-title">Sustainability & Service Projects</h3>
+                <h3 className="distinction-title">Sustainability Projects</h3>
                 <p className="distinction-text">
                   Students learn stewardship and social impact through action—from campus 
                   initiatives to community outreach.
@@ -377,11 +345,9 @@ const Home = () => {
                 variants={cardVariant}
               >
                 <div className="distinction-icon-box">
-                  <div className="distinction-icon">
-                    <Globe2 size={24} />
-                  </div>
+                  <Globe2 className="distinction-icon" size={24} />
                 </div>
-                <h3 className="distinction-title">Local Relevance, Global Awareness</h3>
+                <h3 className="distinction-title">Global Awareness</h3>
                 <p className="distinction-text">
                   Learning is rooted in local language, culture, and identity—while preparing 
                   students to engage confidently with the wider world.
@@ -393,11 +359,9 @@ const Home = () => {
                 variants={cardVariant}
               >
                 <div className="distinction-icon-box">
-                  <div className="distinction-icon">
-                    <GraduationCap size={24} />
-                  </div>
+                  <GraduationCap className="distinction-icon" size={24} />
                 </div>
-                <h3 className="distinction-title">Academic Excellence with Character</h3>
+                <h3 className="distinction-title">Academic Excellence</h3>
                 <p className="distinction-text">
                   We hold high academic expectations while giving equal importance to values, 
                   behavior, and emotional growth.
@@ -434,33 +398,23 @@ const Home = () => {
                   variants={staggerContainerVariant}
                 >
                   <motion.div className="reason-item" variants={cardVariant}>
-                    <div className="reason-icon">
-                      <CheckCircle2 size={16} />
-                    </div>
+                    <CheckCircle2 className="reason-icon" size={16} />
                     <span>Structured, research-informed learning</span>
                   </motion.div>
                   <motion.div className="reason-item" variants={cardVariant}>
-                    <div className="reason-icon">
-                      <CheckCircle2 size={16} />
-                    </div>
+                    <CheckCircle2 className="reason-icon" size={16} />
                     <span>Strong focus on language and thinking skills</span>
                   </motion.div>
                   <motion.div className="reason-item" variants={cardVariant}>
-                    <div className="reason-icon">
-                      <CheckCircle2 size={16} />
-                    </div>
+                    <CheckCircle2 className="reason-icon" size={16} />
                     <span>Calm, respectful classrooms</span>
                   </motion.div>
                   <motion.div className="reason-item" variants={cardVariant}>
-                    <div className="reason-icon">
-                      <CheckCircle2 size={16} />
-                    </div>
+                    <CheckCircle2 className="reason-icon" size={16} />
                     <span>Teaching that values understanding over memorization</span>
                   </motion.div>
                   <motion.div className="reason-item" variants={cardVariant}>
-                    <div className="reason-icon">
-                      <CheckCircle2 size={16} />
-                    </div>
+                    <CheckCircle2 className="reason-icon" size={16} />
                     <span>A school that prepares children for life—not just exams</span>
                   </motion.div>
                 </motion.div>
@@ -468,31 +422,6 @@ const Home = () => {
             </motion.div>
           </div>
         </motion.section>
-
-
-        {/* CTA Section
-        <section className="cta-section">
-          <div className="academic-container">
-            <div className="cta-content">
-              <h2 className="cta-heading serif-heading">Ready to Take the First Step?</h2>
-              <p className="cta-text">
-                We are committed to providing a supportive learning environment for every child. 
-                Our focus is on strong academics, co-curricular growth, and a safe, caring campus 
-                where students feel motivated to achieve.
-              </p>
-              <div className="cta-buttons">
-                <button className="academic-button filled" onClick={() => navigate('/admissions')}>
-                  Apply for Admission
-                  <FaArrowRight className="button-icon" />
-                </button>
-                <button className="academic-button outlined" onClick={() => navigate('/contact')}>
-                  Contact Admissions
-                  <FaCaretRight className="button-icon" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section> */}
       </div>
     </>
   );
