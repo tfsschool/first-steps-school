@@ -78,9 +78,15 @@ const JobManagement = () => {
         showSuccess('Job posted successfully!');
       }
       
-      // Clear public jobs cache so changes appear immediately
+      // Clear public jobs cache and trigger invalidation signal for cross-tab updates
       localStorage.removeItem('jobs_cache');
       localStorage.removeItem('jobs_cache_timestamp');
+      localStorage.setItem('jobs_cache_invalidated', 'true');
+      
+      // Trigger storage event in same tab (storage event only fires in other tabs)
+      setTimeout(() => {
+        localStorage.removeItem('jobs_cache_invalidated');
+      }, 100);
       
       setShowModal(false);
       setEditingJob(null);
@@ -113,9 +119,15 @@ const JobManagement = () => {
       await axios.delete(API_ENDPOINTS.ADMIN.JOB(id), config);
       showSuccess('Job deleted successfully!');
       
-      // Clear public jobs cache so changes appear immediately
+      // Clear public jobs cache and trigger invalidation signal for cross-tab updates
       localStorage.removeItem('jobs_cache');
       localStorage.removeItem('jobs_cache_timestamp');
+      localStorage.setItem('jobs_cache_invalidated', 'true');
+      
+      // Trigger storage event in same tab (storage event only fires in other tabs)
+      setTimeout(() => {
+        localStorage.removeItem('jobs_cache_invalidated');
+      }, 100);
       
       fetchJobs();
     } catch (err) {

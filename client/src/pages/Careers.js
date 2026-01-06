@@ -69,23 +69,38 @@ const Careers = () => {
   const [bannerEmail, setBannerEmail] = useState(''); // Store email for banner display
   const [rateLimitError, setRateLimitError] = useState(null);
 
-  // Fetch jobs ONCE on mount with caching and rate limit handling
+  // Fetch jobs with polling for real-time updates
   useEffect(() => {
     const fetchJobs = async (forceRefresh = false) => {
       try {
-        // Check if we have cached jobs data (valid for 2 minutes)
+        // Always fetch fresh data if forceRefresh is true (from polling or storage event)
+        if (forceRefresh) {
+          const res = await axios.get(API_ENDPOINTS.PUBLIC.JOBS);
+          const jobsData = Array.isArray(res.data) ? res.data : [];
+          setJobs(jobsData);
+          
+          // Update cache
+          const now = Date.now();
+          localStorage.setItem('jobs_cache', JSON.stringify(jobsData));
+          localStorage.setItem('jobs_cache_timestamp', now.toString());
+          setRateLimitError(null);
+          return;
+        }
+
+        // Check if we have cached jobs data (valid for 30 seconds for faster updates)
         const cachedData = localStorage.getItem('jobs_cache');
         const cacheTimestamp = localStorage.getItem('jobs_cache_timestamp');
         const now = Date.now();
-        const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes (reduced from 5)
+        const CACHE_DURATION = 30 * 1000; // 30 seconds for faster updates
 
-        if (!forceRefresh && cachedData && cacheTimestamp && (now - parseInt(cacheTimestamp)) < CACHE_DURATION) {
+        if (cachedData && cacheTimestamp && (now - parseInt(cacheTimestamp)) < CACHE_DURATION) {
           const parsed = JSON.parse(cachedData);
           setJobs(Array.isArray(parsed) ? parsed : []);
           setLoading(false);
           return;
         }
 
+        // Fetch fresh data
         const res = await axios.get(API_ENDPOINTS.PUBLIC.JOBS);
         const jobsData = Array.isArray(res.data) ? res.data : [];
         setJobs(jobsData);
@@ -116,12 +131,35 @@ const Careers = () => {
         setLoading(false);
       }
     };
+    
+    // Initial fetch
     fetchJobs();
+
+    // Poll for updates every 15 seconds for near real-time updates
+    const pollInterval = setInterval(() => {
+      fetchJobs(true); // Force refresh on poll
+    }, 15000); // 15 seconds
+
+    // Listen for storage events (when admin clears cache in another tab/window)
+    const handleStorageChange = (e) => {
+      if (e.key === 'jobs_cache_invalidated' && e.newValue === 'true') {
+        console.log('[Careers] Cache invalidated by admin, refreshing jobs...');
+        fetchJobs(true);
+        localStorage.removeItem('jobs_cache_invalidated');
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
 
     // If coming from verification page, show success message
     if (searchParams.get('verified') === 'true') {
       setSearchParams({});
     }
+
+    // Cleanup interval and event listener on unmount
+    return () => {
+      clearInterval(pollInterval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
