@@ -260,10 +260,29 @@ const createOrUpdateProfile = async (req, res) => {
     res.json({ msg: message, profile });
   } catch (err) {
     console.error('Error saving profile:', err);
+    
+    // Handle duplicate key errors
     if (err.code === 11000) {
-      return res.status(400).json({ msg: 'Email or CNIC already exists' });
+      const field = Object.keys(err.keyPattern || {})[0];
+      return res.status(400).json({ 
+        msg: `This ${field || 'field'} is already registered with another account.` 
+      });
     }
-    res.status(500).json({ msg: 'Server Error', error: err.message });
+    
+    // Handle validation errors
+    if (err.name === 'ValidationError') {
+      const errors = Object.values(err.errors).map(e => e.message);
+      return res.status(400).json({ 
+        msg: 'Validation failed',
+        errors: errors 
+      });
+    }
+    
+    // Handle other errors with detailed message
+    res.status(500).json({ 
+      msg: err.message || 'Server Error while saving profile',
+      error: err.message 
+    });
   }
 };
 

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import axios from '../config/axios';
 import { API_ENDPOINTS } from '../config/api';
 import { useAuth } from '../context/AuthContext';
+import { getErrorMessage, getFormattedError } from '../utils/errorHandler';
 
 const CreateProfile = () => {
   const navigate = useNavigate();
@@ -299,8 +300,19 @@ const CreateProfile = () => {
         setTimeout(() => setShowSuccessPopup(false), 1500);
       }
     } catch (err) {
-      // Silently fail for auto-save (don't interrupt user flow)
+      // Log detailed error for auto-save
       console.error('Auto-save error:', err);
+      
+      // Extract specific error message using utility
+      const errorMsg = getFormattedError(err, 'Auto-save failed');
+      console.error(errorMsg);
+      
+      // Show notification to user (except for locked profile)
+      if (err.response?.status !== 403) {
+        setPopupMessage(errorMsg);
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+      }
     } finally {
       setSaving(false);
     }
@@ -680,24 +692,8 @@ const CreateProfile = () => {
         }, 2000);
       }
     } catch (err) {
-      // Extract detailed error messages
-      let errorMessage = 'Error saving profile: ';
-      
-      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        // Validation errors array from server
-        const errorList = err.response.data.errors.map(e => e.msg || e).join('\n');
-        errorMessage += '\n\n' + errorList;
-      } else if (err.response?.data?.msg) {
-        // Single error message from server
-        errorMessage += err.response.data.msg;
-      } else if (err.response?.data?.error) {
-        // Alternative error field
-        errorMessage += err.response.data.error;
-      } else {
-        // Generic error
-        errorMessage += err.message || 'Unknown error occurred';
-      }
-      
+      // Extract detailed error messages using utility
+      const errorMessage = getFormattedError(err, 'Error saving profile');
       setPopupMessage(errorMessage);
       setShowErrorPopup(true);
     } finally {

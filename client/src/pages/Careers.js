@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import axios from '../config/axios';
 import { API_ENDPOINTS } from '../config/api';
 import { useAuth } from '../context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { getErrorMessage, getFormattedError, isRateLimitError, getRetryAfter } from '../utils/errorHandler';
 import SEO from '../components/SEO';
 
 const Careers = () => {
@@ -110,9 +112,9 @@ const Careers = () => {
         localStorage.setItem('jobs_cache_timestamp', now.toString());
         setRateLimitError(null);
       } catch (err) {
-        if (err.response?.status === 429) {
-          const retryAfter = err.response.headers['retry-after'] || err.response.headers['ratelimit-reset'];
-          const waitTime = retryAfter ? Math.ceil(parseInt(retryAfter) / 60) : 10;
+        if (isRateLimitError(err)) {
+          const retryAfter = getRetryAfter(err);
+          const waitTime = retryAfter ? Math.ceil(retryAfter / 60) : 10;
           setRateLimitError(`Too many requests. Please try again in ${waitTime} minutes.`);
           
           // Try to use cached data even if expired
@@ -124,7 +126,8 @@ const Careers = () => {
             setJobs([]);
           }
         } else {
-          setError('Error loading job positions. Please try again later.');
+          const errorMsg = getErrorMessage(err, 'Error loading job positions. Please try again later.');
+          setError(errorMsg);
           setJobs([]);
         }
       } finally {
@@ -319,8 +322,8 @@ const Careers = () => {
       setBannerEmail(emailInput.trim());
       setShowLoginModal(false);
     } catch (err) {
-      if (err.response?.status === 429) {
-        const retryAfter = err.response?.data?.retryAfter;
+      if (isRateLimitError(err)) {
+        const retryAfter = getRetryAfter(err);
         const minutes = retryAfter ? Math.ceil(retryAfter / 60) : 60;
         setLoginMessage(`Too many attempts. Please try again after ${minutes} minutes.`);
       } else if (err.response?.data?.notRegistered) {
@@ -332,7 +335,8 @@ const Careers = () => {
         setLoginMessage('Your email is not verified. Please check your inbox and click the verification link. If you did not receive the email, you can resend it below.');
         setIsUnverified(true);
       } else {
-        setLoginMessage(err.response?.data?.msg || 'Failed to send login link. Please try again.');
+        const errorMsg = getErrorMessage(err, 'Failed to send login link. Please try again.');
+        setLoginMessage(errorMsg);
       }
     } finally {
       setLoggingIn(false);
@@ -368,15 +372,16 @@ const Careers = () => {
       setEmailInput('');
       setRegisterMessage('');
     } catch (err) {
-      if (err.response?.status === 429) {
-        const retryAfter = err.response?.data?.retryAfter;
+      if (isRateLimitError(err)) {
+        const retryAfter = getRetryAfter(err);
         const minutes = retryAfter ? Math.ceil(retryAfter / 60) : 60;
         setRegisterMessage(`Too many attempts. Please try again after ${minutes} minutes.`);
       } else if (err.response?.data?.alreadyRegistered) {
         setRegisterMessage('This email is already registered and verified. Please login.');
         setIsUnverified(false);
       } else {
-        setRegisterMessage(err.response?.data?.msg || 'Registration failed. Please try again.');
+        const errorMsg = getErrorMessage(err, 'Registration failed. Please try again.');
+        setRegisterMessage(errorMsg);
       }
     } finally {
       setRegistering(false);
@@ -404,7 +409,8 @@ const Careers = () => {
         setRegisterMessage('');
       }, 5000);
     } catch (err) {
-      setRegisterMessage(err.response?.data?.msg || 'Failed to resend verification email. Please try again.');
+      const errorMsg = getErrorMessage(err, 'Failed to resend verification email. Please try again.');
+      setRegisterMessage(errorMsg);
     } finally {
       setRegistering(false);
     }
