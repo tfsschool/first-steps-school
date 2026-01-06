@@ -510,9 +510,9 @@ const Careers = () => {
                           
                           <div className="w-full max-w-md space-y-4">
                             <div className="space-y-2">
-                              <p className="text-base text-gray-700">
+                              {/* <p className="text-base text-gray-700">
                                 Create an account to get started
-                              </p>
+                              </p> */}
                               <button
                                 onClick={handleRegisteredNo}
                                 className="w-full bg-theme-green text-white px-8 py-4 rounded-lg font-semibold text-lg hover:brightness-95 transition shadow-sm"
@@ -523,14 +523,13 @@ const Careers = () => {
                             
                             <div className="space-y-2">
                               <p className="text-base text-gray-700">
-                                Already have an account?
+                                Already have an account? <button
+                                  onClick={handleRegisteredYes}
+                                  className="text-theme-blue hover:text-theme-green font-semibold underline transition-colors inline"
+                                >
+                                  Login here
+                                </button>
                               </p>
-                              <button
-                                onClick={handleRegisteredYes}
-                                className="w-full bg-theme-blue text-white px-8 py-4 rounded-lg font-semibold text-lg hover:brightness-95 transition shadow-sm"
-                              >
-                                Login
-                              </button>
                             </div>
                           </div>
                         </div>
@@ -777,8 +776,8 @@ const Careers = () => {
                 
                 {/* Show "Register First" button if email not registered */}
                 {showNotRegisteredInLogin && (
-                  <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-sm text-yellow-800 mb-3">
+                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-800 mb-3">
                       This email is not registered yet. Please register first to continue.
                     </p>
                   </div>
