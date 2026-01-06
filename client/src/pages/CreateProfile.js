@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import axios from '../config/axios';
 import { API_ENDPOINTS } from '../config/api';
 import { useAuth } from '../context/AuthContext';
-import { getErrorMessage, getFormattedError } from '../utils/errorHandler';
+import { getErrorMessage, getFormattedError, isServiceUnavailable, retryWithBackoff } from '../utils/errorHandler';
 
 const CreateProfile = () => {
   const navigate = useNavigate();
@@ -657,10 +657,13 @@ const CreateProfile = () => {
       
       submitData.append('profileData', JSON.stringify(profileData));
       
-      await axios.post(API_ENDPOINTS.PROFILE.CREATE_UPDATE, submitData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        withCredentials: true
-      });
+      // Use retry logic for 503 errors (database connection issues)
+      await retryWithBackoff(async () => {
+        return await axios.post(API_ENDPOINTS.PROFILE.CREATE_UPDATE, submitData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          withCredentials: true
+        });
+      }, 3, 1000); // 3 retries with 1s, 2s, 4s delays
 
       // Refresh auth context to update profile state immediately
       await checkAuth();
@@ -693,7 +696,13 @@ const CreateProfile = () => {
       }
     } catch (err) {
       // Extract detailed error messages using utility
-      const errorMessage = getFormattedError(err, 'Error saving profile');
+      let errorMessage = getFormattedError(err, 'Error saving profile');
+      
+      // Add specific guidance for 503 errors
+      if (isServiceUnavailable(err)) {
+        errorMessage += '\n\nThis is usually a temporary database connection issue. Please:\n1. Wait 10-30 seconds\n2. Try saving again\n3. If it persists, check your internet connection or contact support';
+      }
+      
       setPopupMessage(errorMessage);
       setShowErrorPopup(true);
     } finally {

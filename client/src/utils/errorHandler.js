@@ -88,3 +88,50 @@ export const getRetryAfter = (err) => {
   
   return retryAfter ? parseInt(retryAfter) : null;
 };
+
+/**
+ * Check if error is service unavailable (503)
+ * @param {Error} err - The error object
+ * @returns {boolean}
+ */
+export const isServiceUnavailable = (err) => {
+  return isErrorStatus(err, 503);
+};
+
+/**
+ * Retry a function with exponential backoff
+ * @param {Function} fn - Async function to retry
+ * @param {number} maxRetries - Maximum number of retries (default: 3)
+ * @param {number} baseDelay - Base delay in ms (default: 1000)
+ * @returns {Promise} - Result of the function
+ */
+export const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 1000) => {
+  let lastError;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      
+      // Don't retry on client errors (4xx except 429) or auth errors
+      if (err.response?.status >= 400 && err.response?.status < 500 && err.response?.status !== 429) {
+        throw err;
+      }
+      
+      // If this was the last attempt, throw the error
+      if (attempt === maxRetries) {
+        throw err;
+      }
+      
+      // Calculate delay with exponential backoff
+      const delay = baseDelay * Math.pow(2, attempt);
+      console.log(`Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms...`);
+      
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw lastError;
+};

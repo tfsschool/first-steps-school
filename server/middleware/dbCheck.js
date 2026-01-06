@@ -43,9 +43,12 @@ const checkDatabaseConnection = async (req, res, next) => {
     throw new Error('Failed to establish database connection');
   } catch (err) {
     console.error('❌ Database connection check failed:', err.message);
+    console.error('Connection state:', mongoose.connection.readyState);
+    console.error('Error details:', err);
     return res.status(503).json({
-      msg: 'Service temporarily unavailable. Please try again in a moment.',
-      error: 'DATABASE_UNAVAILABLE'
+      msg: 'Database connection unavailable. This is usually temporary - please wait a moment and try again. If the issue persists, contact support.',
+      error: 'DATABASE_UNAVAILABLE',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 };
