@@ -71,15 +71,15 @@ const Careers = () => {
 
   // Fetch jobs ONCE on mount with caching and rate limit handling
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchJobs = async (forceRefresh = false) => {
       try {
-        // Check if we have cached jobs data (valid for 5 minutes)
+        // Check if we have cached jobs data (valid for 2 minutes)
         const cachedData = localStorage.getItem('jobs_cache');
         const cacheTimestamp = localStorage.getItem('jobs_cache_timestamp');
         const now = Date.now();
-        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+        const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes (reduced from 5)
 
-        if (cachedData && cacheTimestamp && (now - parseInt(cacheTimestamp)) < CACHE_DURATION) {
+        if (!forceRefresh && cachedData && cacheTimestamp && (now - parseInt(cacheTimestamp)) < CACHE_DURATION) {
           const parsed = JSON.parse(cachedData);
           setJobs(Array.isArray(parsed) ? parsed : []);
           setLoading(false);

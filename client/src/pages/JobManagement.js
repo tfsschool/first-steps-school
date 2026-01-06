@@ -77,6 +77,11 @@ const JobManagement = () => {
         await axios.post(API_ENDPOINTS.ADMIN.JOB(), formData, config);
         showSuccess('Job posted successfully!');
       }
+      
+      // Clear public jobs cache so changes appear immediately
+      localStorage.removeItem('jobs_cache');
+      localStorage.removeItem('jobs_cache_timestamp');
+      
       setShowModal(false);
       setEditingJob(null);
       setFormData({
@@ -107,6 +112,11 @@ const JobManagement = () => {
     try {
       await axios.delete(API_ENDPOINTS.ADMIN.JOB(id), config);
       showSuccess('Job deleted successfully!');
+      
+      // Clear public jobs cache so changes appear immediately
+      localStorage.removeItem('jobs_cache');
+      localStorage.removeItem('jobs_cache_timestamp');
+      
       fetchJobs();
     } catch (err) {
       if (!handleAuthError(err)) {
