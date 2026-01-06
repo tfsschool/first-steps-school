@@ -9,7 +9,7 @@ const CreateProfile = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const jobIdParam = searchParams.get('jobId');
-  const { isAuthenticated, userEmail, loading: authLoading, hasProfile, authChecked, applicationStatus } = useAuth();
+  const { isAuthenticated, userEmail, loading: authLoading, hasProfile, authChecked, applicationStatus, checkAuth } = useAuth();
   
   // Check if we're in editing mode (came from Update Profile button)
   const isEditingMode = location.state?.isEditing || false;
@@ -289,6 +289,9 @@ const CreateProfile = () => {
         withCredentials: true
       });
       
+      // Refresh auth context to update profile state
+      await checkAuth();
+      
       setLastSaved(new Date());
       if (showNotification) {
         setPopupMessage('Progress saved!');
@@ -301,7 +304,7 @@ const CreateProfile = () => {
     } finally {
       setSaving(false);
     }
-  }, [isAuthenticated, userEmail, isLocked]);
+  }, [isAuthenticated, userEmail, isLocked, checkAuth]);
 
   // Auto-save on form data changes (debounced)
   useEffect(() => {
@@ -647,6 +650,9 @@ const CreateProfile = () => {
         withCredentials: true
       });
 
+      // Refresh auth context to update profile state immediately
+      await checkAuth();
+
       // Update state immediately for real-time UI updates
       setProfileLoaded(true);
       setShowApplyButton(true);
@@ -674,7 +680,25 @@ const CreateProfile = () => {
         }, 2000);
       }
     } catch (err) {
-      setPopupMessage('Error saving profile: ' + (err.response?.data?.msg || err.message));
+      // Extract detailed error messages
+      let errorMessage = 'Error saving profile: ';
+      
+      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        // Validation errors array from server
+        const errorList = err.response.data.errors.map(e => e.msg || e).join('\n');
+        errorMessage += '\n\n' + errorList;
+      } else if (err.response?.data?.msg) {
+        // Single error message from server
+        errorMessage += err.response.data.msg;
+      } else if (err.response?.data?.error) {
+        // Alternative error field
+        errorMessage += err.response.data.error;
+      } else {
+        // Generic error
+        errorMessage += err.message || 'Unknown error occurred';
+      }
+      
+      setPopupMessage(errorMessage);
       setShowErrorPopup(true);
     } finally {
       setSubmitting(false);
