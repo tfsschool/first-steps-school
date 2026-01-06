@@ -20,6 +20,16 @@ axios.interceptors.response.use(
       return Promise.reject(error);
     }
     
+    // Handle 429 Rate Limit - add retry-after info to error
+    if (error.response?.status === 429) {
+      const retryAfter = error.response.headers['retry-after'] || error.response.headers['ratelimit-reset'];
+      if (retryAfter) {
+        error.retryAfter = parseInt(retryAfter);
+      }
+      console.warn('Rate limit exceeded. Retry after:', retryAfter, 'seconds');
+      return Promise.reject(error);
+    }
+    
     // Handle 503 Service Unavailable - don't retry automatically
     if (error.response?.status === 503) {
       return Promise.reject(error);

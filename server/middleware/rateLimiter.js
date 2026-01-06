@@ -2,11 +2,13 @@ const rateLimit = require('express-rate-limit');
 
 /**
  * Global API Rate Limiter
- * Limits all API requests to 100 per 15 minutes per IP
+ * Limits all API requests per IP
+ * Production: 300 requests per 15 minutes (more lenient for legitimate users)
+ * Development: 100 requests per 15 minutes
  */
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: process.env.NODE_ENV === 'production' ? 300 : 100, // Higher limit in production
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -52,9 +54,24 @@ const applicationLimiter = rateLimit({
   legacyHeaders: false
 });
 
+/**
+ * Public Jobs Rate Limiter
+ * More lenient for public job listings (30 per 15 minutes)
+ * This is a read-only endpoint that should be more accessible
+ */
+const publicJobsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Limit each IP to 30 requests per 15 minutes
+  message: 'Too many requests for job listings. Please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: false
+});
+
 module.exports = {
   globalLimiter,
   authLimiter,
   checkAuthLimiter,
-  applicationLimiter
+  applicationLimiter,
+  publicJobsLimiter
 };

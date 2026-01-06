@@ -67,17 +67,51 @@ const Careers = () => {
   const [showNotRegisteredInLogin, setShowNotRegisteredInLogin] = useState(false);
   const [bannerStatus, setBannerStatus] = useState('idle'); // 'idle', 'verification_sent', 'login_link_sent'
   const [bannerEmail, setBannerEmail] = useState(''); // Store email for banner display
+  const [rateLimitError, setRateLimitError] = useState(null);
 
-  // Fetch jobs ONCE on mount
+  // Fetch jobs ONCE on mount with caching and rate limit handling
   useEffect(() => {
     const fetchJobs = async () => {
       try {
+        // Check if we have cached jobs data (valid for 5 minutes)
+        const cachedData = localStorage.getItem('jobs_cache');
+        const cacheTimestamp = localStorage.getItem('jobs_cache_timestamp');
+        const now = Date.now();
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+        if (cachedData && cacheTimestamp && (now - parseInt(cacheTimestamp)) < CACHE_DURATION) {
+          const parsed = JSON.parse(cachedData);
+          setJobs(Array.isArray(parsed) ? parsed : []);
+          setLoading(false);
+          return;
+        }
+
         const res = await axios.get(API_ENDPOINTS.PUBLIC.JOBS);
-        // Ensure res.data is an array before setting
-        setJobs(Array.isArray(res.data) ? res.data : []);
+        const jobsData = Array.isArray(res.data) ? res.data : [];
+        setJobs(jobsData);
+        
+        // Cache the jobs data
+        localStorage.setItem('jobs_cache', JSON.stringify(jobsData));
+        localStorage.setItem('jobs_cache_timestamp', now.toString());
+        setRateLimitError(null);
       } catch (err) {
-        setError('Error loading job positions. Please try again later.');
-        setJobs([]); // Set empty array on error
+        if (err.response?.status === 429) {
+          const retryAfter = err.response.headers['retry-after'] || err.response.headers['ratelimit-reset'];
+          const waitTime = retryAfter ? Math.ceil(parseInt(retryAfter) / 60) : 10;
+          setRateLimitError(`Too many requests. Please try again in ${waitTime} minutes.`);
+          
+          // Try to use cached data even if expired
+          const cachedData = localStorage.getItem('jobs_cache');
+          if (cachedData) {
+            const parsed = JSON.parse(cachedData);
+            setJobs(Array.isArray(parsed) ? parsed : []);
+          } else {
+            setJobs([]);
+          }
+        } else {
+          setError('Error loading job positions. Please try again later.');
+          setJobs([]);
+        }
       } finally {
         setLoading(false);
       }
@@ -619,7 +653,22 @@ const Careers = () => {
               </>
             )}
 
-            {error && (
+            {rateLimitError && (
+              <div className="max-w-3xl mx-auto mb-8 bg-yellow-50 border border-yellow-300 text-yellow-800 px-5 py-4 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <svg className="w-6 h-6 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <p className="font-semibold">Rate Limit Reached</p>
+                    <p className="text-sm mt-1">{rateLimitError}</p>
+                    <p className="text-sm mt-2">Showing cached job listings. Data may be slightly outdated.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {error && !rateLimitError && (
               <div className="max-w-3xl mx-auto mb-8 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-lg">
                 {error}
               </div>
