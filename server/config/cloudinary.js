@@ -137,8 +137,10 @@ const uploadFile = async (buffer, folder, originalFilename) => {
       overwrite: false
     };
 
-    // Explicitly set format for non-raw files to ensure correct extension
-    if (!isWordDoc && ext) {
+    // Only set format for non-image, non-Word files to allow Cloudinary auto-detection
+    // This fixes issues where AI tools save WEBP as PNG
+    const isImage = ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext);
+    if (!isWordDoc && !isImage && ext) {
       uploadOptions.format = ext;
     }
 
