@@ -50,18 +50,16 @@ const connectDB = async () => {
         console.log('🔄 Establishing new MongoDB connection...');
     }
     cachedConnection = mongoose.connect(process.env.MONGO_URI, {
-        serverSelectionTimeoutMS: 30000, // Increased to 30s for slower connections
+        serverSelectionTimeoutMS: 5000,
         maxPoolSize: 10,
         minPoolSize: 2,
-        socketTimeoutMS: 75000, // Increased to 75s
+        socketTimeoutMS: 45000,
         family: 4,
-        // Serverless-friendly options
         maxIdleTimeMS: 10000,
         retryWrites: true,
         retryReads: true,
-        connectTimeoutMS: 30000, // Increased to 30s
-        heartbeatFrequencyMS: 10000, // Check connection health every 10s
-        serverSelectionRetryMS: 5000 // Retry server selection every 5s
+        connectTimeoutMS: 10000,
+        heartbeatFrequencyMS: 10000
     }).then((mongooseInstance) => {
         console.log(`✅ MongoDB Connected: ${mongooseInstance.connection.host}`);
         console.log(`   Database: ${mongooseInstance.connection.name}`);
