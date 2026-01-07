@@ -35,12 +35,12 @@ const HeroSection = () => {
                Where bright minds and compassionate hearts grow together
               </div>
               <div className="mt-8">
-                <button
+                {/* <button
                   type="button"
                   className="inline-flex items-center justify-center bg-white text-theme-blue px-6 py-3 font-semibold tracking-wide shadow-sm hover:bg-theme-green hover:text-white transition-colors duration-200"
                 >
                   Take a Tour
-                </button>
+                </button> */}
               </div>
             </div>
           </div>
