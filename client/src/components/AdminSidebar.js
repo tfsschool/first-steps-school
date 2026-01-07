@@ -78,10 +78,16 @@ const AdminSidebar = () => {
             💼 Job Posts
           </Link>
           <Link
+            to="/admin/view-candidates"
+            className={`block px-4 py-3 rounded-lg mb-2 transition ${isActive('/admin/view-candidates')}`}
+          >
+            👥 Candidates
+          </Link>
+          <Link
             to="/admin/candidates"
             className={`block px-4 py-3 rounded-lg mb-2 transition ${isActive('/admin/candidates')}`}
           >
-            👥 Candidates
+            📋 Applications
           </Link>
           <Link
             to="/admin/registered-emails"

@@ -542,9 +542,14 @@ router.get('/candidate/:id', adminAuth, async (req, res) => {
             candidateId: candidate._id
         });
 
+        const applications = await Application.find({ candidateId: candidateId })
+            .select('jobId minimumSalary expectedSalary appliedAt')
+            .populate('jobId', 'title');
+
         res.json({
             ...candidate,
-            applicationCount
+            applicationCount,
+            applications
         });
     } catch (err) {
         console.error('Error fetching candidate details:', err);

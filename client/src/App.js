@@ -19,6 +19,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const JobManagement = lazy(() => import('./pages/JobManagement'));
+const AdminCandidates = lazy(() => import('./pages/AdminCandidates'));
 const Candidates = lazy(() => import('./pages/Candidates'));
 const RegisteredEmails = lazy(() => import('./pages/RegisteredEmails'));
 
@@ -65,6 +66,11 @@ function AppContent() {
         <Route path="/admin/jobs" element={
             <PrivateRoute>
               <JobManagement />
+            </PrivateRoute>
+        } />
+        <Route path="/admin/view-candidates" element={
+            <PrivateRoute>
+              <AdminCandidates />
             </PrivateRoute>
         } />
         <Route path="/admin/candidates" element={
