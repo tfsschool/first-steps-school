@@ -5,12 +5,10 @@ const HeroSection = () => {
   const slides = useMemo(
     () => [
       {
-        image:
-          'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=2400&q=80',
+        image: '/82283529_3330051090360567_6299281597917036544_n.jpg',
       },
       {
-        image:
-          'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2400&q=80',
+        image: '/IMG_20230415_150701.jpg',
       },
     ],
     []
