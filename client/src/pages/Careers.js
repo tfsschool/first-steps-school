@@ -57,6 +57,7 @@ const Careers = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showAlreadyAppliedModal, setShowAlreadyAppliedModal] = useState(false);
+  const [showRefreshHint, setShowRefreshHint] = useState(false);
   const [pendingAction, setPendingAction] = useState(null); // 'apply' or 'profile'
   
   // Form states
@@ -175,6 +176,23 @@ const Careers = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, authChecked]);
+
+  // Handle profile creation state from navigation
+  useEffect(() => {
+    if (location.state?.profileCreated) {
+      console.log('[Careers] Profile created, refreshing auth state...');
+      // Force refresh of auth state to update hasProfile
+      refreshApplications();
+    }
+  }, [location.state, refreshApplications]);
+
+  // Check if profile state hasn't updated after profile creation
+  useEffect(() => {
+    if (location.state?.profileCreated && authChecked && !hasProfile) {
+      console.log('[Careers] Profile created but hasProfile is still false, showing refresh hint');
+      setShowRefreshHint(true);
+    }
+  }, [location.state, authChecked, hasProfile]);
 
   // Fetch ONLY applications data - profile state comes from AuthContext
   const fetchApplications = useCallback(async () => {
@@ -555,6 +573,39 @@ const Careers = () => {
 
         <section className="bg-gray-50 py-12">
           <div className="container mx-auto px-4">
+
+            {/* Refresh Hint Banner */}
+            {showRefreshHint && (
+              <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start">
+                    <svg className="h-6 w-6 text-yellow-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-semibold text-yellow-800">Profile Update in Progress</h3>
+                      <p className="mt-1 text-sm text-yellow-700">
+                        Your profile was created successfully! If you don't see the changes reflected, please refresh the page manually.
+                      </p>
+                      <button
+                        onClick={() => window.location.reload()}
+                        className="mt-2 text-sm font-medium text-yellow-800 hover:text-yellow-900 underline"
+                      >
+                        Refresh Page Now
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowRefreshHint(false)}
+                    className="ml-4 text-yellow-400 hover:text-yellow-600 transition"
+                  >
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
 
             {(
               <>

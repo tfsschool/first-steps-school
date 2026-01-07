@@ -693,9 +693,9 @@ const CreateProfile = () => {
           setShowSuccessPopup(false);
           // If we came from a job application, redirect to that job
           if (jobIdParam) {
-            navigate(`/careers?apply=${jobIdParam}`);
+            navigate(`/careers?apply=${jobIdParam}`, { state: { profileCreated: true } });
           } else {
-            navigate('/careers');
+            navigate('/careers', { state: { profileCreated: true } });
           }
         }, 2000);
       }
