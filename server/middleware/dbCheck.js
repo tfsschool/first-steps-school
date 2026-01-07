@@ -17,8 +17,8 @@ const checkDatabaseConnection = async (req, res, next) => {
       if (process.env.NODE_ENV === 'development') {
         console.log('⏳ Database connection in progress, waiting...');
       }
-      // Wait up to 5 seconds for connection
-      const timeout = 5000;
+      // Wait up to 10 seconds for connection (increased from 5s)
+      const timeout = 10000;
       const startTime = Date.now();
       while (mongoose.connection.readyState === 2 && Date.now() - startTime < timeout) {
         await new Promise(resolve => setTimeout(resolve, 100));

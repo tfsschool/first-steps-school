@@ -658,12 +658,13 @@ const CreateProfile = () => {
       submitData.append('profileData', JSON.stringify(profileData));
       
       // Use retry logic for 503 errors (database connection issues)
+      // Reduced retries for faster response
       await retryWithBackoff(async () => {
         return await axios.post(API_ENDPOINTS.PROFILE.CREATE_UPDATE, submitData, {
           headers: { 'Content-Type': 'multipart/form-data' },
           withCredentials: true
         });
-      }, 3, 1000); // 3 retries with 1s, 2s, 4s delays
+      }, 1, 500); // 1 retry with 500ms delay for faster response
 
       // Refresh auth context to update profile state immediately
       await checkAuth();
@@ -673,14 +674,18 @@ const CreateProfile = () => {
       setShowApplyButton(true);
 
       if (missing.length > 0) {
-        setPopupMessage(`Profile saved, but it is incomplete.\n\n${formatMissingFieldsMessage(missing)}`);
+        // Show incomplete profile warning with missing fields
+        const missingFieldsMsg = formatMissingFieldsMessage(missing);
+        setPopupMessage(`Profile saved, but it is incomplete.\n\n${missingFieldsMsg}`);
         setShowErrorPopup(true);
+        setShowSuccessPopup(false); // Ensure success popup is hidden
         // For incomplete profiles, just close popup after 5 seconds
         setTimeout(() => {
           setShowErrorPopup(false);
         }, 5000);
       } else {
         // Complete profile - show success message then redirect
+        setShowErrorPopup(false); // Ensure error popup is hidden
         setPopupMessage('Profile saved successfully! Redirecting to careers page...');
         setShowSuccessPopup(true);
         // Show message for 2 seconds, then redirect

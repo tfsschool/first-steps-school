@@ -96,6 +96,16 @@ const createOrUpdateProfile = async (req, res) => {
     
     const email = req.candidate.email;
     
+    // Validate profile fields and return detailed errors
+    const { validateProfileFields } = require('../middleware/validation');
+    const validationErrors = validateProfileFields(profileData);
+    if (validationErrors.length > 0) {
+      return res.status(400).json({
+        msg: 'Validation failed',
+        errors: validationErrors.map(e => `${e.field}: ${e.message}`)
+      });
+    }
+    
     // CNIC formatting
     let cleanedCnic = '';
     if (profileData.cnic) {
@@ -195,24 +205,24 @@ const createOrUpdateProfile = async (req, res) => {
     }
 
     // Security: Check if CNIC is already used by another candidate
-    const cnicVariants = [];
-    if (cleanedCnic) {
+    // Only check if CNIC is provided and not empty
+    if (cleanedCnic && cleanedCnic.length > 0) {
+      const cnicVariants = [];
       cnicVariants.push(cleanedCnic);
       if (cleanedCnic.length === 13) {
         cnicVariants.push(`${cleanedCnic.slice(0, 5)}-${cleanedCnic.slice(5, 12)}-${cleanedCnic.slice(12)}`);
       }
-    } else if (profileData.cnic) {
-      cnicVariants.push(profileData.cnic);
-    }
 
-    const cnicCheck = await UserProfile.findOne({
-      cnic: { $in: cnicVariants },
-      candidateId: { $exists: true, $ne: candidateId }
-    });
-    if (cnicCheck) {
-      return res.status(403).json({ 
-        msg: 'This CNIC is already registered with another account. Each user must have a unique CNIC.' 
+      const cnicCheck = await UserProfile.findOne({
+        cnic: { $in: cnicVariants },
+        candidateId: { $exists: true, $ne: candidateId }
       });
+      
+      if (cnicCheck) {
+        return res.status(403).json({ 
+          msg: 'This CNIC is already registered with another account. Each user must have a unique CNIC.' 
+        });
+      }
     }
 
     const updateData = {
