@@ -448,18 +448,43 @@ const CandidateDetails = ({ candidate }) => {
       <div className="bg-gray-50 p-4 rounded-lg border-t-2 border-theme-blue">
         <h4 className="font-semibold text-gray-700 mb-3">Application History</h4>
         {candidate.applications && Array.isArray(candidate.applications) && candidate.applications.length > 0 ? (
-          <div className="space-y-2">
-            {candidate.applications.map((app, idx) => (
-              <div key={idx} className="text-sm text-gray-700 py-2 border-b border-gray-200 last:border-b-0">
-                <span className="font-medium">{app.jobId?.title || 'N/A'}</span>
-                <span className="text-gray-400 mx-2">|</span>
-                <span>{app.minimumSalary || 'N/A'}</span>
-                <span className="text-gray-400 mx-2">|</span>
-                <span>{app.expectedSalary || 'N/A'}</span>
-                <span className="text-gray-400 mx-2">|</span>
-                <span>{new Date(app.appliedAt).toLocaleDateString()}</span>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Job Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Minimum Salary
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Expected Salary
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Date Applied
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {candidate.applications.map((app, idx) => (
+                  <tr key={idx}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {app.jobId?.title || 'Unknown Job'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {app.minimumSalary || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {app.expectedSalary || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {new Date(app.appliedAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
           <p className="text-sm text-gray-500">No applications found for this candidate.</p>
