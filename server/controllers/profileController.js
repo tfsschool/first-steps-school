@@ -30,10 +30,11 @@ const getProfile = async (req, res) => {
     }
 
     // CHECK IF LOCKED: Has the user applied to any job?
-    const hasApplied = await Application.exists({ candidateId: candidateId });
+    // Add timeout to prevent hanging queries
+    const hasApplied = await Application.exists({ candidateId: candidateId }).maxTimeMS(5000);
     const isLocked = !!hasApplied;
     
-    const profile = await UserProfile.findOne({ candidateId: candidateId });
+    const profile = await UserProfile.findOne({ candidateId: candidateId }).maxTimeMS(10000);
     
     if (!profile) {
       if (process.env.NODE_ENV === 'development') {
@@ -68,7 +69,26 @@ const getProfile = async (req, res) => {
     res.json({ ...profileData, isLocked });
   } catch (err) {
     console.error('Error fetching profile:', err);
-    res.status(500).json({ msg: 'Server Error', error: err.message });
+    
+    // Provide more specific error messages
+    if (err.name === 'MongooseError' && err.message.includes('buffering timed out')) {
+      return res.status(503).json({ 
+        msg: 'Database connection is slow. Please check your internet connection and try again.',
+        error: 'DATABASE_TIMEOUT'
+      });
+    }
+    
+    if (err.name === 'MongoServerError' && err.code === 'ETIMEDOUT') {
+      return res.status(503).json({ 
+        msg: 'Database query timed out. Please try again.',
+        error: 'QUERY_TIMEOUT'
+      });
+    }
+    
+    res.status(500).json({ 
+      msg: 'Error loading profile. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? err.message : 'SERVER_ERROR'
+    });
   }
 };
 

@@ -35,16 +35,27 @@ const authenticate = async (req, res, next) => {
     // Check if candidate exists and is verified (use lean() for performance)
     let candidate;
     try {
-      candidate = await Candidate.findById(decoded.candidateId).lean();
+      // Add timeout to prevent hanging on slow database queries
+      candidate = await Candidate.findById(decoded.candidateId)
+        .lean()
+        .maxTimeMS(10000); // 10 second query timeout
     } catch (dbErr) {
       console.error('Database error in auth middleware:', {
         error: dbErr.message,
         candidateId: decoded.candidateId,
-        readyState: require('mongoose').connection.readyState
+        readyState: require('mongoose').connection.readyState,
+        errorName: dbErr.name
       });
+      
+      // Provide more specific error message
+      const errorMsg = dbErr.name === 'MongooseError' && dbErr.message.includes('buffering timed out')
+        ? 'Database connection is slow. Please check your internet connection and try again.'
+        : 'Service temporarily unavailable. Please try again in a moment.';
+      
       return res.status(503).json({ 
-        msg: 'Service temporarily unavailable. Please try again.',
-        authenticated: false 
+        msg: errorMsg,
+        authenticated: false,
+        details: process.env.NODE_ENV === 'development' ? dbErr.message : undefined
       });
     }
     
